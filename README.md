@@ -202,7 +202,17 @@ See `data/individuals/examples/` for templates. The [CLAUDE.md](CLAUDE.md) has d
 
 Contributions welcome! See [CONTRIBUTING.md](CONTRIBUTING.md).
 
+## Community
+
+Interested in AI agents, virtual worlds, or multi-agent systems? Let's chat!
+
+- **QQ**: 3353467972 (feel free to add me for discussion)
+
 ## Acknowledgments
+
+### Development Tools
+
+This project was built with the help of **[Claude Code](https://claude.ai/claude-code)** by Anthropic — an AI-powered coding assistant that helped with architecture design, code generation, testing, and documentation.
 
 ### Pixel Art Assets
 
@@ -214,6 +224,11 @@ The pixel-art tilesets, building sprites, and outdoor environment assets used in
 ### Character Sprites
 
 Character sprite sheets are from **[Animated Pixel Adventurer](https://rvros.itch.io/animated-pixel-hero)** and community-contributed pixel character assets.
+
+### Contributors
+
+- **[@hjl2004-10](https://github.com/hjl2004-10)** — Creator & maintainer
+- **Claude** (Anthropic) — AI pair programmer
 
 ## License
 

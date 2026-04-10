@@ -202,7 +202,17 @@ NPC 在对话中按需连接，自动发现可用工具。
 
 欢迎贡献！请阅读 [CONTRIBUTING.md](CONTRIBUTING.md) 了解如何参与。
 
+## 交流
+
+对 AI Agent、虚拟世界、多智能体系统感兴趣？欢迎一起讨论！
+
+- **QQ**: 3353467972（欢迎加好友交流）
+
 ## 致谢
+
+### 开发工具
+
+本项目在开发过程中使用了 Anthropic 的 **[Claude Code](https://claude.ai/claude-code)** AI 编程助手，协助完成了架构设计、代码生成、测试和文档编写。
 
 ### 像素素材
 
@@ -214,6 +224,11 @@ NPC 在对话中按需连接，自动发现可用工具。
 ### 角色精灵图
 
 角色精灵图来自 **[Animated Pixel Adventurer](https://rvros.itch.io/animated-pixel-hero)** 及社区贡献的像素角色素材。
+
+### 贡献者
+
+- **[@hjl2004-10](https://github.com/hjl2004-10)** — 创作者 & 维护者
+- **Claude** (Anthropic) — AI 结对编程
 
 ## 许可证
 
