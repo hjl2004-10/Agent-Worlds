@@ -1,0 +1,7 @@
+{
+  "header": {
+    "version": "v1.0",
+    "type": "OBSTACLES"
+  },
+  "obstacles": []
+}

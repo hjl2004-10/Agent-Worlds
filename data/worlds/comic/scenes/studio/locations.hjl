@@ -1,0 +1,32 @@
+{
+  "header": {
+    "version": "v1.0",
+    "type": "LOCATIONS"
+  },
+  "locations": {
+    "编剧桌": {
+      "x": 80, "y": 80, "tile": [5, 5],
+      "building": "house/ME_Singles_Villas_48x48_Villa_4.png",
+      "desc": "编剧构思和写作剧本的地方",
+      "greeting": "编剧桌上散落着故事大纲和灵感笔记，一杯咖啡还冒着热气。"
+    },
+    "分镜桌": {
+      "x": 240, "y": 80, "tile": [15, 5],
+      "building": "house/24_Additional_Houses_Modern_House_48x48.png",
+      "desc": "分镜师拆解画面和规划镜头的地方",
+      "greeting": "分镜桌上铺满了草稿纸，每张都画着粗略的构图框架。"
+    },
+    "画板区": {
+      "x": 80, "y": 240, "tile": [5, 15],
+      "building": "house/ME_Singles_Villas_48x48_Villa_2.png",
+      "desc": "画师创作每格画面的地方",
+      "greeting": "画板区摆放着数位板和参考图，屏幕上正显示着AI绘图工具。"
+    },
+    "排版台": {
+      "x": 240, "y": 240, "tile": [15, 15],
+      "building": "house/24_Additional_Houses_Terraced_House_1_48x48.png",
+      "desc": "排版师拼装漫画成品的地方",
+      "greeting": "排版台的大屏幕上显示着漫画排版软件，各种对话框模板整齐排列。"
+    }
+  }
+}

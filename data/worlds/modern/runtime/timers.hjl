@@ -1,0 +1,8 @@
+{
+  "header": {
+    "version": "v1.0",
+    "type": "TIMER_POOL",
+    "world_id": "modern"
+  },
+  "pool": []
+}

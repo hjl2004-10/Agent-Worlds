@@ -1,0 +1,13 @@
+{
+  "header": {
+    "version": "v1.0",
+    "type": "TILES"
+  },
+  "config": {
+    "tileSize": 16,
+    "mapWidth": 20,
+    "mapHeight": 20,
+    "assetPath": "/tiles/"
+  },
+  "tiles": []
+}

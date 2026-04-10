@@ -1,0 +1,220 @@
+/* ========== 全局样式 + 氛围层 + 主题系统 ========== */
+
+/* --- Google Fonts 像素字体 --- */
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+/* ========== 暗色主题 (默认) ========== */
+:root {
+  --primary-color: #4ade80;
+  --font-pixel: 'Press Start 2P', monospace;
+
+  /* 背景 */
+  --bg-body: #0f0f1a;
+  --bg-body-overlay: rgba(15, 15, 26, 0.7);
+  --bg-panel: #1a1a2e;
+  --bg-input: #0f0f1a;
+  --bg-deep: #0a0a1a;
+  --bg-chat: rgba(10, 10, 20, 0.6);
+  --bg-panel-translucent: rgba(26, 26, 46, 0.8);
+
+  /* 悬浮/覆盖 */
+  --bg-hover-faint: rgba(255, 255, 255, 0.04);
+  --bg-hover-subtle: rgba(255, 255, 255, 0.03);
+  --bg-hover: rgba(255, 255, 255, 0.06);
+  --bg-hover-strong: rgba(255, 255, 255, 0.08);
+
+  /* 文字 */
+  --text-primary: #e2e8f0;
+  --text-secondary: #8a9a8a;
+  --text-muted: #5a6a5a;
+  --text-label: #c0d0c0;
+  --text-bubble: #d0e8d0;
+  --text-icon: #6b7280;
+  --text-icon-muted: #888888;
+  --text-placeholder: #999999;
+  --text-empty: #3a4a3a;
+  --text-white: #ffffff;
+
+  /* 边框 */
+  --border-primary: #2a2a4a;
+  --border-secondary: #2a3a4a;
+  --border-accent: #3a5a5a;
+  --border-divider: #3a3a5a;
+  --border-name-tag: rgba(255, 255, 255, 0.15);
+
+  /* 滚动条 */
+  --scrollbar-track: #0f0f1a;
+  --scrollbar-thumb: #3a3a5a;
+  --scrollbar-thumb-hover: #4a4a6a;
+
+  /* 发光 */
+  --glow-green: #4ade80;
+  --glow-blue: #38bdf8;
+  --glow-amber: #fbbf24;
+  --glow-pink: #e879f9;
+
+  /* 氛围 */
+  --scanline-opacity: 0.08;
+  --vignette-opacity: 0.35;
+
+  /* 气泡 Markdown */
+  --bubble-strong: #f0f0f0;
+  --bubble-em: #a0d0a0;
+  --bubble-code-bg: rgba(0, 0, 0, 0.3);
+  --bubble-code-color: #80e080;
+  --bubble-pre-bg: rgba(0, 0, 0, 0.4);
+  --bubble-blockquote-border: #4a8a4a;
+  --bubble-blockquote-color: #a0c0a0;
+}
+
+/* ========== 亮色主题 ========== */
+[data-theme="light"] {
+  /* 背景 */
+  --bg-body: #f0f2f5;
+  --bg-body-overlay: rgba(240, 242, 248, 0.82);
+  --bg-panel: #ffffff;
+  --bg-input: #f8f9fc;
+  --bg-deep: #e5e7eb;
+  --bg-chat: rgba(235, 238, 245, 0.8);
+  --bg-panel-translucent: rgba(240, 242, 248, 0.9);
+
+  /* 悬浮/覆盖 */
+  --bg-hover-faint: rgba(0, 0, 0, 0.02);
+  --bg-hover-subtle: rgba(0, 0, 0, 0.025);
+  --bg-hover: rgba(0, 0, 0, 0.04);
+  --bg-hover-strong: rgba(0, 0, 0, 0.06);
+
+  /* 文字 */
+  --text-primary: #1a1a2e;
+  --text-secondary: #5a6a6a;
+  --text-muted: #8a9a9a;
+  --text-label: #4a5a4a;
+  --text-bubble: #1a2a1a;
+  --text-icon: #6b7280;
+  --text-icon-muted: #8a8a8a;
+  --text-placeholder: #aaaaaa;
+  --text-empty: #b0b8b0;
+  --text-white: #1a1a2e;
+
+  /* 边框 */
+  --border-primary: #d0d0e0;
+  --border-secondary: #c0d0d0;
+  --border-accent: #a0c0c0;
+  --border-divider: #d0d0e0;
+  --border-name-tag: rgba(0, 0, 0, 0.12);
+
+  /* 滚动条 */
+  --scrollbar-track: #e8e8f0;
+  --scrollbar-thumb: #c0c0d0;
+  --scrollbar-thumb-hover: #a0a0b0;
+
+  /* 氛围 */
+  --scanline-opacity: 0.02;
+  --vignette-opacity: 0.08;
+
+  /* 气泡 Markdown */
+  --bubble-strong: #1a1a2e;
+  --bubble-em: #2a5a2a;
+  --bubble-code-bg: rgba(0, 0, 0, 0.06);
+  --bubble-code-color: #1a6a1a;
+  --bubble-pre-bg: rgba(0, 0, 0, 0.04);
+  --bubble-blockquote-border: #6aaa6a;
+  --bubble-blockquote-color: #3a6a3a;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  background:
+    linear-gradient(var(--bg-body-overlay), var(--bg-body-overlay)),
+    url('/ui/bg-wasteland.png');
+  background-size: auto, 512px 512px;
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow: hidden;
+  transition: background 0.3s, color 0.3s;
+}
+
+/* --- CRT 扫描线 --- */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0px,
+    transparent 2px,
+    rgba(0, 0, 0, var(--scanline-opacity)) 2px,
+    rgba(0, 0, 0, var(--scanline-opacity)) 4px
+  );
+  mix-blend-mode: multiply;
+}
+
+/* --- 屏幕暗角 (vignette) --- */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 9998;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse at center,
+    transparent 50%,
+    rgba(0, 0, 0, var(--vignette-opacity)) 100%
+  );
+}
+
+/* --- 全局入场动画 --- */
+@keyframes fadeSlideIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+#root {
+  animation: fadeIn 0.6s ease-out;
+}
+
+/* 滚动条样式 */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover);
+}
+
+/* Ant Design 覆盖 */
+.ant-layout {
+  background: transparent !important;
+}
+
+.ant-card {
+  border-radius: 8px;
+}
+
+.ant-btn-primary {
+  text-shadow: none;
+}

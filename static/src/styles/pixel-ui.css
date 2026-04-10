@@ -1,0 +1,1134 @@
+/* ========== Pixel UI 像素风主题样式 ========== */
+
+/* ========== 氛围动画 Keyframes ========== */
+
+@keyframes dotPulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.4); opacity: 0.7; }
+}
+
+@keyframes bubbleIn {
+  from { opacity: 0; transform: scale(0.92) translateY(6px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+@keyframes btnFlash {
+  0% { filter: brightness(1); }
+  50% { filter: brightness(1.4); }
+  100% { filter: brightness(1); }
+}
+
+@keyframes barShine {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes glowPulse {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.8; }
+}
+
+@keyframes idleHighlight {
+  from { width: 0; }
+  to { width: 100%; }
+}
+
+@keyframes cursorBlink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+@keyframes panelFadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* --- PixelPanel 九宫格面板 --- */
+.pixel-panel {
+  border-style: solid;
+  border-width: 8px;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  box-sizing: border-box;
+  background: var(--bg-panel);
+  animation: panelFadeIn 0.4s ease-out both;
+}
+
+.pixel-panel--gray {
+  border-image: url('/ui/frames/frame-stone.png') 20 stretch;
+  border-width: 10px;
+  box-shadow: inset 0 0 40px rgba(200, 210, 220, 0.03);
+}
+
+.pixel-panel--blue {
+  border-image: url('/ui/frames/frame-blue-magic.png') 20 stretch;
+  border-width: 10px;
+  box-shadow: inset 0 0 40px rgba(56, 189, 248, 0.04);
+}
+
+.pixel-panel--orange {
+  border-image: url('/ui/frames/frame-wood.png') 18 stretch;
+  border-width: 10px;
+  box-shadow: inset 0 0 40px rgba(251, 191, 36, 0.04);
+}
+
+/* --- PixelButton 像素按钮 --- */
+.pixel-btn {
+  border: none;
+  background: none;
+  padding: 0;
+  cursor: pointer;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: inherit;
+  color: #3a2a1a;
+  font-weight: 600;
+  transition: transform 0.05s;
+  /* 九宫格拉伸按钮背景 */
+  border-style: solid;
+  border-width: 6px;
+  box-sizing: border-box;
+}
+
+/* 按钮样式1 (白底橙边) */
+.pixel-btn--style1 {
+  border-image: url('/ui/flat/UI_Flat_Button01a_1.png') 6 fill stretch;
+}
+.pixel-btn--style1:hover {
+  border-image: url('/ui/flat/UI_Flat_Button01a_2.png') 6 fill stretch;
+  text-shadow: 0 0 6px rgba(58, 42, 26, 0.3);
+}
+.pixel-btn--style1:active {
+  border-image: url('/ui/flat/UI_Flat_Button01a_3.png') 6 fill stretch;
+  transform: translateY(1px);
+  animation: btnFlash 0.15s ease-out;
+}
+.pixel-btn--style1:disabled,
+.pixel-btn--style1.pixel-btn--disabled {
+  border-image: url('/ui/flat/UI_Flat_Button01a_4.png') 6 fill stretch;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+/* 按钮样式2 (蓝底) */
+.pixel-btn--style2 {
+  border-image: url('/ui/flat/UI_Flat_Button02a_1.png') 6 fill stretch;
+  color: #3a2a1a;
+}
+.pixel-btn--style2:hover {
+  border-image: url('/ui/flat/UI_Flat_Button02a_2.png') 6 fill stretch;
+  text-shadow: 0 0 6px rgba(58, 42, 26, 0.3);
+}
+.pixel-btn--style2:active {
+  border-image: url('/ui/flat/UI_Flat_Button02a_3.png') 6 fill stretch;
+  transform: translateY(1px);
+  animation: btnFlash 0.15s ease-out;
+}
+.pixel-btn--style2:disabled,
+.pixel-btn--style2.pixel-btn--disabled {
+  border-image: url('/ui/flat/UI_Flat_Button02a_4.png') 6 fill stretch;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+/* 按钮尺寸 */
+.pixel-btn--sm {
+  min-width: 48px;
+  min-height: 28px;
+  padding: 2px 8px;
+  font-size: 12px;
+}
+
+.pixel-btn--md {
+  min-width: 64px;
+  min-height: 32px;
+  padding: 4px 12px;
+  font-size: 13px;
+}
+
+.pixel-btn--lg {
+  min-width: 96px;
+  min-height: 40px;
+  padding: 6px 16px;
+  font-size: 14px;
+}
+
+/* --- PixelBanner 横幅标题 --- */
+.pixel-banner {
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  border-style: solid;
+  border-width: 4px 8px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 12px;
+  font-weight: 700;
+  color: #3a2a1a;
+  white-space: nowrap;
+}
+
+.pixel-banner--style1 {
+  border-image: url('/ui/flat/UI_Flat_Banner01a.png') 4 8 fill stretch;
+}
+
+.pixel-banner--style2 {
+  border-image: url('/ui/flat/UI_Flat_Banner02a.png') 4 8 fill stretch;
+}
+
+.pixel-banner--style3 {
+  border-image: url('/ui/flat/UI_Flat_Banner03a.png') 4 8 fill stretch;
+}
+
+.pixel-banner--style4 {
+  border-image: url('/ui/flat/UI_Flat_Banner04a.png') 4 8 fill stretch;
+}
+
+/* --- PixelInput 输入框 --- */
+.pixel-input {
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  border-style: solid;
+  border-width: 4px;
+  border-image: url('/ui/flat/UI_Flat_InputField01a.png') 4 fill stretch;
+  box-sizing: border-box;
+  padding: 4px 8px;
+  font-family: inherit;
+  font-size: 13px;
+  color: #3a2a1a;
+  outline: none;
+  width: 100%;
+  background: transparent;
+}
+
+.pixel-input::placeholder {
+  color: #999;
+}
+
+.pixel-input--dark {
+  border-image: url('/ui/flat/UI_Flat_InputField02a.png') 4 fill stretch;
+  color: var(--text-primary);
+}
+
+/* --- PixelBar 进度条 --- */
+.pixel-bar {
+  position: relative;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  height: 24px;
+  border-style: solid;
+  border-width: 3px;
+  border-image: url('/ui/flat/UI_Flat_Bar01a.png') 3 fill stretch;
+  box-sizing: border-box;
+}
+
+.pixel-bar__fill {
+  position: absolute;
+  top: 1px;
+  left: 1px;
+  bottom: 1px;
+  image-rendering: pixelated;
+  background: url('/ui/flat/UI_Flat_BarFill01a.png');
+  background-size: 100% 100%;
+  transition: width 0.3s ease;
+}
+
+/* 进度条流光 */
+.pixel-bar__fill::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    105deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.15) 45%,
+    rgba(255, 255, 255, 0.25) 50%,
+    rgba(255, 255, 255, 0.15) 55%,
+    transparent 70%
+  );
+  background-size: 200% 100%;
+  animation: barShine 3s ease-in-out infinite;
+}
+
+/* --- PixelBubble 聊天气泡 --- */
+.pixel-bubble {
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  border-style: solid;
+  box-sizing: border-box;
+  padding: 8px 12px;
+  font-size: 12px;
+  line-height: 1.6;
+  color: #d0e8d0;
+  word-break: break-word;
+  animation: bubbleIn 0.25s ease-out both;
+  transition: filter 0.15s;
+}
+
+.pixel-bubble:hover {
+  filter: brightness(1.08);
+}
+
+.pixel-bubble--left {
+  border-width: 8px 8px 8px 18px;
+  border-image: url('/ui/bubble-left.png') 4 4 4 10 fill stretch;
+}
+
+.pixel-bubble--right {
+  border-width: 8px 18px 8px 8px;
+  border-image: url('/ui/bubble-right.png') 4 10 4 4 fill stretch;
+}
+
+/* 气泡内 Markdown 样式 */
+.pixel-bubble p {
+  margin: 0 0 4px 0;
+}
+.pixel-bubble p:last-child {
+  margin-bottom: 0;
+}
+.pixel-bubble strong {
+  color: #f0f0f0;
+  font-weight: 700;
+}
+.pixel-bubble em {
+  color: #a0d0a0;
+  font-style: italic;
+}
+.pixel-bubble code {
+  background: rgba(0,0,0,0.3);
+  padding: 1px 4px;
+  border-radius: 2px;
+  font-size: 11px;
+  color: #80e080;
+}
+.pixel-bubble pre {
+  background: rgba(0,0,0,0.4);
+  padding: 6px 8px;
+  margin: 4px 0;
+  border-radius: 2px;
+  overflow-x: auto;
+}
+.pixel-bubble pre code {
+  background: none;
+  padding: 0;
+}
+.pixel-bubble ul, .pixel-bubble ol {
+  margin: 4px 0;
+  padding-left: 18px;
+}
+.pixel-bubble li {
+  margin-bottom: 2px;
+}
+.pixel-bubble blockquote {
+  border-left: 2px solid #4a8a4a;
+  margin: 4px 0;
+  padding: 2px 8px;
+  color: #a0c0a0;
+}
+.pixel-bubble table {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+  margin: 4px 0;
+  font-size: 11px;
+  word-break: break-all;
+}
+.pixel-bubble th, .pixel-bubble td {
+  border: 1px solid rgba(255,255,255,0.15);
+  padding: 2px 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.pixel-bubble th {
+  background: rgba(0,0,0,0.3);
+  color: #f0f0f0;
+  font-weight: 700;
+}
+
+/* 聊天区域容器 */
+.memory-chat-area {
+  background: var(--bg-chat);
+  border-radius: 4px;
+  position: relative;
+}
+
+
+/* 消息时间戳 */
+.msg-time {
+  font-size: 10px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+/* 名字标签 */
+.msg-speaker-tag {
+  padding: 2px 6px;
+  border-radius: 2px;
+  font-size: 10px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 64px;
+  margin-top: 6px;
+  image-rendering: pixelated;
+  border: 1px solid var(--border-name-tag);
+}
+
+/* --- PixelSlot 背包物品格 --- */
+.pixel-slot {
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  border-style: solid;
+  border-width: 5px;
+  box-sizing: border-box;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  min-height: 80px;
+  transition: transform 0.1s;
+  position: relative;
+}
+
+.pixel-slot:hover {
+  transform: scale(1.03);
+}
+
+.pixel-slot--normal {
+  border-image: url('/ui/inv-slot-normal.png') 5 fill stretch;
+}
+
+.pixel-slot--selected {
+  border-image: url('/ui/inv-slot-selected.png') 5 fill stretch;
+}
+
+.pixel-slot--empty {
+  border-image: url('/ui/inv-slot-empty.png') 5 fill stretch;
+  opacity: 0.4;
+  cursor: default;
+}
+
+.pixel-slot--empty:hover {
+  transform: none;
+}
+
+/* 物品格内文字 */
+.pixel-slot__name {
+  font-size: 11px;
+  font-weight: 600;
+  text-align: center;
+  word-break: break-all;
+  line-height: 1.2;
+}
+
+.pixel-slot__value {
+  font-size: 18px;
+  font-weight: 800;
+  color: #fbbf24;
+  font-family: monospace;
+  margin-top: 4px;
+}
+
+/* 背包详情面板 */
+.inv-detail-panel {
+  image-rendering: pixelated;
+  border-style: solid;
+  border-width: 5px;
+  border-image: url('/ui/inv-slot-normal.png') 5 fill stretch;
+  box-sizing: border-box;
+  padding: 10px 14px;
+  margin-top: 10px;
+}
+
+/* --- Ant Design 表单元素像素风覆盖 --- */
+
+/* ===== Button 按钮 ===== */
+.ant-btn {
+  border-radius: 0 !important;
+  image-rendering: pixelated;
+  border-style: solid !important;
+  border-width: 4px !important;
+  border-image: url('/ui/flat/UI_Flat_Button01a_1.png') 4 fill stretch !important;
+  background: transparent !important;
+  color: #3a2a1a !important;
+  font-weight: 600 !important;
+  box-shadow: none !important;
+  transition: none !important;
+}
+
+.ant-btn:hover:not(:disabled) {
+  border-image: url('/ui/flat/UI_Flat_Button01a_2.png') 4 fill stretch !important;
+  color: #3a2a1a !important;
+  text-shadow: 0 0 6px rgba(58, 42, 26, 0.2);
+}
+
+.ant-btn:active:not(:disabled) {
+  border-image: url('/ui/flat/UI_Flat_Button01a_3.png') 4 fill stretch !important;
+  transform: translateY(1px);
+  animation: btnFlash 0.15s ease-out;
+}
+
+.ant-btn-primary {
+  border-image: url('/ui/flat/UI_Flat_Button02a_1.png') 4 fill stretch !important;
+  color: #3a2a1a !important;
+}
+
+.ant-btn-primary:hover:not(:disabled) {
+  border-image: url('/ui/flat/UI_Flat_Button02a_2.png') 4 fill stretch !important;
+}
+
+.ant-btn-primary:active:not(:disabled) {
+  border-image: url('/ui/flat/UI_Flat_Button02a_3.png') 4 fill stretch !important;
+}
+
+.ant-btn-dangerous,
+.ant-btn-dangerous.ant-btn-primary {
+  border-image: url('/ui/flat/UI_Flat_Button01a_1.png') 4 fill stretch !important;
+  color: #d93025 !important;
+}
+
+.ant-btn-dangerous:hover:not(:disabled) {
+  border-image: url('/ui/flat/UI_Flat_Button01a_2.png') 4 fill stretch !important;
+  color: #ff4d4f !important;
+}
+
+.ant-btn[disabled],
+.ant-btn-disabled {
+  border-image: url('/ui/flat/UI_Flat_Button01a_4.png') 4 fill stretch !important;
+  color: #999 !important;
+  cursor: not-allowed !important;
+  opacity: 0.7;
+}
+
+/* ===== Select 选择器 ===== */
+.ant-select .ant-select-selector {
+  border-radius: 0 !important;
+  image-rendering: pixelated;
+  border-style: solid !important;
+  border-width: 3px !important;
+  border-image: url('/ui/flat/UI_Flat_InputField02a.png') 3 stretch !important;
+  background: var(--bg-input) !important;
+  color: var(--text-primary) !important;
+}
+
+.ant-select-dropdown {
+  border-radius: 0 !important;
+  background: var(--bg-panel) !important;
+  border: 2px solid var(--border-accent) !important;
+}
+
+.ant-select-item-option-selected {
+  background: rgba(251, 191, 36, 0.15) !important;
+}
+
+.ant-select-item-option-active {
+  background: var(--bg-hover-strong) !important;
+}
+
+/* ===== Input 输入框 ===== */
+.ant-input {
+  border-radius: 0 !important;
+  image-rendering: pixelated;
+  border-style: solid !important;
+  border-width: 3px !important;
+  border-image: url('/ui/flat/UI_Flat_InputField02a.png') 3 stretch !important;
+  background: var(--bg-input) !important;
+  color: var(--text-primary) !important;
+}
+
+.ant-input:focus,
+.ant-input-focused {
+  box-shadow: none !important;
+  border-image: url('/ui/flat/UI_Flat_InputField01a.png') 3 stretch !important;
+}
+
+.ant-input-affix-wrapper {
+  border-radius: 0 !important;
+  image-rendering: pixelated;
+  border-style: solid !important;
+  border-width: 3px !important;
+  border-image: url('/ui/flat/UI_Flat_InputField02a.png') 3 stretch !important;
+  background: var(--bg-input) !important;
+}
+
+.ant-input-affix-wrapper:focus,
+.ant-input-affix-wrapper-focused {
+  box-shadow: none !important;
+  border-image: url('/ui/flat/UI_Flat_InputField01a.png') 3 stretch !important;
+}
+
+/* InputNumber */
+.ant-input-number {
+  border-radius: 0 !important;
+  image-rendering: pixelated;
+  border-style: solid !important;
+  border-width: 3px !important;
+  border-image: url('/ui/flat/UI_Flat_InputField02a.png') 3 stretch !important;
+  background: var(--bg-input) !important;
+}
+
+.ant-input-number-input {
+  color: var(--text-primary) !important;
+}
+
+/* TextArea */
+.ant-input-textarea textarea.ant-input {
+  border-image: url('/ui/flat/UI_Flat_InputField02a.png') 3 stretch !important;
+}
+
+/* ===== Switch 开关 ===== */
+.ant-switch {
+  border-radius: 0 !important;
+  image-rendering: pixelated;
+  background-image: url('/ui/flat/UI_Flat_ToggleOff01a.png') !important;
+  background-size: 100% 100% !important;
+  background-color: transparent !important;
+  min-width: 40px;
+  height: 22px;
+}
+
+.ant-switch-checked {
+  background-image: url('/ui/flat/UI_Flat_ToggleOn01a.png') !important;
+  background-color: transparent !important;
+}
+
+.ant-switch .ant-switch-handle::before {
+  border-radius: 0 !important;
+  image-rendering: pixelated;
+  background: url('/ui/flat/UI_Flat_Handle01a.png') center/contain no-repeat !important;
+  box-shadow: none !important;
+}
+
+/* ===== Modal 弹窗 ===== */
+.ant-modal .ant-modal-content {
+  border-radius: 0 !important;
+  image-rendering: pixelated;
+  border-style: solid;
+  border-width: 10px;
+  border-image: url('/ui/frames/frame-gold.png') 18 stretch;
+  background: var(--bg-panel) !important;
+  color: var(--text-primary) !important;
+}
+
+.ant-modal .ant-modal-title,
+.ant-modal .ant-modal-body,
+.ant-modal .ant-modal-body .ant-typography,
+.ant-modal .ant-modal-body .ant-typography.ant-typography-secondary,
+.ant-modal .ant-modal-body label,
+.ant-modal .ant-modal-body .ant-form-item-label > label,
+.ant-modal .ant-modal-body .ant-select-selection-item,
+.ant-modal .ant-modal-body .ant-select-selection-placeholder,
+.ant-modal .ant-modal-body .ant-input,
+.ant-modal .ant-modal-body .ant-input-number-input,
+.ant-modal .ant-modal-body .ant-checkbox-wrapper,
+.ant-modal .ant-modal-body .ant-steps .ant-steps-item-title,
+.ant-modal .ant-modal-body .ant-tag,
+.ant-modal .ant-modal-body .ant-result-title,
+.ant-modal .ant-modal-body .ant-result-subtitle,
+.ant-modal .ant-modal-body .ant-divider-inner-text,
+.ant-modal .ant-modal-close {
+  color: var(--text-primary) !important;
+}
+
+.ant-modal .ant-modal-header {
+  background: transparent !important;
+  border-bottom: 1px solid var(--border-secondary) !important;
+  border-radius: 0 !important;
+}
+
+.ant-modal .ant-modal-close {
+  color: var(--text-secondary) !important;
+}
+
+.ant-modal .ant-modal-footer .ant-btn + .ant-btn {
+  margin-left: 8px;
+}
+
+/* ===== Slider 滑块 ===== */
+.ant-slider .ant-slider-rail {
+  border-radius: 0 !important;
+  image-rendering: pixelated;
+  background: url('/ui/flat/UI_Flat_Bar01a.png') center/100% 100% no-repeat !important;
+  height: 8px !important;
+}
+
+.ant-slider .ant-slider-track {
+  border-radius: 0 !important;
+  image-rendering: pixelated;
+  background: url('/ui/flat/UI_Flat_BarFill01a.png') left/100% 100% no-repeat !important;
+  height: 8px !important;
+}
+
+.ant-slider .ant-slider-handle::after {
+  border-radius: 0 !important;
+  image-rendering: pixelated;
+  background: url('/ui/flat/UI_Flat_Handle01a.png') center/contain no-repeat !important;
+  box-shadow: none !important;
+  border: none !important;
+}
+
+/* ===== Divider 分割线 ===== */
+.ant-divider {
+  border-color: var(--border-secondary) !important;
+}
+
+.ant-divider-inner-text {
+  color: var(--text-secondary) !important;
+  font-size: 12px !important;
+}
+
+/* ===== Tag 标签 ===== */
+.ant-tag {
+  border-radius: 0 !important;
+  border: 2px solid var(--border-accent) !important;
+  background: var(--bg-panel-translucent) !important;
+  color: var(--text-primary) !important;
+}
+
+/* ===== Drawer 抽屉 ===== */
+.ant-drawer .ant-drawer-content {
+  background: var(--bg-panel) !important;
+}
+
+.ant-drawer .ant-drawer-header {
+  background: var(--bg-panel) !important;
+  border-bottom: 1px solid var(--border-secondary) !important;
+}
+
+/* ===== Popover / Popconfirm ===== */
+.ant-popover .ant-popover-inner {
+  border-radius: 0 !important;
+  image-rendering: pixelated;
+  border-style: solid;
+  border-width: 4px;
+  border-image: url('/ui/frames/frame-stone.png') 15 stretch;
+  background: var(--bg-panel) !important;
+}
+
+.ant-popover .ant-popover-arrow {
+  display: none !important;
+}
+
+/* ===== Steps 步骤条 ===== */
+.ant-steps .ant-steps-item-icon {
+  border-radius: 0 !important;
+  image-rendering: pixelated;
+  border-style: solid !important;
+  border-width: 3px !important;
+  border-image: url('/ui/flat/UI_Flat_FrameSlot01a.png') 3 stretch !important;
+  background: var(--bg-panel) !important;
+}
+
+.ant-steps .ant-steps-item-finish .ant-steps-item-icon {
+  border-image: url('/ui/flat/UI_Flat_FrameSlot01c.png') 3 stretch !important;
+}
+
+.ant-steps .ant-steps-item-process .ant-steps-item-icon {
+  border-image: url('/ui/flat/UI_Flat_FrameSlot02a.png') 3 stretch !important;
+}
+
+/* ===== Checkbox / Radio ===== */
+.ant-checkbox .ant-checkbox-inner {
+  border-radius: 0 !important;
+  image-rendering: pixelated;
+  border-style: solid !important;
+  border-width: 2px !important;
+  border-image: url('/ui/flat/UI_Flat_Select01a_1.png') 2 fill stretch !important;
+  background: transparent !important;
+}
+
+.ant-checkbox-checked .ant-checkbox-inner {
+  border-image: url('/ui/flat/UI_Flat_Select01a_2.png') 2 fill stretch !important;
+  background: transparent !important;
+}
+
+.ant-checkbox-checked .ant-checkbox-inner::after {
+  display: none !important;
+}
+
+.ant-radio .ant-radio-inner {
+  border-radius: 0 !important;
+  image-rendering: pixelated;
+  border-style: solid !important;
+  border-width: 2px !important;
+  border-image: url('/ui/flat/UI_Flat_Select02a_1.png') 2 fill stretch !important;
+  background: transparent !important;
+}
+
+.ant-radio-checked .ant-radio-inner {
+  border-image: url('/ui/flat/UI_Flat_Select02a_2.png') 2 fill stretch !important;
+  background: transparent !important;
+}
+
+.ant-radio-checked .ant-radio-inner::after {
+  display: none !important;
+}
+
+/* ===== Tooltip ===== */
+.ant-tooltip .ant-tooltip-inner {
+  border-radius: 0 !important;
+  background: var(--bg-panel) !important;
+  border: 1px solid var(--border-accent) !important;
+  color: var(--text-primary) !important;
+}
+
+.ant-tooltip .ant-tooltip-arrow {
+  display: none !important;
+}
+
+/* ===== Dropdown Menu ===== */
+.ant-dropdown .ant-dropdown-menu {
+  border-radius: 0 !important;
+  background: var(--bg-panel) !important;
+  border: 2px solid var(--border-accent) !important;
+  padding: 2px !important;
+}
+
+.ant-dropdown .ant-dropdown-menu-item {
+  border-radius: 0 !important;
+  color: var(--text-primary) !important;
+}
+
+.ant-dropdown .ant-dropdown-menu-item:hover {
+  background: var(--bg-hover-strong) !important;
+}
+
+/* ===== Typography 文字 ===== */
+.ant-typography {
+  color: var(--text-primary) !important;
+}
+
+.ant-typography.ant-typography-secondary {
+  color: var(--text-secondary) !important;
+}
+
+/* ===== Empty 空态 ===== */
+.ant-empty-description {
+  color: var(--text-muted) !important;
+}
+
+/* ===== Select 选项文字 ===== */
+.ant-select-item {
+  color: var(--text-primary) !important;
+}
+
+/* ===== Card 卡片 ===== */
+.ant-card {
+  background: var(--bg-panel) !important;
+  border-radius: 8px;
+}
+
+.ant-card-head {
+  color: var(--text-primary) !important;
+  border-bottom-color: var(--border-primary) !important;
+}
+
+.ant-card-body {
+  color: var(--text-primary) !important;
+}
+
+/* ===== List 列表 ===== */
+.ant-list-item {
+  color: var(--text-primary) !important;
+}
+
+/* ===== Transfer 穿梭框 ===== */
+.ant-transfer .ant-transfer-list {
+  background: var(--bg-panel) !important;
+  border-color: var(--border-primary) !important;
+}
+
+.ant-transfer .ant-transfer-list-header {
+  background: var(--bg-panel) !important;
+  border-bottom-color: var(--border-primary) !important;
+  color: var(--text-primary) !important;
+}
+
+.ant-transfer .ant-transfer-list-header .ant-transfer-list-header-title {
+  color: var(--text-primary) !important;
+}
+
+.ant-transfer .ant-transfer-list-header .ant-transfer-list-header-selected {
+  color: var(--text-secondary) !important;
+}
+
+.ant-transfer .ant-transfer-list-content-item {
+  color: var(--text-primary) !important;
+}
+
+.ant-transfer .ant-transfer-list-content-item:hover {
+  background: var(--bg-hover) !important;
+}
+
+.ant-transfer .ant-transfer-list-content-item-checked {
+  background: var(--bg-hover-strong) !important;
+}
+
+.ant-transfer .ant-transfer-list-body-search-wrapper .ant-input {
+  background: var(--bg-input) !important;
+}
+
+/* ===== Form 表单标签 ===== */
+.ant-form-item-label > label {
+  color: var(--text-label) !important;
+}
+
+/* ===== Table 表格 ===== */
+.ant-table {
+  background: transparent !important;
+}
+
+.ant-table-thead > tr > th {
+  background: var(--bg-panel-translucent) !important;
+  border-bottom: 2px solid var(--border-accent) !important;
+  color: var(--text-label) !important;
+  border-radius: 0 !important;
+}
+
+.ant-table-tbody > tr > td {
+  border-bottom: 1px solid var(--border-secondary) !important;
+  color: var(--text-primary) !important;
+}
+
+.ant-table-tbody > tr:hover > td {
+  background: var(--bg-hover-faint) !important;
+}
+
+/* ===== Tabs 标签页 (非 pixel-theme 的通用 Tabs) ===== */
+.ant-tabs .ant-tabs-tab {
+  color: var(--text-secondary) !important;
+}
+
+.ant-tabs .ant-tabs-tab-active .ant-tabs-tab-btn {
+  color: var(--text-primary) !important;
+}
+
+.ant-tabs .ant-tabs-tab-btn {
+  color: var(--text-secondary) !important;
+}
+
+.ant-tabs .ant-tabs-nav::before {
+  border-bottom-color: var(--border-primary) !important;
+}
+
+.ant-tabs .ant-tabs-ink-bar {
+  background: var(--glow-amber) !important;
+}
+
+/* ===== Modal 弹窗标题 ===== */
+.ant-modal .ant-modal-title {
+  color: var(--text-primary) !important;
+}
+
+.ant-modal .ant-modal-body {
+  color: var(--text-primary) !important;
+}
+
+.ant-modal .ant-modal-footer {
+  border-top-color: var(--border-secondary) !important;
+}
+
+/* ===== Popconfirm ===== */
+.ant-popconfirm-message-title {
+  color: var(--text-primary) !important;
+}
+
+/* ===== Spin 加载 ===== */
+.ant-spin .ant-spin-dot-item {
+  background: #fbbf24 !important;
+}
+
+/* ===== Message / Notification ===== */
+.ant-message .ant-message-notice-content {
+  border-radius: 0 !important;
+  image-rendering: pixelated;
+  border-style: solid;
+  border-width: 4px;
+  border-image: url('/ui/frames/frame-stone.png') 15 stretch;
+  background: var(--bg-panel) !important;
+  color: var(--text-primary) !important;
+}
+
+/* --- 像素风全局覆盖 --- */
+.pixel-theme {
+  /* 覆盖 Ant Design Tabs */
+  & .ant-tabs-tab {
+    border-style: solid !important;
+    border-width: 4px !important;
+    border-image: url('/ui/flat/UI_Flat_Button01a_1.png') 4 fill stretch !important;
+    padding: 4px 8px !important;
+    margin-right: 2px !important;
+    color: #3a2a1a !important;
+    transition: none !important;
+    border-radius: 0 !important;
+    background: none !important;
+  }
+
+  & .ant-tabs-tab:hover {
+    border-image: url('/ui/flat/UI_Flat_Button01a_2.png') 4 fill stretch !important;
+  }
+
+  & .ant-tabs-tab-active {
+    border-image: url('/ui/flat/UI_Flat_Button02a_1.png') 4 fill stretch !important;
+    color: #3a2a1a !important;
+  }
+
+  & .ant-tabs-tab-active .ant-tabs-tab-btn {
+    color: #3a2a1a !important;
+    font-weight: 700;
+  }
+
+  & .ant-tabs-tab-btn {
+    color: #3a2a1a !important;
+    font-weight: 600;
+    font-size: 12px;
+  }
+
+  & .ant-tabs-ink-bar {
+    display: none !important;
+  }
+
+  & .ant-tabs-nav::before {
+    display: none !important;
+  }
+}
+
+/* --- NPC 角色列表卡片 --- */
+.npc-card {
+  transition: background 0.2s, box-shadow 0.2s;
+}
+
+.npc-card:hover {
+  background: var(--bg-hover) !important;
+}
+
+.npc-card:hover .npc-card__actions {
+  opacity: 1 !important;
+  transition: opacity 0.15s;
+}
+
+.npc-card__actions span:hover {
+  color: var(--text-primary) !important;
+}
+
+/* 活跃卡片入场动画 */
+.npc-card--active {
+  animation: panelFadeIn 0.3s ease-out both;
+}
+
+/* 活跃卡片呼吸发光 */
+@keyframes npc-breathe {
+  0%, 100% {
+    border-color: rgba(56, 189, 248, 0.3);
+    box-shadow: inset 0 0 12px rgba(56, 189, 248, 0.05);
+  }
+  50% {
+    border-color: rgba(56, 189, 248, 0.6);
+    box-shadow: inset 0 0 12px rgba(56, 189, 248, 0.12);
+  }
+}
+
+.npc-card--active:has([data-talking="true"]) {
+  animation: npc-breathe 2s ease-in-out infinite;
+}
+
+/* 状态指示点脉冲 */
+.npc-dot--pulse {
+  animation: dotPulse 2s ease-in-out infinite;
+}
+
+/* 头像 hover 效果 */
+.npc-card:hover .npc-avatar {
+  filter: brightness(1.25);
+  transform: scale(1.05);
+  transition: filter 0.15s, transform 0.15s;
+}
+
+.npc-avatar {
+  transition: filter 0.15s, transform 0.15s;
+}
+
+/* 闲置卡片 hover 高亮条 */
+.npc-card--idle {
+  position: relative;
+  overflow: hidden;
+}
+
+.npc-card--idle::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 0;
+  background: linear-gradient(to right, rgba(255, 255, 255, 0.04), transparent);
+  transition: width 0.25s ease-out;
+}
+
+.npc-card--idle:hover::before {
+  width: 100%;
+}
+
+/* 物品格 hover 发光 */
+.pixel-slot--normal:hover,
+.pixel-slot--selected:hover {
+  box-shadow: 0 0 8px rgba(251, 191, 36, 0.15);
+}
+
+/* Tab 活跃底部发光 */
+.pixel-theme .ant-tabs-tab-active {
+  position: relative;
+}
+
+.pixel-theme .ant-tabs-tab-active::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 20%;
+  right: 20%;
+  height: 2px;
+  background: rgba(251, 191, 36, 0.5);
+  box-shadow: 0 0 8px rgba(251, 191, 36, 0.4);
+  border-radius: 1px;
+}
+
+/* 输入框 focus 发光 */
+.pixel-input:focus {
+  box-shadow: 0 0 10px rgba(74, 222, 128, 0.12);
+}
+
+/* 空态装饰 */
+.empty-state-text {
+  color: var(--text-empty);
+  font-size: 11px;
+  text-align: center;
+  padding: 40px 20px;
+  animation: glowPulse 3s ease-in-out infinite;
+}
+
+/* 打字机光标 */
+.cursor-blink::after {
+  content: '▌';
+  animation: cursorBlink 1s step-end infinite;
+  color: #4ade80;
+  margin-left: 2px;
+  font-size: 0.9em;
+}
+
+/* 地图容器内阴影 (景深) */
+.map-inner-shadow {
+  box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.4);
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: 2px;
+}

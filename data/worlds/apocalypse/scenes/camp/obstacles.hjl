@@ -1,0 +1,87 @@
+{
+  "header": {
+    "version": "v1.0",
+    "type": "OBSTACLES"
+  },
+  "obstacles": [
+    {
+      "id": "scrap_crate",
+      "type": "rect",
+      "x": 88,
+      "y": 64,
+      "width": 28,
+      "height": 18,
+      "desc": "回收木箱",
+      "sprite": "/obstacles/Box_1_full_1_48x48.gif"
+    },
+    {
+      "id": "gate_barrier",
+      "type": "rect",
+      "x": 168,
+      "y": 112,
+      "width": 36,
+      "height": 12,
+      "desc": "营地闸栏",
+      "sprite": "/obstacles/Automatic_Barrier_1_48x48.gif"
+    },
+    {
+      "id": "watch_lamp",
+      "type": "rect",
+      "x": 256,
+      "y": 64,
+      "width": 12,
+      "height": 12,
+      "desc": "巡逻灯柱",
+      "sprite": "/obstacles/Street_Lamp_2_48x48.gif"
+    },
+    {
+      "id": "supply_dumpster",
+      "type": "rect",
+      "x": 96,
+      "y": 224,
+      "width": 30,
+      "height": 18,
+      "desc": "补给垃圾箱",
+      "sprite": "/obstacles/Dumpster_full_48x48.gif"
+    },
+    {
+      "id": "water_unit",
+      "type": "circle",
+      "x": 208,
+      "y": 224,
+      "radius": 12,
+      "desc": "净水设备",
+      "sprite": "/obstacles/Drinking_Fountain_1_loop_3-6_48x48.gif"
+    },
+    {
+      "id": "med_crate",
+      "type": "rect",
+      "x": 264,
+      "y": 176,
+      "width": 26,
+      "height": 18,
+      "desc": "药品物资箱",
+      "sprite": "/obstacles/Military_Crate_Medicines_1_48x48.gif"
+    },
+    {
+      "id": "notice_board",
+      "type": "rect",
+      "x": 160,
+      "y": 48,
+      "width": 30,
+      "height": 12,
+      "desc": "营地公告牌",
+      "sprite": "/obstacles/Billboard_48x48_1.gif"
+    },
+    {
+      "id": "center_lamp",
+      "type": "rect",
+      "x": 208,
+      "y": 160,
+      "width": 12,
+      "height": 12,
+      "desc": "中庭照明",
+      "sprite": "/obstacles/Street_Lamp_48x48.gif"
+    }
+  ]
+}

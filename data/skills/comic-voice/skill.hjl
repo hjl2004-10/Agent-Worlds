@@ -1,0 +1,7 @@
+{
+  "name": "comic-voice",
+  "description": "漫剧配音 - 为每格漫画台词生成TTS配音音频",
+  "tools": ["@file", "tts", "@npc"],
+  "prompt_file": "prompt.md",
+  "mcp_server": null
+}

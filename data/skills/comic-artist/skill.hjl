@@ -1,0 +1,7 @@
+{
+  "name": "comic-artist",
+  "description": "漫剧画师 - 按分镜表逐格生成画面，支持生图和基于原图编辑保持一致性",
+  "tools": ["@file", "@creative", "@npc"],
+  "prompt_file": "prompt.md",
+  "mcp_server": null
+}

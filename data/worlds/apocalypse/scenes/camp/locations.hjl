@@ -1,0 +1,80 @@
+{
+  "header": {
+    "version": "v1.0",
+    "type": "LOCATIONS"
+  },
+  "locations": {
+    "净水站": {
+      "x": 48,
+      "y": 48,
+      "tile": [3, 3],
+      "building": "house/24_Additional_Houses_One_Story_House_48x48.png",
+      "desc": "营地最重要的补给点，旧过滤设备还在勉强运转。",
+      "greeting": "净水站的桶和滤芯排得整整齐齐，所有人都知道这里的每一滴水都很珍贵。"
+    },
+    "指挥棚": {
+      "x": 160,
+      "y": 48,
+      "tile": [10, 3],
+      "building": "house/24_Additional_Houses_Modern_House_Unadorned_48x48.png",
+      "desc": "营地协调用的临时指挥点，墙上贴满巡逻和补给安排。",
+      "greeting": "指挥棚里挂着简陋地图和轮值表，所有外出和补给安排都会在这里过一遍。"
+    },
+    "旧邮站": {
+      "x": 272,
+      "y": 48,
+      "tile": [17, 3],
+      "building": "house/22_Post_Office_48x48_Building_2.png",
+      "desc": "旧时代留下的邮站，被改成了营地公告和消息中转处。",
+      "greeting": "旧邮站的柜台还在，只是现在寄送的不只是信，还有求助、清单和营地消息。"
+    },
+    "临时交易点": {
+      "x": 48,
+      "y": 160,
+      "tile": [3, 10],
+      "building": "house/24_Additional_Houses_Terraced_House_3_48x48.png",
+      "desc": "用破棚和货架搭出的交易角，零件、罐头和旧电池都能在这换到。",
+      "greeting": "交易点前摆着杂乱却有序的物资，开价的人和讲价的人都很清醒。"
+    },
+    "营地中庭": {
+      "x": 160,
+      "y": 160,
+      "tile": [10, 10],
+      "building": "house/ME_Singles_Villas_48x48_Villa_5.png",
+      "desc": "大家休整、集合和临时开会的中心区域。",
+      "greeting": "营地中庭点着几盏还算稳定的灯，巡逻归来的人和准备外出的人都会在这里停一下。"
+    },
+    "发电房": {
+      "x": 272,
+      "y": 160,
+      "tile": [17, 10],
+      "building": "house/ME_Singles_City_Props_48x48_Power_House_1.png",
+      "desc": "老旧发电机和备用线路所在的地方，晚上尤其重要。",
+      "greeting": "发电房外能听见低沉的机器嗡鸣，只要这里没停，营地夜里就不算完全黑。"
+    },
+    "回收场": {
+      "x": 48,
+      "y": 272,
+      "tile": [3, 17],
+      "building": "house/ME_Singles_City_Props_48x48_Container_House_1.png",
+      "desc": "旧金属、可拆零件和半坏设备都堆在这里等待分拣。",
+      "greeting": "回收场里堆满了旧时代的残骸，在懂行的人眼里，这些都还算是资源。"
+    },
+    "医疗点": {
+      "x": 160,
+      "y": 272,
+      "tile": [10, 17],
+      "building": "house/ME_Singles_Villas_48x48_Villa_2.png",
+      "desc": "一个由旧住宅改成的医疗点，药品不多，但比什么都没有强。",
+      "greeting": "医疗点里药味很淡，更多的是消毒水和绷带的味道，能救急已经算幸运。"
+    },
+    "哨塔值班室": {
+      "x": 272,
+      "y": 272,
+      "tile": [17, 17],
+      "building": "house/24_Additional_Houses_Terraced_House_6_48x48.png",
+      "desc": "外围值守人员交接班的地方，也负责记录外部动静。",
+      "greeting": "值班室里的望远镜、记录板和备用手电都摆在显眼位置，说明这里随时准备应对意外。"
+    }
+  }
+}

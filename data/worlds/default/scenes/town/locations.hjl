@@ -1,0 +1,32 @@
+{
+  "header": {
+    "version": "v1.0",
+    "type": "LOCATIONS"
+  },
+  "locations": {
+    "Café": {
+      "x": 48, "y": 48, "tile": [3, 3],
+      "building": "house/ME_Singles_Villas_48x48_Villa_4.png",
+      "desc": "A cozy café with fresh coffee and soft music",
+      "greeting": "The café smells of freshly brewed coffee. A few seats are open by the window."
+    },
+    "Library": {
+      "x": 272, "y": 48, "tile": [17, 3],
+      "building": "house/ME_Singles_Villas_48x48_Villa_2.png",
+      "desc": "A quiet library full of books and knowledge",
+      "greeting": "Rows of bookshelves line the walls. It's peaceful and quiet here."
+    },
+    "Park": {
+      "x": 160, "y": 160, "tile": [10, 10],
+      "building": "house/ME_Singles_Villas_48x48_Villa_1.png",
+      "desc": "A central park with trees and benches",
+      "greeting": "The park is lush and green. Birds are singing in the trees."
+    },
+    "Workshop": {
+      "x": 48, "y": 272, "tile": [3, 17],
+      "building": "house/ME_Singles_Villas_48x48_Villa_3.png",
+      "desc": "A maker space for building and creating things",
+      "greeting": "Tools and materials are neatly organized on the workbenches."
+    }
+  }
+}

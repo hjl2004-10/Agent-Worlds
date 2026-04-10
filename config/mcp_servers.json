@@ -1,0 +1,18 @@
+{
+  "version": "1.0",
+  "servers": {
+    "playwright": {
+      "command": "npx",
+      "args": [
+        "@playwright/mcp@latest",
+        "--port",
+        "8100",
+        "--output-dir",
+        "workspace"
+      ],
+      "transport": "sse",
+      "port": 8100,
+      "description": "浏览器控制 (Playwright)"
+    }
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "name": "comic-layout",
+  "description": "漫剧排版 - 静态漫画+图转视频+视频拼接配音，输出PNG和MP4",
+  "tools": ["@file", "composite_image", "@video"],
+  "prompt_file": "prompt.md",
+  "mcp_server": null
+}

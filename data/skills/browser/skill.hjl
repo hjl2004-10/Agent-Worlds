@@ -1,0 +1,7 @@
+{
+  "name": "browser",
+  "description": "内置浏览器能力 - 无头浏览器操作，无需外部 MCP",
+  "tools": ["@browser"],
+  "prompt_file": "prompt.md",
+  "mcp_server": null
+}

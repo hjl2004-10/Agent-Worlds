@@ -1,0 +1,62 @@
+{
+  "header": {
+    "version": "v1.0",
+    "type": "LOCATIONS"
+  },
+  "locations": {
+    "咖啡厅": {
+      "x": 48, "y": 48, "tile": [3, 3],
+      "building": "house/ME_Singles_Villas_48x48_Villa_4.png",
+      "desc": "休息放松、喝咖啡聊天的地方",
+      "greeting": "咖啡厅里飘着浓郁的咖啡香，轻松的背景音乐让人心情愉悦。"
+    },
+    "会议室": {
+      "x": 272, "y": 48, "tile": [17, 3],
+      "building": "house/24_Additional_Houses_Modern_House_48x48.png",
+      "desc": "进行重要会议和讨论的地方",
+      "greeting": "会议室宽敞明亮，投影仪和白板已经准备好了。"
+    },
+    "图书馆": {
+      "x": 48, "y": 160, "tile": [3, 10],
+      "building": "house/ME_Singles_Villas_48x48_Villa_2.png",
+      "desc": "查阅资料、安静学习的地方",
+      "greeting": "图书馆安静整洁，书架上整齐地排列着各类专业书籍。"
+    },
+    "中央大厅": {
+      "x": 160, "y": 160, "tile": [10, 10],
+      "building": "house/ME_Singles_Villas_48x48_Villa_1.png",
+      "desc": "工坊中心的公共大厅，人流汇聚",
+      "greeting": "你来到了中央大厅，现代化的装饰和来来往往的居民让这里充满活力。"
+    },
+    "监控中心": {
+      "x": 272, "y": 160, "tile": [17, 10],
+      "building": "house/ME_Singles_City_Props_48x48_Power_House_1.png",
+      "desc": "监控系统运行状态的地方",
+      "greeting": "监控中心的屏幕墙上显示着各项系统指标，值班人员正在认真观察。"
+    },
+    "银行": {
+      "x": 48, "y": 272, "tile": [3, 17],
+      "building": "house/ME_Singles_Villas_48x48_Villa_3.png",
+      "desc": "办理 Token 存取和转账业务",
+      "greeting": "银行大厅明亮整洁，柜台前排着整齐的等候线。"
+    },
+    "休息区": {
+      "x": 160, "y": 272, "tile": [10, 17],
+      "building": "house/24_Additional_Houses_One_Story_House_48x48.png",
+      "desc": "放松休息的公共区域",
+      "greeting": "休息区有舒适的沙发和绿植，是放松身心的好地方。"
+    },
+    "邮局": {
+      "x": 272, "y": 272, "tile": [17, 17],
+      "building": "house/22_Post_Office_48x48_Building_1.png",
+      "desc": "发送和接收消息的中转站",
+      "greeting": "邮局里工作人员正在整理信件和包裹，服务窗口秩序井然。"
+    },
+    "办公区": {
+      "x": 160, "y": 48, "tile": [10, 3],
+      "building": "house/24_Additional_Houses_Terraced_House_1_48x48.png",
+      "desc": "日常办公和协作的开放区域",
+      "greeting": "办公区里工位整齐排列，键盘敲击声此起彼伏，大家都在专注工作。"
+    }
+  }
+}

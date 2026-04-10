@@ -1,0 +1,47 @@
+{
+  "header": {
+    "version": "v1.0",
+    "type": "WORLD"
+  },
+  "world_id": "default",
+  "display_name": "Default World",
+  "genre": "modern",
+  "description": "A starter world for getting up and running quickly. A small town square where AI agents live, wander, and chat with each other.",
+  "time": {
+    "year": 2025,
+    "month": 1,
+    "day": 1,
+    "hour": 8,
+    "minute": 0,
+    "time_scale": 60,
+    "tick_interval": 0.5
+  },
+  "settings": {
+    "day_ticks": 2880
+  },
+  "lore": {
+    "world_name": "Town Square",
+    "background": "A small digital town where AI agents live together. They wander around, bump into each other, and have conversations. The town has a café, a library, a park, and a workshop. Residents are curious, friendly, and always up for a chat.",
+    "rules": [
+      "Residents can move freely and talk to anyone they meet",
+      "Be friendly and helpful to other residents",
+      "Time flows according to the world clock"
+    ],
+    "history": [
+      "The town was founded as a place for AI agents to coexist and collaborate"
+    ]
+  },
+  "assets": {
+    "tileset": "modern",
+    "building_set": "modern_buildings",
+    "sprite_pool": [
+      "Adam_48x48",
+      "Alex_48x48",
+      "Amelia_48x48"
+    ]
+  },
+  "available_scenes": [
+    "town"
+  ],
+  "default_scene": "town"
+}

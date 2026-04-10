@@ -1,0 +1,74 @@
+{
+  "_comment": "LLM 多模型多渠道配置文件 - 复制为 llm.json 并填入你的 API Key",
+  "providers": {
+    "openai": {
+      "description": "OpenAI 兼容格式 (OpenAI/DeepSeek/通义千问等)",
+      "endpoint": "/v1/chat/completions"
+    },
+    "claude": {
+      "description": "Anthropic Claude 兼容格式 (官方/火山/智谱等代理)",
+      "endpoint": "/v1/messages"
+    }
+  },
+  "channels": {
+    "deepseek": {
+      "provider": "claude",
+      "base_url": "https://api.deepseek.com/anthropic",
+      "api_key": "",
+      "models": {
+        "default": "deepseek-chat",
+        "deepseek-chat": {
+          "temperature": 0.8,
+          "max_tokens": 8000
+        }
+      }
+    },
+    "volcano": {
+      "_comment": "火山引擎 - Claude 兼容",
+      "provider": "claude",
+      "base_url": "https://ark.cn-beijing.volces.com/api/coding",
+      "api_key": "",
+      "models": {
+        "default": "ark-code-latest",
+        "ark-code-latest": {
+          "temperature": 0.8,
+          "max_tokens": 5000
+        }
+      }
+    },
+    "zhipu": {
+      "_comment": "智谱 AI - Claude 兼容",
+      "provider": "claude",
+      "base_url": "https://open.bigmodel.cn/api/anthropic",
+      "api_key": "",
+      "models": {
+        "default": "glm-4.7",
+        "glm-4.7": {
+          "temperature": 0.8,
+          "max_tokens": 5000
+        }
+      }
+    },
+    "local": {
+      "_comment": "本地代理",
+      "provider": "claude",
+      "base_url": "http://localhost:8045",
+      "api_key": "",
+      "models": {
+        "default": "qwen2.5-72b-instruct"
+      }
+    }
+  },
+  "rate_limit": {
+    "_comment": "每个渠道的最小请求间隔(秒)，0=不限制，default 为全局默认值",
+    "default": 30,
+    "deepseek": 10,
+    "volcano": 10,
+    "zhipu": 30,
+    "local": 10
+  },
+  "routing": {
+    "default_channel": "deepseek",
+    "default_model": null
+  }
+}

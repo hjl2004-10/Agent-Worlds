@@ -1,0 +1,7 @@
+{
+  "name": "programmer",
+  "description": "编程能力 - 文件读写、代码检查、命令执行、MCP连接",
+  "tools": ["@file", "delete_file", "check_syntax", "run_command", "list_mcp_servers", "connect_mcp"],
+  "prompt_file": "prompt.md",
+  "mcp_server": null
+}

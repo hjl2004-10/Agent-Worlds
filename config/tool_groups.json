@@ -1,0 +1,96 @@
+{
+  "version": "1.0",
+  "groups": {
+    "@file": {
+      "description": "文件操作组",
+      "tools": [
+        "read_file",
+        "write_file",
+        "edit_text"
+      ]
+    },
+    "@task": {
+      "description": "任务管理组",
+      "tools": [
+        "add_task",
+        "complete_task"
+      ]
+    },
+    "@memory": {
+      "description": "记忆笔记组",
+      "tools": [
+        "edit_memory_note"
+      ]
+    },
+    "@notify": {
+      "description": "通知消息组",
+      "tools": [
+        "send_qq_notify"
+      ]
+    },
+    "@inventory": {
+      "description": "背包属性组",
+      "tools": [
+        "list_writable_attrs",
+        "get_auth_code",
+        "read_attr",
+        "edit_attr",
+        "modify_attr",
+        "delete_attr"
+      ]
+    },
+    "@location": {
+      "description": "地点工具",
+      "tools": [
+        "goto_location",
+        "arrived_at"
+      ]
+    },
+    "@browser": {
+      "description": "内置浏览器操作组",
+      "tools": [
+        "browser_open",
+        "browser_click",
+        "browser_type",
+        "browser_screenshot",
+        "browser_snapshot",
+        "browser_close"
+      ]
+    },
+    "@npc": {
+      "description": "NPC协作组 (调用/创建NPC)",
+      "tools": [
+        "invoke_npc",
+        "create_npc"
+      ]
+    },
+    "@knowledge": {
+      "description": "知识库检索组",
+      "tools": [
+        "search_knowledge"
+      ]
+    },
+    "@creative": {
+      "description": "创意生成组 (图片生成/编辑/漫画排版)",
+      "tools": [
+        "image_generate",
+        "image_edit",
+        "composite_image"
+      ]
+    },
+    "@voice": {
+      "description": "语音工具组 (语音合成/语音识别)",
+      "tools": [
+        "tts",
+        "asr"
+      ]
+    },
+    "@video": {
+      "description": "视频工具组 (图转视频/视频合成)",
+      "tools": [
+        "image_to_video",
+        "make_video"
+      ]
+    }
+  }
+}

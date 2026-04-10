@@ -1,0 +1,7 @@
+{
+  "name": "comic-storyboard",
+  "description": "漫剧分镜 - 拆分镜表+为角色生成正反面参考图+撰写AI绘图prompt",
+  "tools": ["@file", "@creative", "@npc"],
+  "prompt_file": "prompt.md",
+  "mcp_server": null
+}

@@ -1,0 +1,50 @@
+{
+  "header": {
+    "version": "v1.0",
+    "type": "WORLD"
+  },
+  "world_id": "comic",
+  "display_name": "漫画工作室",
+  "genre": "创作",
+  "description": "AI漫剧制作工作室，四位专职创作者通过协作链完成漫画制作",
+  "time": {
+    "year": 2025,
+    "month": 2,
+    "day": 12,
+    "hour": 16,
+    "minute": 17,
+    "time_scale": 60,
+    "tick_interval": 0.5
+  },
+  "settings": {
+    "day_ticks": 2880
+  },
+  "lore": {
+    "world_name": "漫画工作室",
+    "background": "这是一个AI漫剧制作工作室，四位创作者各司其职：编剧负责写剧本，分镜师负责拆分画面，画师负责生成每格画面，排版师负责拼装成品。他们通过协作链完成漫画创作。",
+    "rules": [
+      "每位创作者专注自己的环节，完成后交给下一位",
+      "所有中间产物统一存放在 workspace/comic/ 目录下",
+      "编剧输出 script.json，分镜师输出 storyboard.json，画师输出 images/，排版师输出 output/",
+      "创作时保持风格一致性，画风描述由分镜师统一指定",
+      "对话压缩输出，工作正常使用"
+    ],
+    "history": [
+      "工作室成立，四位创作者开始协作",
+      "第一部漫剧诞生"
+    ]
+  },
+  "assets": {
+    "tileset": "modern",
+    "building_set": "modern_buildings",
+    "sprite_pool": [
+      "Adam_48x48",
+      "Alex_48x48",
+      "Amelia_48x48"
+    ]
+  },
+  "available_scenes": [
+    "studio"
+  ],
+  "default_scene": "studio"
+}

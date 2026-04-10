@@ -1,0 +1,18 @@
+{
+  "header": {
+    "version": "v1.0",
+    "type": "SCENE"
+  },
+  "scene_id": "office",
+  "display_name": "创造工坊",
+  "description": "协作创作的核心区域，包含办公区、咖啡厅、会议室等功能空间",
+  "map": {
+    "width": 320,
+    "height": 320,
+    "tile_size": 16
+  },
+  "spawn_points": {
+    "default": { "x": 160, "y": 160, "direction": "down" }
+  },
+  "exits": []
+}

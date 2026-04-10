@@ -1,0 +1,26 @@
+{
+  "header": {
+    "version": "v1.0",
+    "type": "SCENE"
+  },
+  "scene_id": "camp",
+  "display_name": "回收营地",
+  "description": "用旧房、铁栏和临时设施拼起来的末世营地，中心是交易与补给区，外围靠哨兵和照明维持秩序。",
+  "map": {
+    "width": 320,
+    "height": 320,
+    "tile_size": 16
+  },
+  "spawn_points": {
+    "default": { "x": 160, "y": 160, "direction": "down" },
+    "player": { "x": 160, "y": 160, "direction": "down" },
+    "Boss": { "x": 160, "y": 160, "direction": "down" },
+    "David": { "x": 112, "y": 80, "direction": "right" },
+    "测试工具助手": { "x": 224, "y": 96, "direction": "left" },
+    "秘书": { "x": 144, "y": 48, "direction": "down" },
+    "财务": { "x": 48, "y": 240, "direction": "right" },
+    "拾荒者阿灰": { "x": 224, "y": 224, "direction": "left" },
+    "哨兵林七": { "x": 272, "y": 64, "direction": "down" }
+  },
+  "exits": []
+}

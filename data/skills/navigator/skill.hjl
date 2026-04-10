@@ -1,0 +1,7 @@
+{
+  "name": "navigator",
+  "description": "移动导航能力 - 前往地点、确认到达",
+  "tools": ["@location"],
+  "prompt_file": "prompt.md",
+  "mcp_server": null
+}

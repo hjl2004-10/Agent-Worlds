@@ -1,0 +1,67 @@
+{
+  "header": {
+    "version": "v1.0",
+    "type": "OBSTACLES"
+  },
+  "obstacles": [
+    {
+      "id": "desk_row_1",
+      "type": "rect",
+      "x": 72,
+      "y": 48,
+      "width": 28,
+      "height": 18,
+      "desc": "办公箱柜",
+      "sprite": "/obstacles/Box_1_full_1_48x48.gif"
+    },
+    {
+      "id": "partition_v",
+      "type": "rect",
+      "x": 192,
+      "y": 144,
+      "width": 14,
+      "height": 14,
+      "desc": "路灯B",
+      "sprite": "/obstacles/Street_Lamp_2_48x48.gif"
+    },
+    {
+      "id": "plant_lobby_2",
+      "type": "rect",
+      "x": 192,
+      "y": 192,
+      "width": 12,
+      "height": 12,
+      "desc": "路灯A",
+      "sprite": "/obstacles/Street_Lamp_48x48.gif"
+    },
+    {
+      "id": "sofa_lounge",
+      "type": "rect",
+      "x": 96,
+      "y": 192,
+      "width": 30,
+      "height": 18,
+      "desc": "垃圾桶",
+      "sprite": "/obstacles/Dumpster_full_48x48.gif"
+    },
+    {
+      "id": "fountain_plaza",
+      "type": "circle",
+      "x": 240,
+      "y": 264,
+      "radius": 12,
+      "desc": "喷泉饮水机",
+      "sprite": "/obstacles/Drinking_Fountain_1_loop_3-6_48x48.gif"
+    },
+    {
+      "id": "rack_server",
+      "type": "rect",
+      "x": 264,
+      "y": 96,
+      "width": 26,
+      "height": 18,
+      "desc": "医疗箱",
+      "sprite": "/obstacles/Military_Crate_Medicines_1_48x48.gif"
+    }
+  ]
+}

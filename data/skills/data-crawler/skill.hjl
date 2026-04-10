@@ -1,0 +1,7 @@
+{
+  "name": "data-crawler",
+  "description": "网页数据采集 - 用浏览器访问网站，提取公开数据，保存为结构化文件",
+  "tools": ["@browser", "@file", "run_command"],
+  "prompt_file": "prompt.md",
+  "mcp_server": null
+}

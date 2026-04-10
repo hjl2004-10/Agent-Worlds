@@ -1,0 +1,12 @@
+{
+    "enabled": false,
+    "app_id": "",
+    "client_secret": "",
+    "admin_openid": "",
+    "_comment": {
+        "enabled": "是否启用 QQ 通知功能",
+        "app_id": "QQ 开放平台 https://q.qq.com/ 创建机器人后获取",
+        "client_secret": "QQ Bot 密钥",
+        "admin_openid": "默认接收通知的管理员 OpenID"
+    }
+}

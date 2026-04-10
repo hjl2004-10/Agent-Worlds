@@ -1,0 +1,9 @@
+{
+  "_comment": "非 LLM 的云服务配置 - 复制为 services.json 并填入你的凭据",
+  "baidu_asr": {
+    "_comment": "百度语音识别极速版 (短语音，≤60秒)",
+    "app_id": 0,
+    "api_key": "",
+    "secret_key": ""
+  }
+}

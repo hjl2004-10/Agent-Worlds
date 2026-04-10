@@ -1,0 +1,488 @@
+/* ========== NPC 市场页样式 ========== */
+
+.market-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 12px;
+  padding: 8px;
+}
+
+/* ---------- 卡片 ---------- */
+
+.market-card {
+  position: relative;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  border: 2px solid #334155;
+  border-radius: 4px;
+  padding: 12px 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  image-rendering: pixelated;
+  overflow: hidden;
+}
+
+.market-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, var(--card-accent, #38bdf8), transparent);
+  opacity: 0.6;
+}
+
+.market-card:hover {
+  border-color: var(--card-accent, #38bdf8);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4),
+              0 0 8px var(--card-glow, transparent);
+}
+
+.market-card--disabled {
+  opacity: 0.55;
+  filter: saturate(0.5);
+}
+
+.market-card--disabled:hover {
+  opacity: 0.75;
+  filter: saturate(0.7);
+}
+
+/* ---------- 等级徽章 ---------- */
+
+.market-rank {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 14px;
+  font-weight: 900;
+  color: var(--rank-color, #6b7280);
+  text-shadow: 0 0 6px var(--rank-color, transparent);
+  border: 2px solid var(--rank-color, #6b7280);
+  border-radius: 4px;
+  background: #0f172a;
+}
+
+/* ---------- 状态灯 ---------- */
+
+.market-status {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 1px solid #00000060;
+}
+
+.market-status--online {
+  background: #4ade80;
+  box-shadow: 0 0 6px #4ade8080;
+  animation: market-pulse 2s ease-in-out infinite;
+}
+
+.market-status--offline {
+  background: #475569;
+}
+
+@keyframes market-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* ---------- 头像区 ---------- */
+
+.market-avatar {
+  text-align: center;
+  margin: 8px 0 4px;
+}
+
+.market-avatar img {
+  width: 48px;
+  height: 48px;
+  image-rendering: pixelated;
+  border: 2px solid #475569;
+  border-radius: 4px;
+  background: #0f172a;
+}
+
+.market-name {
+  text-align: center;
+  font-size: 13px;
+  font-weight: 700;
+  color: #e2e8f0;
+  margin: 4px 0 2px;
+  letter-spacing: 1px;
+}
+
+.market-skill-tag {
+  text-align: center;
+  font-size: 10px;
+  color: #94a3b8;
+  margin-bottom: 8px;
+}
+
+.market-skill-tag span {
+  background: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 3px;
+  padding: 1px 6px;
+  margin: 0 2px;
+  font-size: 10px;
+}
+
+/* ---------- 属性条 ---------- */
+
+.market-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 6px 0;
+}
+
+.market-stat-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+}
+
+.market-stat-label {
+  width: 30px;
+  color: #94a3b8;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.market-stat-bar {
+  flex: 1;
+  height: 8px;
+  background: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 2px;
+  overflow: hidden;
+  position: relative;
+}
+
+.market-stat-fill {
+  height: 100%;
+  border-radius: 1px;
+  transition: width 0.6s ease;
+  position: relative;
+}
+
+.market-stat-fill::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 50%;
+  background: linear-gradient(to bottom, rgba(255,255,255,0.15), transparent);
+}
+
+.market-stat-value {
+  width: 22px;
+  text-align: right;
+  color: #cbd5e1;
+  font-size: 9px;
+  font-family: monospace;
+  flex-shrink: 0;
+}
+
+/* ---------- 标签行 ---------- */
+
+.market-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+  margin: 6px 0 4px;
+  justify-content: center;
+}
+
+.market-tag {
+  font-size: 9px;
+  padding: 1px 5px;
+  border-radius: 2px;
+  border: 1px solid;
+  letter-spacing: 0.5px;
+}
+
+.market-tag--wechat {
+  color: #4ade80;
+  border-color: #4ade8060;
+  background: #4ade8015;
+}
+
+.market-tag--mcp {
+  color: #a78bfa;
+  border-color: #a78bfa60;
+  background: #a78bfa15;
+}
+
+.market-tag--player {
+  color: #38bdf8;
+  border-color: #38bdf860;
+  background: #38bdf815;
+}
+
+.market-tag--tools {
+  color: #fb923c;
+  border-color: #fb923c60;
+  background: #fb923c15;
+}
+
+.market-tag--veteran {
+  color: #fbbf24;
+  border-color: #fbbf2460;
+  background: #fbbf2415;
+}
+
+/* ---------- 操作按钮 ---------- */
+
+.market-actions {
+  display: flex;
+  gap: 4px;
+  margin-top: 6px;
+}
+
+.market-actions button {
+  flex: 1;
+  font-size: 10px;
+  padding: 3px 0;
+  background: #1e293b;
+  border: 1px solid #475569;
+  border-radius: 3px;
+  color: #cbd5e1;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.market-actions button:hover {
+  background: #334155;
+  border-color: #64748b;
+}
+
+/* ---------- 筛选栏 ---------- */
+
+.market-filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-bottom: 1px solid #334155;
+  flex-wrap: wrap;
+}
+
+.market-filter-btn {
+  font-size: 11px;
+  padding: 2px 10px;
+  border: 1px solid #475569;
+  border-radius: 3px;
+  background: #1e293b;
+  color: #94a3b8;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.market-filter-btn:hover {
+  border-color: #64748b;
+  color: #e2e8f0;
+}
+
+.market-filter-btn--active {
+  background: #334155;
+  border-color: #38bdf8;
+  color: #38bdf8;
+}
+
+/* ---------- 底栏 ---------- */
+
+.market-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border-top: 1px solid #334155;
+  font-size: 11px;
+  color: #94a3b8;
+}
+
+.market-footer-actions {
+  display: flex;
+  gap: 6px;
+}
+
+/* ---------- 导入卡片 (虚线) ---------- */
+
+.market-card--import {
+  border: 2px dashed #475569;
+  background: transparent;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  color: #64748b;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.market-card--import:hover {
+  border-color: #38bdf8;
+  color: #38bdf8;
+  background: #38bdf808;
+}
+
+.market-card--import .import-icon {
+  font-size: 28px;
+  margin-bottom: 8px;
+}
+
+/* ---------- 详情面板 ---------- */
+
+.market-detail-header {
+  text-align: center;
+  padding: 16px 0;
+  border-bottom: 1px solid #334155;
+  margin-bottom: 12px;
+}
+
+.market-detail-avatar {
+  width: 64px;
+  height: 64px;
+  image-rendering: pixelated;
+  border: 3px solid var(--rank-color, #475569);
+  border-radius: 6px;
+  background: #0f172a;
+  box-shadow: 0 0 12px var(--rank-glow, transparent);
+}
+
+.market-detail-name {
+  font-size: 18px;
+  font-weight: 700;
+  color: #e2e8f0;
+  margin: 8px 0 4px;
+}
+
+.market-detail-desc {
+  font-size: 12px;
+  color: #94a3b8;
+  line-height: 1.5;
+  padding: 0 8px;
+}
+
+.market-detail-section {
+  margin: 12px 0;
+}
+
+.market-detail-section-title {
+  font-size: 12px;
+  color: #64748b;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.market-detail-stat-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  font-size: 12px;
+}
+
+.market-detail-stat-label {
+  width: 50px;
+  color: #94a3b8;
+  flex-shrink: 0;
+}
+
+.market-detail-stat-bar {
+  flex: 1;
+  height: 12px;
+  background: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.market-detail-stat-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.8s ease;
+  position: relative;
+}
+
+.market-detail-stat-fill::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 50%;
+  background: linear-gradient(to bottom, rgba(255,255,255,0.2), transparent);
+}
+
+.market-detail-stat-value {
+  width: 30px;
+  text-align: right;
+  font-family: monospace;
+  color: #e2e8f0;
+  flex-shrink: 0;
+}
+
+/* 技能/工具列表 */
+
+.market-detail-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.market-detail-chip {
+  font-size: 10px;
+  padding: 2px 8px;
+  border: 1px solid #475569;
+  border-radius: 3px;
+  background: #1e293b;
+  color: #cbd5e1;
+}
+
+.market-detail-chip--skill {
+  border-color: #fbbf2460;
+  color: #fbbf24;
+}
+
+/* 入场动画 */
+
+@keyframes market-card-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.market-card {
+  animation: market-card-in 0.3s ease forwards;
+}
+
+.market-card:nth-child(2) { animation-delay: 0.05s; }
+.market-card:nth-child(3) { animation-delay: 0.1s; }
+.market-card:nth-child(4) { animation-delay: 0.15s; }
+.market-card:nth-child(5) { animation-delay: 0.2s; }
+.market-card:nth-child(6) { animation-delay: 0.25s; }
+.market-card:nth-child(7) { animation-delay: 0.3s; }
+.market-card:nth-child(8) { animation-delay: 0.35s; }

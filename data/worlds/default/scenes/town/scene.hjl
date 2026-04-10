@@ -1,0 +1,18 @@
+{
+  "header": {
+    "version": "v1.0",
+    "type": "SCENE"
+  },
+  "scene_id": "town",
+  "display_name": "Town Square",
+  "description": "The central gathering area with a café, library, park, and workshop",
+  "map": {
+    "width": 320,
+    "height": 320,
+    "tile_size": 16
+  },
+  "spawn_points": {
+    "default": { "x": 160, "y": 160, "direction": "down" }
+  },
+  "exits": []
+}

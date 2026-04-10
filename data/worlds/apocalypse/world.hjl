@@ -1,0 +1,54 @@
+{
+  "header": {
+    "version": "v1.0",
+    "type": "WORLD"
+  },
+  "world_id": "apocalypse",
+  "display_name": "废土营地",
+  "genre": "末世",
+  "description": "文明坍塌后的临时幸存者据点。这里的人靠回收、交易、值守和协作维持营地运转。",
+  "time": {
+    "year": 2037,
+    "month": 9,
+    "day": 9,
+    "hour": 7,
+    "minute": 44,
+    "time_scale": 60,
+    "tick_interval": 0.5
+  },
+  "settings": {
+    "day_ticks": 2880
+  },
+  "lore": {
+    "world_name": "灰烬营地",
+    "background": "旧城市断电多年后，幸存者在一片半毁街区里搭起了临时营地。营地不大，但有自己的值守制度、交易秩序和生存规则。每个人都在想办法把废墟里的旧世界重新拼接成还能住人的新世界。",
+    "rules": [
+      "水、电、药品和可用零件都是稀缺资源",
+      "营地优先保证净水、发电和警戒系统运行",
+      "陌生人可以被接纳，但必须先经过哨岗观察",
+      "任何人都可以提出任务或求助，但资源分配要讲清理由",
+      "能修复旧物、整理库存、巡查外围的人都对营地有价值",
+      "营地内部默认互助，但外出探索需要承担风险"
+    ],
+    "history": [
+      "最初这里只是几间空屋和一台勉强能启动的发电机",
+      "后来幸存者把旧邮站、净水设备和回收堆连成了一个营地",
+      "营地逐渐形成了守夜、修理、回收和交易四种日常分工",
+      "现在这里既是避难所，也是试着重新生活的地方"
+    ]
+  },
+  "assets": {
+    "tileset": "modern",
+    "building_set": "modern_buildings",
+    "sprite_pool": [
+      "Adam",
+      "Amelia",
+      "Zombie_1_48x48",
+      "Zombie_2_48x48"
+    ]
+  },
+  "available_scenes": [
+    "camp"
+  ],
+  "default_scene": "camp"
+}

@@ -1,0 +1,21 @@
+{
+  "header": {
+    "version": "v1.0",
+    "type": "SCENE"
+  },
+  "scene_id": "studio",
+  "display_name": "创作工坊",
+  "description": "漫画制作的核心区域，包含编剧桌、分镜桌、画板区和排版台",
+
+  "map": {
+    "width": 320,
+    "height": 320,
+    "tile_size": 16
+  },
+
+  "spawn_points": {
+    "default": { "x": 160, "y": 160, "direction": "down" }
+  },
+
+  "exits": []
+}

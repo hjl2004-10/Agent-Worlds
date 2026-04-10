@@ -1,0 +1,7 @@
+{
+  "name": "wechat-mp",
+  "description": "微信服务号运营 - 图文发布、粉丝管理、消息回复、数据分析",
+  "tools": ["@file", "run_command"],
+  "prompt_file": "prompt.md",
+  "mcp_server": null
+}

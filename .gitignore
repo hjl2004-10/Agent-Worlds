@@ -1,0 +1,58 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+.eggs/
+dist/
+build/
+
+# 虚拟环境
+venv/
+.venv/
+env/
+.env/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# === 开源保护：敏感配置 ===
+config/llm.json
+config/qq_bot.json
+config/services.json
+config/auth.json
+config/*.local.json
+
+# === 运行时产物 ===
+workspace/
+data/runtime/
+data/individuals/
+data/mailbox/
+data/tasks/
+data/knowledge/
+
+# === 构建产物 ===
+static/dist/
+
+# === 工具/IDE 缓存 ===
+.claude/settings.local.json
+.playwright-mcp/
+.trae/
+.gstack/
+.pytest_cache/
+
+# 日志
+*.log
+
+# 系统文件
+.DS_Store
+Thumbs.db
+
+# Node.js
+node_modules/
+package-lock.json

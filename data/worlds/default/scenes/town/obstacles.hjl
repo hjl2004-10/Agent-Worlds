@@ -1,0 +1,37 @@
+{
+  "header": {
+    "version": "v1.0",
+    "type": "OBSTACLES"
+  },
+  "obstacles": [
+    {
+      "id": "fountain",
+      "type": "circle",
+      "x": 160,
+      "y": 100,
+      "radius": 12,
+      "desc": "A small fountain",
+      "sprite": "/obstacles/Drinking_Fountain_1_loop_3-6_48x48.gif"
+    },
+    {
+      "id": "lamp_1",
+      "type": "rect",
+      "x": 96,
+      "y": 96,
+      "width": 14,
+      "height": 14,
+      "desc": "Street lamp",
+      "sprite": "/obstacles/Street_Lamp_48x48.gif"
+    },
+    {
+      "id": "lamp_2",
+      "type": "rect",
+      "x": 224,
+      "y": 224,
+      "width": 14,
+      "height": 14,
+      "desc": "Street lamp",
+      "sprite": "/obstacles/Street_Lamp_2_48x48.gif"
+    }
+  ]
+}

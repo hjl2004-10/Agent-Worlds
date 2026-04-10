@@ -1,0 +1,7 @@
+{
+  "name": "comic-writer",
+  "description": "漫剧编剧 - 根据主题创作漫画剧本，输出标准化剧本JSON",
+  "tools": ["@file", "@npc"],
+  "prompt_file": "prompt.md",
+  "mcp_server": null
+}
