@@ -42,6 +42,14 @@ Think of it as a SimCity for LLM agents, with a real-time pixel map, a skill sys
 | ![Conversation](docs/screenshots/02-conversation.jpg) | ![World](docs/screenshots/03-world-panel.jpg) | ![NPC Config](docs/screenshots/04-npc-config.jpg) |
 | Chat with NPCs in real-time | Switch between multiple worlds | Configure NPC personality & skills |
 
+## LLM Provider Support
+
+> **Important:** Tool use (function calling) currently requires the **Anthropic-compatible API** (`provider: "claude"` in config). Many providers support this format — DeepSeek, Zhipu GLM, Volcano Engine all offer Anthropic-compatible endpoints.
+>
+> Providers using the **OpenAI format** (`provider: "openai"`) work for **conversation only** — NPCs can chat but cannot use tools.
+>
+> More provider integrations are planned.
+
 ## Quick Start
 
 ### Requirements

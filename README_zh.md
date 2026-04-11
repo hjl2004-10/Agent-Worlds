@@ -42,6 +42,14 @@ Agent-Worlds 是一个 **AI Agent 操作系统**。你把 NPC 角色放进一个
 | ![对话](docs/screenshots/02-conversation.jpg) | ![世界](docs/screenshots/03-world-panel.jpg) | ![配置](docs/screenshots/04-npc-config.jpg) |
 | 与 NPC 实时聊天，气泡式对话 | 多世界切换，自定义世界观 | 配置 NPC 性格、技能、LLM 渠道 |
 
+## LLM 渠道支持
+
+> **重要提示：** 工具调用（function calling）目前需要 **Anthropic 兼容 API**（配置中 `provider: "claude"`）。许多厂商支持该格式 — DeepSeek、智谱 GLM、火山引擎都提供 Anthropic 兼容接口。
+>
+> 使用 **OpenAI 格式**（`provider: "openai"`）的渠道**仅支持对话** — NPC 可以聊天但无法使用工具。
+>
+> 后续会集成更多渠道的工具调用支持。
+
 ## 快速开始
 
 ### 环境要求

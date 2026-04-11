@@ -15,6 +15,7 @@ import { InventoryPanel } from './InventoryPanel';
 import { NPCCreator } from './NPCCreator';
 import { NPCMarket } from '@/components/Market/NPCMarket';
 import { PixelButton } from '@/components/ui';
+import { useT } from '@/i18n';
 import type { NPC } from '@/api/types';
 
 const COLORS = ['#4ade80', '#38bdf8', '#e879f9', '#fbbf24', '#f87171'];
@@ -43,15 +44,15 @@ function isActive(npc: NPC, selectedNPC: string | null): boolean {
   return npc.is_talking || npc.is_player || npc.name === selectedNPC || npc.walk_mode === 'to_target';
 }
 
-// 状态标签文本和颜色
-function getStatusTag(npc: NPC, selectedNPC: string | null): { text: string; color: string } {
-  if (npc.name === selectedNPC) return { text: '控制中', color: '#fbbf24' };
-  if (npc.is_talking) return { text: '对话中', color: '#38bdf8' };
-  if (npc.is_player) return { text: '玩家', color: '#22d3ee' };
-  if (!npc.enabled) return { text: '禁用', color: '#4a4a6a' };
-  if (npc.walk_mode === 'to_target') return { text: '移动中', color: '#38bdf8' };
-  if (npc.initiative < 0) return { text: '疲惫', color: 'var(--text-icon)' };
-  return { text: '空闲', color: 'var(--text-muted)' };
+// 状态标签 key 和颜色
+function getStatusTag(npc: NPC, selectedNPC: string | null): { key: string; color: string } {
+  if (npc.name === selectedNPC) return { key: 'npc.status.controlled', color: '#fbbf24' };
+  if (npc.is_talking) return { key: 'npc.status.talking', color: '#38bdf8' };
+  if (npc.is_player) return { key: 'npc.status.player', color: '#22d3ee' };
+  if (!npc.enabled) return { key: 'npc.status.disabled', color: '#4a4a6a' };
+  if (npc.walk_mode === 'to_target') return { key: 'npc.status.moving', color: '#38bdf8' };
+  if (npc.initiative < 0) return { key: 'npc.status.tired', color: 'var(--text-icon)' };
+  return { key: 'npc.status.free', color: 'var(--text-muted)' };
 }
 
 // 状态指示点颜色
@@ -64,6 +65,7 @@ function getDotColor(npc: NPC, selectedNPC: string | null): string {
 }
 
 export function NPCList({ onNPCClick }: NPCListProps) {
+  const t = useT();
   const { npcs, fetch: refreshNPCs } = useNPCStore();
   const { selectedNPC } = useGodStore();
   const [configNPC, setConfigNPC] = useState<string | null>(null);
@@ -150,7 +152,7 @@ export function NPCList({ onNPCClick }: NPCListProps) {
             <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
               {/* 操作按钮 */}
               <span className="npc-card__actions" style={{ display: 'flex', gap: 2, opacity: 0 }}>
-                <Tooltip title="配置">
+                <Tooltip title={t('npc.config')}>
                   <span
                     onClick={(e) => handleConfigClick(e, npc.name)}
                     style={{ color: 'var(--text-icon)', cursor: 'pointer', fontSize: 11, padding: '0 2px' }}
@@ -158,7 +160,7 @@ export function NPCList({ onNPCClick }: NPCListProps) {
                     <SettingOutlined />
                   </span>
                 </Tooltip>
-                <Tooltip title="背包">
+                <Tooltip title={t('npc.inventory')}>
                   <span
                     onClick={(e) => handleInventoryClick(e, npc.name)}
                     style={{ color: 'var(--text-icon)', cursor: 'pointer', fontSize: 11, padding: '0 2px' }}
@@ -167,7 +169,7 @@ export function NPCList({ onNPCClick }: NPCListProps) {
                   </span>
                 </Tooltip>
                 {(npc.tools?.length > 0) && (
-                  <Tooltip title={`${npc.tools.length} 个工具`}>
+                  <Tooltip title={`${npc.tools.length}${t('npc.tools')}`}>
                     <span
                       onClick={(e) => handleConfigClick(e, npc.name)}
                       style={{ color: '#e879f9', cursor: 'pointer', fontSize: 10, padding: '0 2px' }}
@@ -192,7 +194,7 @@ export function NPCList({ onNPCClick }: NPCListProps) {
           {/* 详情行 */}
           <div style={{ marginTop: 3, display: 'flex', alignItems: 'center', gap: 6, fontSize: 10, color: 'var(--text-muted)' }}>
             <span>({npc.x.toFixed(0)}, {npc.y.toFixed(0)})</span>
-            <span>主动:{npc.initiative}</span>
+            <span>{t('npc.initiative')}:{npc.initiative}</span>
           </div>
 
           {/* 状态标签 */}
@@ -205,7 +207,7 @@ export function NPCList({ onNPCClick }: NPCListProps) {
               borderRadius: 2,
               border: `1px solid ${tag.color}30`,
             }}>
-              {tag.text}
+              {t(tag.key)}
             </span>
             {npc.is_talking && npc.name !== selectedNPC && (
               <span style={{ marginLeft: 4, color: '#38bdf8', fontSize: 10 }}>
@@ -253,7 +255,7 @@ export function NPCList({ onNPCClick }: NPCListProps) {
           </span>
           {/* hover 时显示的操作按钮 */}
           <span className="npc-card__actions" style={{ display: 'flex', gap: 2, opacity: 0, fontSize: 10 }}>
-            <Tooltip title="配置">
+            <Tooltip title={t('npc.config')}>
               <span
                 onClick={(e) => handleConfigClick(e, npc.name)}
                 style={{ color: 'var(--text-icon)', cursor: 'pointer', padding: '0 2px' }}
@@ -261,7 +263,7 @@ export function NPCList({ onNPCClick }: NPCListProps) {
                 <SettingOutlined />
               </span>
             </Tooltip>
-            <Tooltip title="背包">
+            <Tooltip title={t('npc.inventory')}>
               <span
                 onClick={(e) => handleInventoryClick(e, npc.name)}
                 style={{ color: 'var(--text-icon)', cursor: 'pointer', padding: '0 2px' }}
@@ -340,7 +342,7 @@ export function NPCList({ onNPCClick }: NPCListProps) {
             onClick={() => setShowCreator(true)}
             style={{ flex: 1 }}
           >
-            <PlusOutlined /> 创建
+            <PlusOutlined /> {t('npc.create')}
           </PixelButton>
           <PixelButton
             variant="style2"
@@ -348,7 +350,7 @@ export function NPCList({ onNPCClick }: NPCListProps) {
             onClick={() => setShowMarket(true)}
             style={{ flex: 1 }}
           >
-            <ShoppingOutlined /> 市场
+            <ShoppingOutlined /> {t('npc.market')}
           </PixelButton>
         </div>
 
@@ -357,7 +359,7 @@ export function NPCList({ onNPCClick }: NPCListProps) {
           {/* 活跃组 */}
           {activeNPCs.length > 0 && (
             <>
-              {renderGroupHeader('活跃', activeNPCs.length, activeCollapsed, () => setActiveCollapsed(!activeCollapsed))}
+              {renderGroupHeader(t('npc.active'), activeNPCs.length, activeCollapsed, () => setActiveCollapsed(!activeCollapsed))}
               {!activeCollapsed && activeNPCs.map(renderActiveCard)}
             </>
           )}
@@ -365,7 +367,7 @@ export function NPCList({ onNPCClick }: NPCListProps) {
           {/* 闲置组 */}
           {idleNPCs.length > 0 && (
             <>
-              {renderGroupHeader('闲置', idleNPCs.length, idleCollapsed, () => setIdleCollapsed(!idleCollapsed))}
+              {renderGroupHeader(t('npc.idle'), idleNPCs.length, idleCollapsed, () => setIdleCollapsed(!idleCollapsed))}
               {!idleCollapsed && idleNPCs.map(renderIdleCard)}
             </>
           )}

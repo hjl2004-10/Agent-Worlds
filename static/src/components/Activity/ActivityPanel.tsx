@@ -15,6 +15,7 @@ import { useActivityStore } from '@/store/useActivityStore';
 import { usePolling } from '@/hooks/usePolling';
 import { taskApi } from '@/api';
 import { PixelBanner } from '@/components/ui';
+import { useT } from '@/i18n';
 
 const COLORS = ['#4ade80', '#38bdf8', '#e879f9', '#fbbf24', '#f87171'];
 
@@ -50,6 +51,7 @@ interface TaskItem {
 }
 
 export function ActivityPanel() {
+  const t = useT();
   const { events, fetch } = useActivityStore();
   const scrollRef = useRef<HTMLDivElement>(null);
   const [allTasks, setAllTasks] = useState<Record<string, TaskItem[]>>({});
@@ -94,7 +96,7 @@ export function ActivityPanel() {
       {/* 标题 */}
       <div style={{ marginBottom: 8 }}>
         <PixelBanner variant="style3" style={{ height: 32 }}>
-          <span style={{ fontSize: 13 }}>动态</span>
+          <span style={{ fontSize: 13 }}>{t('activity.title')}</span>
         </PixelBanner>
       </div>
 
@@ -118,7 +120,7 @@ export function ActivityPanel() {
         >
           <span>
             <CarryOutOutlined style={{ marginRight: 4 }} />
-            待办任务 ({pendingTasks.length})
+            {t('activity.pendingTasks')} ({pendingTasks.length})
           </span>
           {tasksExpanded ? <UpOutlined style={{ fontSize: 10 }} /> : <DownOutlined style={{ fontSize: 10 }} />}
         </div>
@@ -127,7 +129,7 @@ export function ActivityPanel() {
           <div style={{ maxHeight: 180, overflowY: 'auto', padding: '4px 0' }}>
             {pendingTasks.length === 0 ? (
               <div style={{ textAlign: 'center', padding: '12px 0', color: 'var(--text-muted)', fontSize: 11 }}>
-                暂无待办
+                {t('activity.noPending')}
               </div>
             ) : (
               pendingTasks.map((item, idx) => {
@@ -151,8 +153,8 @@ export function ActivityPanel() {
                         <span>{item.task.hint}</span>
                       </div>
                       <div style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 1 }}>
-                        来源: {item.task.source}
-                        {item.task.tool_hint && ` · 工具: ${item.task.tool_hint.split(':')[0]}`}
+                        {t('activity.source')}: {item.task.source}
+                        {item.task.tool_hint && ` · ${t('activity.tool')}: ${item.task.tool_hint.split(':')[0]}`}
                       </div>
                     </div>
                   </div>
@@ -164,7 +166,7 @@ export function ActivityPanel() {
             {doneTasks.length > 0 && (
               <>
                 <Divider style={{ margin: '6px 0', fontSize: 10 }}>
-                  <span style={{ color: 'var(--text-muted)' }}>已完成 ({doneTasks.length})</span>
+                  <span style={{ color: 'var(--text-muted)' }}>{t('activity.completed')} ({doneTasks.length})</span>
                 </Divider>
                 {doneTasks.map((item, idx) => {
                   const color = getNPCColor(item.npc);
@@ -195,7 +197,7 @@ export function ActivityPanel() {
       {/* 事件时间线 */}
       <div style={{ fontSize: 12, color: 'var(--text-secondary)', padding: '2px 8px', marginBottom: 4 }}>
         <ThunderboltOutlined style={{ marginRight: 4 }} />
-        事件流
+        {t('activity.eventStream')}
       </div>
 
       <div
@@ -210,7 +212,7 @@ export function ActivityPanel() {
       >
         {events.length === 0 ? (
           <div className="empty-state-text">
-            ··· 暂无动态 ···
+            ··· {t('activity.noEvents')} ···
           </div>
         ) : (
           events.map((evt, idx) => {

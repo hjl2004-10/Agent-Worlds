@@ -20,6 +20,8 @@ import { PixelPanel } from '@/components/ui';
 
 import { usePolling } from '@/hooks/usePolling';
 import { useThemeStore } from '@/store/useThemeStore';
+import { useLocaleStore } from '@/store/useLocaleStore';
+import { useT } from '@/i18n';
 import { useStatusStore } from '@/store/useStatusStore';
 import { useNPCStore } from '@/store/useNPCStore';
 import { useGodStore } from '@/store/useGodStore';
@@ -27,6 +29,8 @@ import { useConversationStore } from '@/store/useConversationStore';
 
 function App() {
   const { init: initTheme } = useThemeStore();
+  const { init: initLocale } = useLocaleStore();
+  const t = useT();
   const { fetch: fetchStatus } = useStatusStore();
   const { fetch: fetchNPCs } = useNPCStore();
   const { fetchStatus: fetchGodStatus } = useGodStore();
@@ -45,11 +49,12 @@ function App() {
   // 初始化
   useEffect(() => {
     initTheme();
+    initLocale();
     fetchStatus();
     fetchNPCs();
     fetchGodStatus();
     fetchConversationState();
-  }, [initTheme, fetchStatus, fetchNPCs, fetchGodStatus, fetchConversationState]);
+  }, [initTheme, initLocale, fetchStatus, fetchNPCs, fetchGodStatus, fetchConversationState]);
 
   const { selectNPC } = useGodStore();
 
@@ -63,7 +68,7 @@ function App() {
       label: (
         <span>
           <ThunderboltOutlined />
-          指挥
+          {t('tab.command')}
         </span>
       ),
       children: <GodControl />,
@@ -73,7 +78,7 @@ function App() {
       label: (
         <span>
           <MessageOutlined />
-          对话
+          {t('tab.chat')}
         </span>
       ),
       children: <PlayerInput />,
@@ -83,7 +88,7 @@ function App() {
       label: (
         <span>
           <UnorderedListOutlined />
-          动态
+          {t('tab.activity')}
         </span>
       ),
       children: <ActivityPanel />,
@@ -93,7 +98,7 @@ function App() {
       label: (
         <span>
           <GlobalOutlined />
-          世界
+          {t('tab.world')}
         </span>
       ),
       children: <LorePanel />,

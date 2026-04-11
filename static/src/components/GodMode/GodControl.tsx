@@ -14,12 +14,14 @@ import { useConversationStore } from '@/store/useConversationStore';
 import { useTaskStore } from '@/store/useTaskStore';
 import { useKeyboard } from '@/hooks/useKeyboard';
 import { PixelBanner, PixelButton } from '@/components/ui';
+import { useT } from '@/i18n';
 import { MemoryChat } from './MemoryChat';
 
 const { Text } = Typography;
 const { Option } = Select;
 
 export function GodControl() {
+  const t = useT();
   const { selectedNPC, isGodMode, deselectNPC, move, stop } = useGodStore();
   const { npcs } = useNPCStore();
   const { active: conversationActive } = useConversationStore();
@@ -86,11 +88,11 @@ export function GodControl() {
 
   const handleAssign = async () => {
     if (!taskTarget) {
-      message.warning('请选择目标 NPC');
+      message.warning(t('god.warnSelectNPC'));
       return;
     }
     if (!taskHint.trim()) {
-      message.warning('请输入任务描述');
+      message.warning(t('god.warnTaskDesc'));
       return;
     }
 
@@ -130,20 +132,20 @@ export function GodControl() {
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
         <PixelBanner variant="style4" style={{ height: 32 }}>
           <Space size={6}>
-            <span style={{ fontSize: 13 }}>指挥中心</span>
+            <span style={{ fontSize: 13 }}>{t('god.title')}</span>
             {selectedNPC && (
               <span style={{
                 fontSize: 12,
                 textShadow: '0 0 8px rgba(251, 191, 36, 0.4)',
               }}>
-                控制: <strong>{selectedNPC}</strong>
+                {t('god.control')}: <strong>{selectedNPC}</strong>
               </span>
             )}
           </Space>
         </PixelBanner>
 
         {selectedNPC && (
-          <PixelButton variant="style1" size="sm" onClick={deselectNPC} title="取消控制">
+          <PixelButton variant="style1" size="sm" onClick={deselectNPC} title={t('god.cancelControl')}>
             <CloseOutlined />
           </PixelButton>
         )}
@@ -155,7 +157,7 @@ export function GodControl() {
           <MemoryChat npcName={selectedNPC} allNPCNames={allNPCNames} refreshKey={memoryRefreshKey} />
         ) : (
           <div className="empty-state-text">
-            ···  点击选中角色查看聊天记录  ···
+            ···  {t('god.viewHistory')}  ···
           </div>
         )}
       </div>
@@ -178,7 +180,7 @@ export function GodControl() {
         >
           <Space size={4}>
             <PlusOutlined style={{ fontSize: 10 }} />
-            <span>下达任务</span>
+            <span>{t('god.assignTask')}</span>
             {currentTasks.filter(t => t.status !== 'done').length > 0 && (
               <Tag color="purple" style={{ margin: 0, fontSize: 10, lineHeight: '16px', padding: '0 4px' }}>
                 {currentTasks.filter(t => t.status !== 'done').length}
@@ -192,9 +194,9 @@ export function GodControl() {
           <div style={{ padding: '8px 6px', maxHeight: 320, overflowY: 'auto' }}>
             {/* 目标 NPC */}
             <div style={{ marginBottom: 8 }}>
-              <Text type="secondary" style={{ fontSize: 11, display: 'block', marginBottom: 3 }}>目标 NPC</Text>
+              <Text type="secondary" style={{ fontSize: 11, display: 'block', marginBottom: 3 }}>{t('god.targetNPC')}</Text>
               <Select
-                placeholder="选择 NPC"
+                placeholder={t('god.selectTargetNPC')}
                 value={taskTarget || undefined}
                 onChange={(val) => {
                   setTaskTarget(val);
@@ -211,9 +213,9 @@ export function GodControl() {
 
             {/* 任务描述 */}
             <div style={{ marginBottom: 8 }}>
-              <Text type="secondary" style={{ fontSize: 11, display: 'block', marginBottom: 3 }}>任务描述</Text>
+              <Text type="secondary" style={{ fontSize: 11, display: 'block', marginBottom: 3 }}>{t('god.taskDesc')}</Text>
               <Input
-                placeholder="例: 查看 Bob 留给你的信"
+                placeholder={t('god.taskPlaceholder')}
                 value={taskHint}
                 onChange={(e) => setTaskHint(e.target.value)}
                 onPressEnter={handleAssign}
@@ -223,10 +225,10 @@ export function GodControl() {
 
             {/* 工具选择 */}
             <div style={{ marginBottom: 8 }}>
-              <Text type="secondary" style={{ fontSize: 11, display: 'block', marginBottom: 3 }}>工具 (可选)</Text>
+              <Text type="secondary" style={{ fontSize: 11, display: 'block', marginBottom: 3 }}>{t('god.toolOptional')}</Text>
               <div style={{ display: 'flex', gap: 4 }}>
                 <Select
-                  placeholder="选择工具"
+                  placeholder={t('god.selectTool')}
                   value={selectedTool || undefined}
                   onChange={setSelectedTool}
                   style={{ width: 130 }}
@@ -239,7 +241,7 @@ export function GodControl() {
                 </Select>
                 {selectedTool && (
                   <Input
-                    placeholder={selectedTool === 'goto_location' ? '地点名称' : '文件路径'}
+                    placeholder={selectedTool === 'goto_location' ? t('god.locationName') : t('god.filePath')}
                     value={toolParam}
                     onChange={(e) => setToolParam(e.target.value)}
                     size="small"
@@ -256,14 +258,14 @@ export function GodControl() {
               disabled={submitting || !taskTarget || !taskHint.trim()}
               style={{ width: '100%', marginBottom: 8 }}
             >
-              <PlusOutlined /> 下达任务
+              <PlusOutlined /> {t('god.assignTask')}
             </PixelButton>
 
             {/* 当前 NPC 任务列表 */}
             {taskTarget && currentTasks.length > 0 && (
               <div style={{ borderTop: '1px solid var(--bg-hover)', paddingTop: 6 }}>
                 <Text type="secondary" style={{ fontSize: 11, marginBottom: 4, display: 'block' }}>
-                  {taskTarget} 的任务 ({currentTasks.length})
+                  {taskTarget}{t('god.tasksOf')} ({currentTasks.length})
                 </Text>
                 {currentTasks.map((task, idx) => (
                   <div
@@ -285,13 +287,13 @@ export function GodControl() {
                           color={task.status === 'done' ? 'default' : 'purple'}
                           style={{ margin: 0, fontSize: 10, lineHeight: '16px', padding: '0 4px' }}
                         >
-                          {task.status === 'done' ? '完成' : '待办'}
+                          {task.status === 'done' ? t('god.done') : t('god.pending')}
                         </Tag>
                       </div>
                       <Text style={{ fontSize: 12, display: 'block', marginBottom: 2 }}>{task.hint}</Text>
                       <Text type="secondary" style={{ fontSize: 10 }}>
-                        来源: {task.source}
-                        {task.tool_hint && ` · 工具: ${task.tool_hint}`}
+                        {t('god.source')}: {task.source}
+                        {task.tool_hint && ` · ${t('activity.tool')}: ${task.tool_hint}`}
                       </Text>
                     </div>
                     <Space size={2} style={{ flexShrink: 0 }}>
@@ -301,11 +303,11 @@ export function GodControl() {
                           type="text"
                           icon={<CheckOutlined style={{ color: '#4ade80', fontSize: 11 }} />}
                           onClick={() => handleComplete(task.hint)}
-                          title="完成"
+                          title={t('god.done')}
                           style={{ padding: '0 4px', height: 22 }}
                         />
                       )}
-                      <Popconfirm title="确定删除?" onConfirm={() => handleDelete(task.hint)}>
+                      <Popconfirm title={t('god.confirmDelete')} onConfirm={() => handleDelete(task.hint)}>
                         <Button
                           size="small"
                           type="text"
@@ -325,7 +327,7 @@ export function GodControl() {
       </div>
 
       <Text type="secondary" style={{ fontSize: 11, textAlign: 'center', display: 'block', marginTop: 6, flexShrink: 0 }}>
-        {selectedNPC ? '方向键/WASD 移动，ESC 取消控制' : '点击 NPC 列表或地图选中角色'}
+        {selectedNPC ? t('god.moveHelp') : t('god.selectNPC')}
       </Text>
     </div>
   );

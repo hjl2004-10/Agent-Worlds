@@ -9,6 +9,8 @@ import {
 } from '@ant-design/icons';
 import { useStatusStore } from '@/store/useStatusStore';
 import { useThemeStore } from '@/store/useThemeStore';
+import { useLocaleStore } from '@/store/useLocaleStore';
+import { useT } from '@/i18n';
 import { PixelBanner, PixelButton } from '@/components/ui';
 import { HelpModal } from './HelpModal';
 
@@ -19,8 +21,11 @@ interface AppLayoutProps {
 }
 
 export function AppLayout({ children }: AppLayoutProps) {
-  const { tick, npcCount, date, time, period } = useStatusStore();
+  const { tick, npcCount, date, dateIso, time, period, periodKey } = useStatusStore();
+  const locale = useLocaleStore((s) => s.locale);
   const { theme, toggle } = useThemeStore();
+  const { toggle: toggleLocale } = useLocaleStore();
+  const t = useT();
 
   return (
     <Layout style={{ minHeight: '100vh', background: 'var(--bg-body)' }}>
@@ -50,7 +55,7 @@ export function AppLayout({ children }: AppLayoutProps) {
               fontFamily: "'Press Start 2P', monospace",
               textShadow: '0 0 8px rgba(74, 222, 128, 0.3)',
             }}>
-              夸父
+              {t('app.title')}
             </span>
             <span style={{ fontSize: 10, opacity: 0.6 }}>v2.0</span>
           </Space>
@@ -66,7 +71,7 @@ export function AppLayout({ children }: AppLayoutProps) {
             variant="style1"
             size="sm"
             onClick={toggle}
-            title={theme === 'dark' ? '切换亮色' : '切换暗色'}
+            title={theme === 'dark' ? t('header.toggleLight') : t('header.toggleDark')}
             style={{ minWidth: 36 }}
           >
             {theme === 'dark' ? (
@@ -74,6 +79,16 @@ export function AppLayout({ children }: AppLayoutProps) {
             ) : (
               <MoonOutlined style={{ fontSize: 14 }} />
             )}
+          </PixelButton>
+
+          {/* 语言切换按钮 */}
+          <PixelButton
+            variant="style1"
+            size="sm"
+            onClick={toggleLocale}
+            style={{ minWidth: 36, fontSize: 12, fontWeight: 700 }}
+          >
+            {t('header.switchLang')}
           </PixelButton>
 
           <PixelBanner variant="style2" style={{ height: 36 }}>
@@ -96,7 +111,7 @@ export function AppLayout({ children }: AppLayoutProps) {
           <PixelBanner variant="style3" style={{ height: 36 }}>
             <Space size={4}>
               <ClockCircleOutlined style={{ fontSize: 13 }} />
-              <span style={{ fontSize: 12 }}>{date}</span>
+              <span style={{ fontSize: 12 }}>{locale === 'zh' ? date : dateIso}</span>
               <span style={{
                 fontFamily: 'monospace',
                 fontSize: 12,
@@ -104,7 +119,7 @@ export function AppLayout({ children }: AppLayoutProps) {
               }}>
                 {time}
               </span>
-              <span style={{ fontSize: 10, opacity: 0.7 }}>({period})</span>
+              <span style={{ fontSize: 10, opacity: 0.7 }}>({periodKey ? t(`period.${periodKey}`) : period})</span>
             </Space>
           </PixelBanner>
 

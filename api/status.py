@@ -16,8 +16,10 @@ async def api_status():
         "tick": _state.get_tick(),
         "npc_count": len(npcs),
         "date": f"{info['year']}年{info['month']}月{info['day']}日",
+        "date_iso": f"{info['year']}-{info['month']:02d}-{info['day']:02d}",
         "time": info['time_str'],
-        "period": info['period']
+        "period": info['period'],
+        "period_key": info.get('period_key', ''),
     }
 
 

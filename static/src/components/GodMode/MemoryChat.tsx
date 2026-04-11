@@ -3,6 +3,7 @@ import { Typography, Spin, Divider } from 'antd';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { godApi } from '@/api';
+import { useT } from '@/i18n';
 import type { MemoryItem } from '@/api/types';
 
 const { Text } = Typography;
@@ -77,6 +78,7 @@ function parseMemoryItem(item: MemoryItem, selfName: string): ParsedMessage | nu
 }
 
 export function MemoryChat({ npcName, allNPCNames = [], refreshKey = 0 }: MemoryChatProps) {
+  const t = useT();
   const [messages, setMessages] = useState<ParsedMessage[]>([]);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
@@ -171,7 +173,7 @@ export function MemoryChat({ npcName, allNPCNames = [], refreshKey = 0 }: Memory
   if (messages.length === 0 && !loading) {
     return (
       <div style={{ textAlign: 'center', padding: 20, color: 'var(--text-muted)' }}>
-        暂无历史记忆
+        {t('memory.noHistory')}
       </div>
     );
   }

@@ -7,6 +7,7 @@ import { useConversationStore } from '@/store/useConversationStore';
 import { useNPCStore } from '@/store/useNPCStore';
 import { godApi } from '@/api';
 import { PixelBanner, PixelButton } from '@/components/ui';
+import { useT } from '@/i18n';
 import type { MemoryItem } from '@/api/types';
 
 const { Text } = Typography;
@@ -43,7 +44,7 @@ function parseMemoryItem(
   if (typeof item === 'object') {
     const isSelf = item.role === 'assistant';
     return {
-      speaker: isSelf ? npcName : (item.source === 'wechat' ? '微信用户' : partnerName),
+      speaker: isSelf ? npcName : (item.source === 'wechat' ? '_wechatUser_' : partnerName),
       content: item.content,
       isRight: isSelf,
       source: item.source,
@@ -53,6 +54,7 @@ function parseMemoryItem(
 }
 
 export function PlayerInput() {
+  const t = useT();
   const {
     active,
     speaker,
@@ -94,7 +96,7 @@ export function PlayerInput() {
         const { data } = await godApi.getRamBuffer(primaryNPC);
         if (data.status === 'ok' && data.items) {
           const partner = data.partner || (
-            talkingNPCs.length >= 2 ? talkingNPCs[1] : '对方'
+            talkingNPCs.length >= 2 ? talkingNPCs[1] : t('chat.partner')
           );
           setPartnerName(partner);
 
@@ -145,9 +147,9 @@ export function PlayerInput() {
 
   const getStatusTag = () => {
     if (talkingNPCs.length > 0) {
-      return <Tag color="processing" style={{ fontSize: 10 }}>对话中</Tag>;
+      return <Tag color="processing" style={{ fontSize: 10 }}>{t('chat.talking')}</Tag>;
     }
-    return <Tag color="default" style={{ fontSize: 10 }}>空闲</Tag>;
+    return <Tag color="default" style={{ fontSize: 10 }}>{t('chat.free')}</Tag>;
   };
 
   const canInput = active && is_player_conversation;
@@ -158,7 +160,7 @@ export function PlayerInput() {
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
         <PixelBanner variant="style2" style={{ height: 32 }}>
           <Space size={6}>
-            <span style={{ fontSize: 13 }}>实时对话</span>
+            <span style={{ fontSize: 13 }}>{t('chat.realtime')}</span>
           </Space>
         </PixelBanner>
         {getStatusTag()}
@@ -186,7 +188,7 @@ export function PlayerInput() {
       >
         {messages.length === 0 ? (
           <div className="empty-state-text">
-            ···  暂无对话  ···
+            ···  {t('chat.noMessages')}  ···
           </div>
         ) : (
           messages.map((msg, idx) => (
@@ -216,7 +218,7 @@ export function PlayerInput() {
                       borderRadius: 3,
                       padding: '1px 4px',
                       lineHeight: 1.3,
-                    }}>微信</span>
+                    }}>{t('chat.wechat')}</span>
                   )}
                   <div
                     className="msg-speaker-tag"
@@ -225,7 +227,7 @@ export function PlayerInput() {
                       color: getNPCColor(msg.speaker),
                     }}
                   >
-                    {msg.speaker}
+                    {msg.speaker === '_wechatUser_' ? t('chat.wechatUser') : msg.speaker}
                   </div>
                 </div>
 
@@ -255,7 +257,7 @@ export function PlayerInput() {
             value={inputText}
             onChange={(e) => setInputText(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder={waiting ? '输入对话...' : '等待响应...'}
+            placeholder={waiting ? t('chat.inputPlaceholder') : t('chat.waitResponse')}
             disabled={!waiting}
           />
 
@@ -265,7 +267,7 @@ export function PlayerInput() {
               size="sm"
               onClick={endConversation}
             >
-              <StopOutlined /> 结束
+              <StopOutlined /> {t('chat.end')}
             </PixelButton>
             <PixelButton
               variant="style2"
@@ -273,17 +275,17 @@ export function PlayerInput() {
               onClick={handleSend}
               disabled={sending || !waiting || !inputText.trim()}
             >
-              <SendOutlined /> 发送
+              <SendOutlined /> {t('chat.send')}
             </PixelButton>
           </Space>
         </>
       ) : active ? (
         <Text type="secondary" className="cursor-blink" style={{ fontSize: 11, textAlign: 'center' }}>
-          NPC 对话中，仅观察
+          {t('chat.observing')}
         </Text>
       ) : (
         <Text type="secondary" style={{ fontSize: 11, textAlign: 'center' }}>
-          无对话进行中
+          {t('chat.noActive')}
         </Text>
       )}
     </div>
