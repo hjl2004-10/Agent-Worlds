@@ -21,11 +21,13 @@ import {
 import { useTaskStore } from '@/store/useTaskStore';
 import { useNPCStore } from '@/store/useNPCStore';
 import { PixelButton } from '@/components/ui';
+import { useT } from '@/i18n';
 
 const { Text } = Typography;
 const { Option } = Select;
 
 export function TaskPanel() {
+  const t = useT();
   const {
     tasks,
     tools,
@@ -63,11 +65,11 @@ export function TaskPanel() {
 
   const handleAssign = async () => {
     if (!targetNPC) {
-      message.warning('请选择 NPC');
+      message.warning(t('task.warnSelectNPC'));
       return;
     }
     if (!taskHint.trim()) {
-      message.warning('请输入任务描述');
+      message.warning(t('task.warnDesc'));
       return;
     }
 
@@ -105,7 +107,7 @@ export function TaskPanel() {
   return (
     <Card
       size="small"
-      title={<span style={{ color: '#e879f9' }}>任务管理</span>}
+      title={<span style={{ color: '#e879f9' }}>{t('task.title')}</span>}
       style={{ background: 'var(--bg-panel)', borderColor: '#e879f9' }}
       headStyle={{ borderColor: '#e879f9', color: '#e879f9', padding: '8px 12px', minHeight: 36 }}
       bodyStyle={{ padding: 12 }}
@@ -115,10 +117,10 @@ export function TaskPanel() {
         <div>
           <div style={{ marginBottom: 12 }}>
             <Text type="secondary" style={{ fontSize: 12, display: 'block', marginBottom: 4 }}>
-              目标 NPC
+              {t('task.targetNPC')}
             </Text>
             <Select
-              placeholder="选择要下放任务的 NPC"
+              placeholder={t('task.selectNPC')}
               value={targetNPC || undefined}
               onChange={(val) => {
                 setTargetNPC(val);
@@ -136,10 +138,10 @@ export function TaskPanel() {
 
           <div style={{ marginBottom: 12 }}>
             <Text type="secondary" style={{ fontSize: 12, display: 'block', marginBottom: 4 }}>
-              任务描述
+              {t('task.description')}
             </Text>
             <Input
-              placeholder="例: 查看 Bob 留给你的信"
+              placeholder={t('task.descPlaceholder')}
               value={taskHint}
               onChange={(e) => setTaskHint(e.target.value)}
               onPressEnter={handleAssign}
@@ -148,11 +150,11 @@ export function TaskPanel() {
 
           <div style={{ marginBottom: 12 }}>
             <Text type="secondary" style={{ fontSize: 12, display: 'block', marginBottom: 4 }}>
-              工具 (可选)
+              {t('task.toolOptional')}
             </Text>
             <Space style={{ width: '100%' }}>
               <Select
-                placeholder="选择工具"
+                placeholder={t('task.selectTool')}
                 value={selectedTool || undefined}
                 onChange={setSelectedTool}
                 style={{ width: 140 }}
@@ -167,7 +169,7 @@ export function TaskPanel() {
 
               {selectedTool && (
                 <Input
-                  placeholder={selectedTool === 'goto_location' ? '地点名称' : '文件路径'}
+                  placeholder={selectedTool === 'goto_location' ? t('task.locationName') : t('task.filePath')}
                   value={toolParam}
                   onChange={(e) => setToolParam(e.target.value)}
                   style={{ width: 160 }}
@@ -183,7 +185,7 @@ export function TaskPanel() {
             disabled={submitting || !targetNPC || !taskHint.trim()}
             style={{ width: '100%' }}
           >
-            <PlusOutlined /> 下放任务
+            <PlusOutlined /> {t('task.assign')}
           </PixelButton>
         </div>
 
@@ -193,12 +195,12 @@ export function TaskPanel() {
         <div style={{ maxHeight: 300, overflowY: 'auto' }}>
           {!targetNPC ? (
             <Empty
-              description="选择 NPC 查看任务列表"
+              description={t('task.selectNPCList')}
               image={Empty.PRESENTED_IMAGE_SIMPLE}
             />
           ) : currentTasks.length === 0 ? (
             <Empty
-              description="暂无任务"
+              description={t('task.noTasks')}
               image={Empty.PRESENTED_IMAGE_SIMPLE}
             />
           ) : (
@@ -217,17 +219,17 @@ export function TaskPanel() {
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ marginBottom: 4 }}>
                       <Tag color={task.status === 'done' ? 'default' : 'purple'} style={{ margin: 0 }}>
-                        {task.status === 'done' ? '已完成' : '待办'}
+                        {task.status === 'done' ? t('task.done') : t('task.pending')}
                       </Tag>
                     </div>
                     <Text style={{ display: 'block', marginBottom: 4 }}>{task.hint}</Text>
                     <Space size="small" wrap>
                       <Text type="secondary" style={{ fontSize: 11 }}>
-                        来源: {task.source}
+                        {t('task.source')} {task.source}
                       </Text>
                       {task.tool_hint && (
                         <Text type="secondary" style={{ fontSize: 11 }}>
-                          工具: {task.tool_hint}
+                          {t('task.tool')} {task.tool_hint}
                         </Text>
                       )}
                     </Space>
@@ -239,20 +241,20 @@ export function TaskPanel() {
                         icon={<CheckOutlined />}
                         onClick={() => handleComplete(task.hint)}
                         style={{ color: '#4ade80', borderColor: '#4ade80' }}
-                        title="标记完成"
+                        title={t('task.markDoneTitle')}
                       >
-                        完成
+                        {t('task.markDone')}
                       </Button>
                     )}
                     <Popconfirm
-                      title="确定删除此任务?"
+                      title={t('task.confirmDelete')}
                       onConfirm={() => handleDelete(task.hint)}
                     >
                       <Button
                         size="small"
                         danger
                         icon={<DeleteOutlined />}
-                        title="删除"
+                        title={t('task.deleteTitle')}
                       />
                     </Popconfirm>
                   </Space>

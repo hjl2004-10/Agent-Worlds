@@ -7,6 +7,7 @@ import {
   Spin,
 } from 'antd';
 import { getInventory } from '@/api/god';
+import { useT } from '@/i18n';
 
 const { Text } = Typography;
 
@@ -31,6 +32,7 @@ interface InventoryData {
 const ATTR_COLORS = ['#4ade80', '#38bdf8', '#e879f9', '#fbbf24', '#f87171', '#a78bfa', '#fb7185'];
 
 export function InventoryPanel({ npcName, open, onClose }: InventoryPanelProps) {
+  const t = useT();
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState<InventoryData>({ schema: {}, inventory: {} });
   const [selectedAttr, setSelectedAttr] = useState<string | null>(null);
@@ -49,10 +51,10 @@ export function InventoryPanel({ npcName, open, onClose }: InventoryPanelProps) 
             inventory: res.data.inventory || {},
           });
         } else {
-          message.error(res.data.message || '加载背包数据失败');
+          message.error(res.data.message || t('inv.loadFailed'));
         }
       } catch (err) {
-        message.error('加载背包数据失败');
+        message.error(t('inv.loadFailed'));
         console.error(err);
       } finally {
         setLoading(false);
@@ -79,7 +81,7 @@ export function InventoryPanel({ npcName, open, onClose }: InventoryPanelProps) 
             alt="bag"
             style={{ width: 20, height: 18, imageRendering: 'pixelated' }}
           />
-          <span>{npcName} 的背包</span>
+          <span>{npcName} {t('inv.title')}</span>
         </Space>
       }
       open={open}
@@ -149,7 +151,7 @@ export function InventoryPanel({ npcName, open, onClose }: InventoryPanelProps) 
                 </Text>
               ) : (
                 <Text style={{ color: 'var(--text-muted)', fontSize: 12, fontStyle: 'italic' }}>
-                  暂无描述
+                  {t('inv.noDesc')}
                 </Text>
               )}
             </div>
@@ -158,7 +160,7 @@ export function InventoryPanel({ npcName, open, onClose }: InventoryPanelProps) 
           {/* 空状态 */}
           {attrKeys.length === 0 && (
             <div style={{ textAlign: 'center', padding: 20, color: 'var(--text-muted)' }}>
-              背包空空如也
+              {t('inv.empty')}
             </div>
           )}
         </>

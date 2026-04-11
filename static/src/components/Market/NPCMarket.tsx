@@ -6,6 +6,7 @@ import { calcStats } from './MarketStats';
 import { NPCMarketCard } from './NPCMarketCard';
 import { NPCMarketDetail } from './NPCMarketDetail';
 import './NPCMarket.css';
+import { useT } from '@/i18n';
 
 type Filter = 'all' | 'online' | 'skilled' | 'wechat';
 type SortKey = 'overall' | 'skillLevel' | 'memory' | 'name';
@@ -16,6 +17,7 @@ interface Props {
 }
 
 export function NPCMarket({ open, onClose }: Props) {
+  const t = useT();
   const [npcs, setNpcs] = useState<MarketNPCData[]>([]);
   const [loading, setLoading] = useState(false);
   const [filter, setFilter] = useState<Filter>('all');
@@ -29,7 +31,7 @@ export function NPCMarket({ open, onClose }: Props) {
     try {
       const { data } = await getMarketNPCs();
       if (data.status === 'ok') setNpcs(data.npcs);
-    } catch { message.error('加载市场数据失败'); }
+    } catch { message.error(t('market.loadFailed')); }
     setLoading(false);
   }, []);
 
@@ -65,9 +67,9 @@ export function NPCMarket({ open, onClose }: Props) {
         a.download = `${name}.json`;
         a.click();
         URL.revokeObjectURL(url);
-        message.success(`已导出 ${name}`);
+        message.success(`${t('market.exported')} ${name}`);
       }
-    } catch { message.error('导出失败'); }
+    } catch { message.error(t('common.exportFailed')); }
   };
 
   // 全部导出
@@ -85,9 +87,9 @@ export function NPCMarket({ open, onClose }: Props) {
         a.download = `npc_market_${d}.json`;
         a.click();
         URL.revokeObjectURL(url);
-        message.success(`已导出 ${data.npcs.length} 个 NPC`);
+        message.success(`${t('market.exported')} ${data.npcs.length} ${t('market.countNPC')}`);
       }
-    } catch { message.error('导出失败'); }
+    } catch { message.error(t('common.exportFailed')); }
   };
 
   // 导入
@@ -101,17 +103,17 @@ export function NPCMarket({ open, onClose }: Props) {
         // 兼容 { npcs: [...] } 和 [...] 两种格式
         const importData: NPCExportData[] = Array.isArray(parsed) ? parsed : (parsed.npcs || []);
         if (importData.length === 0) {
-          message.warning('文件中没有找到 NPC 数据');
+          message.warning(t('market.noNPCData'));
           return;
         }
         const { data } = await importNPCs(importData, false);
         if (data.status === 'ok') {
-          message.success(`导入成功: ${data.imported_count} 个 NPC`);
+          message.success(`${t('market.importSuccess')} ${data.imported_count} ${t('market.countNPC')}`);
           loadData();
         } else {
-          message.error(data.message || '导入失败');
+          message.error(data.message || t('common.importFailed'));
         }
-      } catch { message.error('文件解析失败'); }
+      } catch { message.error(t('market.fileParseFailed')); }
     };
     reader.readAsText(file);
     e.target.value = '';
@@ -120,17 +122,17 @@ export function NPCMarket({ open, onClose }: Props) {
   const onlineCount = npcs.filter(n => n.enabled).length;
 
   const FILTERS: { key: Filter; label: string }[] = [
-    { key: 'all', label: '全部' },
-    { key: 'online', label: '在线' },
-    { key: 'skilled', label: '有技能' },
-    { key: 'wechat', label: '微信' },
+    { key: 'all', label: t('market.filterAll') },
+    { key: 'online', label: t('market.filterOnline') },
+    { key: 'skilled', label: t('market.filterSkilled') },
+    { key: 'wechat', label: t('market.filterWechat') },
   ];
 
   const SORTS: { key: SortKey; label: string }[] = [
-    { key: 'overall', label: '综合' },
-    { key: 'skillLevel', label: '技能' },
-    { key: 'memory', label: '记忆' },
-    { key: 'name', label: '名称' },
+    { key: 'overall', label: t('market.sortOverall') },
+    { key: 'skillLevel', label: t('market.sortSkill') },
+    { key: 'memory', label: t('market.sortMemory') },
+    { key: 'name', label: t('market.sortName') },
   ];
 
   return (
@@ -167,10 +169,10 @@ export function NPCMarket({ open, onClose }: Props) {
           letterSpacing: 4,
           textShadow: '0 0 8px #38bdf830',
         }}>
-          NPC 交易市场
+          {t('market.title')}
         </div>
         <div style={{ fontSize: 11, color: '#64748b', marginTop: 2 }}>
-          训练你的 AI 员工 · 分享给全世界
+          {t('market.subtitle')}
         </div>
       </div>
 
@@ -186,7 +188,7 @@ export function NPCMarket({ open, onClose }: Props) {
           </button>
         ))}
         <div style={{ flex: 1 }} />
-        <span style={{ fontSize: 10, color: '#64748b', marginRight: 4 }}>排序:</span>
+        <span style={{ fontSize: 10, color: '#64748b', marginRight: 4 }}>{t('market.sortLabel')}</span>
         {SORTS.map(s => (
           <button
             key={s.key}
@@ -216,8 +218,8 @@ export function NPCMarket({ open, onClose }: Props) {
             {/* 导入卡片 */}
             <div className="market-card--import" onClick={() => fileInputRef.current?.click()}>
               <div className="import-icon">+</div>
-              <div>导入 NPC</div>
-              <div style={{ fontSize: 10, marginTop: 4, color: '#475569' }}>点击选择 JSON 文件</div>
+              <div>{t('market.importCard')}</div>
+              <div style={{ fontSize: 10, marginTop: 4, color: '#475569' }}>{t('market.importHint')}</div>
             </div>
           </div>
         )}
@@ -226,14 +228,14 @@ export function NPCMarket({ open, onClose }: Props) {
       {/* 底栏 */}
       <div className="market-footer">
         <span>
-          共 {npcs.length} 个 NPC · {onlineCount} 在线
+          {t('market.total')} {npcs.length} {t('market.countNPC')} · {onlineCount} {t('market.online')}
         </span>
         <div className="market-footer-actions">
           <button className="market-filter-btn" onClick={() => fileInputRef.current?.click()}>
-            导入文件
+            {t('market.importFile')}
           </button>
           <button className="market-filter-btn" onClick={handleExportAll}>
-            全部导出
+            {t('market.exportAll')}
           </button>
         </div>
       </div>

@@ -20,6 +20,7 @@ import {
 } from '@ant-design/icons';
 import { getToolGroups, saveToolGroups, getAvailableTools } from '@/api/god';
 import type { ToolGroup, AvailableTool } from '@/api/types';
+import { useT } from '@/i18n';
 
 const { Text } = Typography;
 
@@ -38,6 +39,7 @@ interface ToolDetail {
 }
 
 export function ToolManager() {
+  const t = useT();
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [groups, setGroups] = useState<Record<string, ToolGroup>>({});
@@ -76,7 +78,7 @@ export function ToolManager() {
           setToolDetails(detailsRes.tools || {});
         }
       } catch (err) {
-        message.error('加载数据失败');
+        message.error(t('common.loadFailed'));
         console.error(err);
       } finally {
         setLoading(false);
@@ -91,12 +93,12 @@ export function ToolManager() {
     try {
       const res = await saveToolGroups(groups);
       if (res.data.status === 'ok') {
-        message.success('工具组已保存');
+        message.success(t('toolMgr.saved'));
       } else {
-        message.error(res.data.message || '保存失败');
+        message.error(res.data.message || t('common.saveFailed'));
       }
     } catch (err) {
-      message.error('保存失败');
+      message.error(t('common.saveFailed'));
       console.error(err);
     } finally {
       setSaving(false);
@@ -146,8 +148,8 @@ export function ToolManager() {
   // 删除工具组
   const deleteGroup = (groupName: string) => {
     Modal.confirm({
-      title: '确认删除',
-      content: `确定要删除工具组 "${groupName}" 吗？`,
+      title: t('toolMgr.confirmDeleteTitle'),
+      content: `${t('toolMgr.confirmDeleteContent')} "${groupName}"?`,
       onOk: () => {
         const newGroups = { ...groups };
         delete newGroups[groupName];
@@ -201,7 +203,7 @@ export function ToolManager() {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
         <Space>
           <ToolOutlined style={{ color: '#a78bfa' }} />
-          <Text strong style={{ color: 'var(--text-primary)', fontSize: 12 }}>工具组</Text>
+          <Text strong style={{ color: 'var(--text-primary)', fontSize: 12 }}>{t('toolMgr.title')}</Text>
           <Tag color="purple" style={{ fontSize: 10 }}>{Object.keys(groups).length}</Tag>
         </Space>
         <Space size={4}>
@@ -212,7 +214,7 @@ export function ToolManager() {
             onClick={() => openEditModal()}
             style={{ fontSize: 11 }}
           >
-            新建
+            {t('toolMgr.new')}
           </Button>
           <Button
             type="primary"
@@ -221,7 +223,7 @@ export function ToolManager() {
             onClick={handleSave}
             style={{ fontSize: 11 }}
           >
-            保存
+            {t('common.save')}
           </Button>
         </Space>
       </div>
@@ -273,7 +275,7 @@ export function ToolManager() {
         ))}
         {Object.keys(groups).length === 0 && (
           <Text type="secondary" style={{ fontSize: 11, textAlign: 'center', display: 'block', padding: 10 }}>
-            暂无工具组，点击"新建"创建
+            {t('toolMgr.noGroups')}
           </Text>
         )}
       </Space>
@@ -298,7 +300,7 @@ export function ToolManager() {
         {currentGroup && (
           <Space direction="vertical" style={{ width: '100%' }} size="small">
             <div>
-              <Text type="secondary" style={{ fontSize: 11 }}>描述</Text>
+              <Text type="secondary" style={{ fontSize: 11 }}>{t('toolMgr.description')}</Text>
               <Text style={{ color: 'var(--text-primary)', display: 'block', marginTop: 4, fontSize: 13 }}>
                 {currentGroup.description}
               </Text>
@@ -308,7 +310,7 @@ export function ToolManager() {
 
             <div>
               <Text type="secondary" style={{ fontSize: 11, display: 'block', marginBottom: 8 }}>
-                包含工具 ({currentGroup.tools.length})
+                {t('toolMgr.containsTools')} ({currentGroup.tools.length})
               </Text>
               <Space direction="vertical" style={{ width: '100%' }} size={6}>
                 {currentGroup.tools.map((toolName) => {
@@ -357,58 +359,58 @@ export function ToolManager() {
 
       {/* 编辑工具组模态框 */}
       <Modal
-        title={editingGroup ? `编辑工具组: ${editingGroup.name}` : '新建工具组'}
+        title={editingGroup ? `${t('toolMgr.editGroup')}: ${editingGroup.name}` : t('toolMgr.newGroup')}
         open={editModalOpen}
         onOk={handleEditSave}
         onCancel={() => setEditModalOpen(false)}
-        okText="保存"
-        cancelText="取消"
+        okText={t('common.save')}
+        cancelText={t('common.cancel')}
       >
         <Form form={form} layout="vertical">
           <Form.Item
             name="name"
-            label="工具组名称"
+            label={t('toolMgr.groupName')}
             rules={[
-              { required: true, message: '请输入工具组名称' },
-              { pattern: /^@?[a-zA-Z0-9_]+$/, message: '只能包含字母、数字和下划线' },
+              { required: true, message: t('toolMgr.groupNameRequired') },
+              { pattern: /^@?[a-zA-Z0-9_]+$/, message: t('toolMgr.groupNameFormat') },
             ]}
           >
             <Select
-              placeholder="选择或输入工具组名称 (会自动添加 @ 前缀)"
+              placeholder={t('toolMgr.groupNamePlaceholder')}
               disabled={!!editingGroup}
               showSearch
               allowClear
               options={[
-                { label: '@file (文件操作)', value: '@file' },
-                { label: '@navigation (导航移动)', value: '@navigation' },
-                { label: '@task (任务管理)', value: '@task' },
-                { label: '@memory (记忆笔记)', value: '@memory' },
-                { label: '@notify (通知消息)', value: '@notify' },
-                { label: '@inventory (背包属性)', value: '@inventory' },
+                { label: '@file', value: '@file' },
+                { label: '@navigation', value: '@navigation' },
+                { label: '@task', value: '@task' },
+                { label: '@memory', value: '@memory' },
+                { label: '@notify', value: '@notify' },
+                { label: '@inventory', value: '@inventory' },
               ]}
             />
           </Form.Item>
 
-          <Form.Item name="description" label="描述" rules={[{ required: true, message: '请输入描述' }]}>
+          <Form.Item name="description" label={t('toolMgr.descLabel')} rules={[{ required: true, message: t('toolMgr.descRequired') }]}>
             <Select
-              placeholder="选择或输入描述"
+              placeholder={t('toolMgr.descPlaceholder')}
               showSearch
               allowClear
               options={[
-                { label: '文件操作组', value: '文件操作组' },
-                { label: '导航移动组', value: '导航移动组' },
-                { label: '任务管理组', value: '任务管理组' },
-                { label: '记忆笔记组', value: '记忆笔记组' },
-                { label: '通知消息组', value: '通知消息组' },
-                { label: '背包属性组', value: '背包属性组' },
+                { label: '@file', value: '@file' },
+                { label: '@navigation', value: '@navigation' },
+                { label: '@task', value: '@task' },
+                { label: '@memory', value: '@memory' },
+                { label: '@notify', value: '@notify' },
+                { label: '@inventory', value: '@inventory' },
               ]}
             />
           </Form.Item>
 
-          <Form.Item name="tools" label="包含工具">
+          <Form.Item name="tools" label={t('toolMgr.toolsLabel')}>
             <Select
               mode="multiple"
-              placeholder="选择要包含的工具"
+              placeholder={t('toolMgr.toolsPlaceholder')}
               options={availableTools.map((t) => ({ label: t.id, value: t.id }))}
               filterOption={(input, option) =>
                 (option?.label ?? '').toLowerCase().includes(input.toLowerCase())

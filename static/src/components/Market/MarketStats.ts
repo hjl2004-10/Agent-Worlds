@@ -55,10 +55,10 @@ export function getRank(score: number): RankInfo {
   return { label: 'D', color: '#6b7280', glow: 'none' };
 }
 
-/** 属性维度定义 */
+/** 属性维度定义 (label 是 i18n key，需在组件中用 t() 翻译) */
 export const STAT_DEFS = [
-  { key: 'skillLevel' as const, label: '技能', icon: '⚡', color: '#fbbf24' },
-  { key: 'social' as const, label: '社交', icon: '🤝', color: '#e879f9' },
-  { key: 'memory' as const, label: '记忆', icon: '🧠', color: '#38bdf8' },
-  { key: 'activity' as const, label: '活跃', icon: '🔥', color: '#4ade80' },
+  { key: 'skillLevel' as const, label: 'market.stat.skill', icon: '⚡', color: '#fbbf24' },
+  { key: 'social' as const, label: 'market.stat.social', icon: '🤝', color: '#e879f9' },
+  { key: 'memory' as const, label: 'market.stat.memory', icon: '🧠', color: '#38bdf8' },
+  { key: 'activity' as const, label: 'market.stat.activity', icon: '🔥', color: '#4ade80' },
 ];

@@ -21,6 +21,7 @@ import {
 import type { NPC } from '@/api/types';
 import type { NPCExportData } from '@/api/types';
 import { exportNPCs, importNPCs } from '@/api/god';
+import { useT } from '@/i18n';
 
 const { Text } = Typography;
 
@@ -32,6 +33,7 @@ interface NPCImportExportProps {
 }
 
 export function NPCImportExport({ open, onClose, npcs, onSuccess }: NPCImportExportProps) {
+  const t = useT();
   const [mode, setMode] = useState<'select' | 'export' | 'import'>('select');
   const [selectedNPCs, setSelectedNPCs] = useState<string[]>([]);
   const [overwrite, setOverwrite] = useState(false);
@@ -42,7 +44,7 @@ export function NPCImportExport({ open, onClose, npcs, onSuccess }: NPCImportExp
 
   const handleExport = async () => {
     if (selectedNPCs.length === 0) {
-      message.warning('请选择至少一个 NPC');
+      message.warning(t('ie.warnSelectOne'));
       return;
     }
 
@@ -67,16 +69,16 @@ export function NPCImportExport({ open, onClose, npcs, onSuccess }: NPCImportExp
         a.click();
         URL.revokeObjectURL(url);
 
-        message.success(`成功导出 ${data.exported_count} 个 NPC`);
+        message.success(`${t('ie.exportSuccess')} ${data.exported_count} ${t('ie.exportCount')}`);
         if (data.not_found && data.not_found.length > 0) {
-          message.warning(`未找到: ${data.not_found.join(', ')}`);
+          message.warning(`${t('ie.notFound')} ${data.not_found.join(', ')}`);
         }
         handleClose();
       } else {
-        message.error(data.message || '导出失败');
+        message.error(data.message || t('common.exportFailed'));
       }
     } catch (error) {
-      message.error('导出失败');
+      message.error(t('common.exportFailed'));
       console.error(error);
     } finally {
       setLoading(false);
@@ -99,7 +101,7 @@ export function NPCImportExport({ open, onClose, npcs, onSuccess }: NPCImportExp
         } else if (content.npcs && Array.isArray(content.npcs)) {
           npcsData = content.npcs;
         } else {
-          message.error('无效的文件格式');
+          message.error(t('ie.invalidFormat'));
           return;
         }
 
@@ -113,7 +115,7 @@ export function NPCImportExport({ open, onClose, npcs, onSuccess }: NPCImportExp
         setImportPreview(preview);
         setMode('import');
       } catch (error) {
-        message.error('解析文件失败');
+        message.error(t('ie.parseFailed'));
         console.error(error);
       }
     };
@@ -127,7 +129,7 @@ export function NPCImportExport({ open, onClose, npcs, onSuccess }: NPCImportExp
 
   const handleImport = async () => {
     if (!importData || importData.length === 0) {
-      message.warning('没有可导入的数据');
+      message.warning(t('ie.noData'));
       return;
     }
 
@@ -135,20 +137,20 @@ export function NPCImportExport({ open, onClose, npcs, onSuccess }: NPCImportExp
     try {
       const { data } = await importNPCs(importData, overwrite);
       if (data.status === 'ok') {
-        message.success(`成功导入 ${data.imported_count} 个 NPC`);
+        message.success(`${t('ie.importSuccess')} ${data.imported_count} ${t('ie.exportCount')}`);
         if (data.skipped && data.skipped.length > 0) {
-          message.info(`已跳过 (已存在): ${data.skipped.join(', ')}`);
+          message.info(`${t('ie.skipped')} ${data.skipped.join(', ')}`);
         }
         if (data.errors && data.errors.length > 0) {
-          message.warning(`部分错误: ${data.errors.join(', ')}`);
+          message.warning(`${t('ie.errors')} ${data.errors.join(', ')}`);
         }
         onSuccess();
         handleClose();
       } else {
-        message.error(data.message || '导入失败');
+        message.error(data.message || t('common.importFailed'));
       }
     } catch (error) {
-      message.error('导入失败');
+      message.error(t('common.importFailed'));
       console.error(error);
     } finally {
       setLoading(false);
@@ -183,7 +185,7 @@ export function NPCImportExport({ open, onClose, npcs, onSuccess }: NPCImportExp
       title={
         <Space>
           <FileOutlined />
-          NPC 导入导出
+          {t('ie.title')}
         </Space>
       }
       open={open}
@@ -200,7 +202,7 @@ export function NPCImportExport({ open, onClose, npcs, onSuccess }: NPCImportExp
             block
             onClick={() => setMode('export')}
           >
-            导出 NPC
+            {t('ie.exportBtn')}
           </Button>
           <Button
             icon={<ImportOutlined />}
@@ -208,7 +210,7 @@ export function NPCImportExport({ open, onClose, npcs, onSuccess }: NPCImportExp
             block
             onClick={() => fileInputRef.current?.click()}
           >
-            导入 NPC
+            {t('ie.importBtn')}
           </Button>
           <input
             ref={fileInputRef}
@@ -223,13 +225,13 @@ export function NPCImportExport({ open, onClose, npcs, onSuccess }: NPCImportExp
       {mode === 'export' && (
         <div>
           <div style={{ marginBottom: 12, display: 'flex', justifyContent: 'space-between' }}>
-            <Text>选择要导出的 NPC：</Text>
+            <Text>{t('ie.selectExport')}</Text>
             <Space>
               <Button size="small" onClick={selectAll}>
-                全选
+                {t('ie.selectAll')}
               </Button>
               <Button size="small" onClick={deselectAll}>
-                取消全选
+                {t('ie.deselectAll')}
               </Button>
             </Space>
           </div>
@@ -252,7 +254,7 @@ export function NPCImportExport({ open, onClose, npcs, onSuccess }: NPCImportExp
                   <Checkbox checked={selectedNPCs.includes(npc.name)}>
                     <Space>
                       <Text>{npc.name}</Text>
-                      {npc.is_player && <Tag color="cyan">玩家</Tag>}
+                      {npc.is_player && <Tag color="cyan">{t('npc.status.player')}</Tag>}
                       <Text type="secondary">({npc.x.toFixed(0)}, {npc.y.toFixed(0)})</Text>
                     </Space>
                   </Checkbox>
@@ -262,14 +264,14 @@ export function NPCImportExport({ open, onClose, npcs, onSuccess }: NPCImportExp
           </div>
           <Divider />
           <Space style={{ width: '100%', justifyContent: 'flex-end' }}>
-            <Button onClick={() => setMode('select')}>返回</Button>
+            <Button onClick={() => setMode('select')}>{t('common.back')}</Button>
             <Button
               type="primary"
               icon={<DownloadOutlined />}
               loading={loading}
               onClick={handleExport}
             >
-              导出 ({selectedNPCs.length})
+              {t('common.export')} ({selectedNPCs.length})
             </Button>
           </Space>
         </div>
@@ -278,8 +280,8 @@ export function NPCImportExport({ open, onClose, npcs, onSuccess }: NPCImportExp
       {mode === 'import' && (
         <div>
           <Alert
-            message={`即将导入 ${importData?.length || 0} 个 NPC`}
-            description="请确认导入列表，已存在的 NPC 将被跳过（除非勾选覆盖选项）"
+            message={`${t('ie.importConfirm')} ${importData?.length || 0} ${t('ie.exportCount')}`}
+            description={t('ie.importHint')}
             type="info"
             showIcon
             style={{ marginBottom: 12 }}
@@ -300,8 +302,8 @@ export function NPCImportExport({ open, onClose, npcs, onSuccess }: NPCImportExp
                 <List.Item style={{ padding: '4px 8px' }}>
                   <Space>
                     <Text>{item.name}</Text>
-                    {item.exists && <Tag color="orange">已存在</Tag>}
-                    {!item.exists && <Tag color="green">新</Tag>}
+                    {item.exists && <Tag color="orange">{t('ie.exists')}</Tag>}
+                    {!item.exists && <Tag color="green">{t('common.new')}</Tag>}
                   </Space>
                 </List.Item>
               )}
@@ -312,18 +314,18 @@ export function NPCImportExport({ open, onClose, npcs, onSuccess }: NPCImportExp
             onChange={(e) => setOverwrite(e.target.checked)}
             style={{ marginBottom: 12 }}
           >
-            覆盖已存在的 NPC
+            {t('ie.overwrite')}
           </Checkbox>
           <Divider />
           <Space style={{ width: '100%', justifyContent: 'flex-end' }}>
-            <Button onClick={() => setMode('select')}>返回</Button>
+            <Button onClick={() => setMode('select')}>{t('common.back')}</Button>
             <Button
               type="primary"
               icon={<UploadOutlined />}
               loading={loading}
               onClick={handleImport}
             >
-              导入 ({importData?.length || 0})
+              {t('common.import')} ({importData?.length || 0})
             </Button>
           </Space>
         </div>

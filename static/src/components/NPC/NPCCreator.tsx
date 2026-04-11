@@ -28,6 +28,7 @@ import { spriteIdsToOptions } from '@/config/sprites';
 import { ModelConfig } from './ModelConfig';
 import { BehaviorConfig } from './BehaviorConfig';
 import type { LLMChannel, NPCCreateRequest } from '@/api/types';
+import { useT } from '@/i18n';
 
 const { Text, Title } = Typography;
 
@@ -50,6 +51,7 @@ const DEFAULT_PROMPT_TEMPLATE = [
 ];
 
 export function NPCCreator({ open, onClose, onSuccess }: NPCCreatorProps) {
+  const t = useT();
   const [currentStep, setCurrentStep] = useState(0);
   const [loading, setLoading] = useState(false);
   const [sprites, setSprites] = useState<string[]>([]);
@@ -95,7 +97,7 @@ export function NPCCreator({ open, onClose, onSuccess }: NPCCreatorProps) {
           setDefaultChannel(channelsRes.data.default_channel);
         }
       } catch (err) {
-        console.error('加载数据失败:', err);
+        console.error('Load data failed:', err);
       }
     };
 
@@ -133,11 +135,11 @@ export function NPCCreator({ open, onClose, onSuccess }: NPCCreatorProps) {
     // 验证当前步骤
     if (currentStep === 0) {
       if (!formData.name.trim()) {
-        message.error('请输入 NPC 名称');
+        message.error(t('creator.warnName'));
         return;
       }
       if (!/^[a-zA-Z\u4e00-\u9fa5]+$/.test(formData.name)) {
-        message.error('名称只能包含中英文字符');
+        message.error(t('creator.warnNameFormat'));
         return;
       }
     }
@@ -158,11 +160,11 @@ export function NPCCreator({ open, onClose, onSuccess }: NPCCreatorProps) {
         setCreated({ name: formData.name, success: true });
         onSuccess?.();
       } else {
-        message.error(res.data.message || '创建失败');
+        message.error(res.data.message || t('creator.createFailed'));
         setCreated({ name: formData.name, success: false });
       }
     } catch (err) {
-      message.error('创建失败');
+      message.error(t('creator.createFailed'));
       console.error(err);
       setCreated({ name: formData.name, success: false });
     } finally {
@@ -178,19 +180,19 @@ export function NPCCreator({ open, onClose, onSuccess }: NPCCreatorProps) {
   // 步骤配置
   const steps = [
     {
-      title: '基本信息',
+      title: t('creator.step.basic'),
       icon: <UserOutlined />,
       content: (
         <Space direction="vertical" style={{ width: '100%' }} size="middle">
           {/* 名称 */}
           <div>
             <Text type="secondary" style={{ fontSize: 12, display: 'block', marginBottom: 4 }}>
-              NPC 名称 <Text type="danger">*</Text>
+              {t('creator.npcName')} <Text type="danger">*</Text>
             </Text>
             <Input
               value={formData.name}
               onChange={(e) => updateField('name', e.target.value)}
-              placeholder="输入 NPC 名称 (中英文)"
+              placeholder={t('creator.npcNamePlaceholder')}
               size="large"
             />
           </div>
@@ -198,7 +200,7 @@ export function NPCCreator({ open, onClose, onSuccess }: NPCCreatorProps) {
           {/* 精灵 */}
           <div>
             <Text type="secondary" style={{ fontSize: 12, display: 'block', marginBottom: 4 }}>
-              <PictureOutlined /> 精灵图
+              <PictureOutlined /> {t('config.sprite')}
             </Text>
             <Select
               value={formData.sprite_id}
@@ -220,7 +222,7 @@ export function NPCCreator({ open, onClose, onSuccess }: NPCCreatorProps) {
           <Row gutter={16}>
             <Col span={12}>
               <Text type="secondary" style={{ fontSize: 12, display: 'block', marginBottom: 4 }}>
-                X 坐标
+                {t('creator.xCoord')}
               </Text>
               <InputNumber
                 value={formData.x}
@@ -232,7 +234,7 @@ export function NPCCreator({ open, onClose, onSuccess }: NPCCreatorProps) {
             </Col>
             <Col span={12}>
               <Text type="secondary" style={{ fontSize: 12, display: 'block', marginBottom: 4 }}>
-                Y 坐标
+                {t('creator.yCoord')}
               </Text>
               <InputNumber
                 value={formData.y}
@@ -250,25 +252,25 @@ export function NPCCreator({ open, onClose, onSuccess }: NPCCreatorProps) {
               checked={formData.is_player}
               onChange={(e) => updateField('is_player', e.target.checked)}
             >
-              标记为玩家 (玩家输入而非 LLM 生成)
+              {t('creator.isPlayer')}
             </Checkbox>
           </div>
         </Space>
       ),
     },
     {
-      title: '人设描述',
+      title: t('creator.step.persona'),
       icon: <RobotOutlined />,
       content: (
         <Space direction="vertical" style={{ width: '100%' }} size="middle">
           <div>
             <Text type="secondary" style={{ fontSize: 12, display: 'block', marginBottom: 4 }}>
-              人设描述
+              {t('creator.persona')}
             </Text>
             <Input.TextArea
               value={formData.description}
               onChange={(e) => updateField('description', e.target.value)}
-              placeholder="描述 NPC 的性格、背景、说话风格等..."
+              placeholder={t('creator.personaPlaceholder')}
               rows={5}
               style={{ background: 'var(--bg-panel)', color: 'var(--text-white)' }}
             />
@@ -276,12 +278,12 @@ export function NPCCreator({ open, onClose, onSuccess }: NPCCreatorProps) {
 
           <div>
             <Text type="secondary" style={{ fontSize: 12, display: 'block', marginBottom: 4 }}>
-              额外提示
+              {t('creator.extraPrompt')}
             </Text>
             <Input.TextArea
               value={formData.extra_prompt}
               onChange={(e) => updateField('extra_prompt', e.target.value)}
-              placeholder="例如: 当你觉得和对方成为朋友时，输出[group:朋友]。"
+              placeholder={t('creator.extraPromptPlaceholder')}
               rows={2}
               style={{ background: 'var(--bg-panel)', color: 'var(--text-white)' }}
             />
@@ -290,12 +292,12 @@ export function NPCCreator({ open, onClose, onSuccess }: NPCCreatorProps) {
       ),
     },
     {
-      title: '模型配置',
+      title: t('creator.step.model'),
       icon: <RobotOutlined />,
       content: (
         <div>
           <Text type="secondary" style={{ fontSize: 12, display: 'block', marginBottom: 8 }}>
-            选择此 NPC 使用的 LLM 渠道和模型
+            {t('creator.modelHint')}
           </Text>
           <ModelConfig
             channel={formData.llm?.channel || null}
@@ -308,7 +310,7 @@ export function NPCCreator({ open, onClose, onSuccess }: NPCCreatorProps) {
       ),
     },
     {
-      title: '行为参数',
+      title: t('creator.step.behavior'),
       icon: <ThunderboltOutlined />,
       content: (
         <BehaviorConfig
@@ -327,54 +329,54 @@ export function NPCCreator({ open, onClose, onSuccess }: NPCCreatorProps) {
       ),
     },
     {
-      title: '确认创建',
+      title: t('creator.step.confirm'),
       icon: <CheckCircleOutlined />,
       content: created ? (
         <Result
           status={created.success ? 'success' : 'error'}
-          title={created.success ? '创建成功!' : '创建失败'}
-          subTitle={created.success ? `NPC "${created.name}" 已创建完成` : '请检查错误后重试'}
+          title={created.success ? t('creator.createSuccess') : t('creator.createFailed')}
+          subTitle={created.success ? `NPC "${created.name}" ${t('creator.createSuccessDesc')}` : t('creator.createFailedDesc')}
           extra={
             created.success && (
               <Button type="primary" onClick={handleClose}>
-                完成
+                {t('god.done')}
               </Button>
             )
           }
         />
       ) : (
         <Space direction="vertical" style={{ width: '100%' }} size="small">
-          <Title level={5}>创建 NPC: {formData.name}</Title>
+          <Title level={5}>{t('creator.confirmTitle')}: {formData.name}</Title>
           <Divider style={{ margin: '12px 0' }} />
 
           <Row gutter={[8, 8]}>
-            <Col span={8}><Text type="secondary">精灵:</Text></Col>
+            <Col span={8}><Text type="secondary">{t('creator.spriteLabel')}</Text></Col>
             <Col span={16}><Tag>{formData.sprite_id}</Tag></Col>
 
-            <Col span={8}><Text type="secondary">位置:</Text></Col>
+            <Col span={8}><Text type="secondary">{t('creator.posLabel')}</Text></Col>
             <Col span={16}><Text>({formData.x}, {formData.y})</Text></Col>
 
-            <Col span={8}><Text type="secondary">类型:</Text></Col>
+            <Col span={8}><Text type="secondary">{t('creator.typeLabel')}</Text></Col>
             <Col span={16}>
               <Tag color={formData.is_player ? 'cyan' : 'default'}>
-                {formData.is_player ? '玩家' : 'NPC'}
+                {formData.is_player ? t('npc.status.player') : 'NPC'}
               </Tag>
             </Col>
 
-            <Col span={8}><Text type="secondary">LLM:</Text></Col>
+            <Col span={8}><Text type="secondary">{t('creator.llmLabel')}</Text></Col>
             <Col span={16}>
               <Text>
-                {formData.llm?.channel || defaultChannel || '默认'}
+                {formData.llm?.channel || defaultChannel || t('creator.default')}
                 {formData.llm?.model && ` / ${formData.llm.model}`}
               </Text>
             </Col>
 
-            <Col span={8}><Text type="secondary">主动值:</Text></Col>
+            <Col span={8}><Text type="secondary">{t('creator.initiativeLabel')}</Text></Col>
             <Col span={16}><Text>{formData.behavior?.base_initiative || 5}</Text></Col>
 
             <Col span={24}>
               <Text type="secondary" style={{ fontSize: 12 }}>
-                人设: {formData.description || '(未设置)'}
+                {t('creator.personaLabel')} {formData.description || t('creator.notSet')}
               </Text>
             </Col>
           </Row>
@@ -385,7 +387,7 @@ export function NPCCreator({ open, onClose, onSuccess }: NPCCreatorProps) {
 
   return (
     <Modal
-      title="创建新 NPC"
+      title={t('creator.title')}
       open={open}
       onCancel={handleClose}
       width={600}
@@ -408,15 +410,15 @@ export function NPCCreator({ open, onClose, onSuccess }: NPCCreatorProps) {
         <div style={{ textAlign: 'right' }}>
           <Space>
             {currentStep > 0 && (
-              <Button onClick={handlePrev}>上一步</Button>
+              <Button onClick={handlePrev}>{t('creator.prev')}</Button>
             )}
             {currentStep < steps.length - 1 ? (
               <Button type="primary" onClick={handleNext}>
-                下一步
+                {t('creator.next')}
               </Button>
             ) : (
               <Button type="primary" loading={loading} onClick={handleCreate}>
-                创建
+                {t('common.create')}
               </Button>
             )}
           </Space>

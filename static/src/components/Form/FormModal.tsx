@@ -8,11 +8,13 @@ import { QuestionCircleOutlined, CheckOutlined, CloseOutlined, ClockCircleOutlin
 import { useFormStore } from '@/store/useFormStore';
 import type { FormResponse } from '@/api';
 import { useState } from 'react';
+import { useT } from '@/i18n';
 
 const { Text, Paragraph } = Typography;
 const { TextArea } = Input;
 
 export function FormModal() {
+  const t = useT();
   const {
     currentForm,
     closeForm,
@@ -27,9 +29,9 @@ export function FormModal() {
   // 格式化剩余时间
   const formatRemainingTime = (expiresAt: number) => {
     const remaining = Math.max(0, expiresAt - Date.now() / 1000);
-    if (remaining < 60) return `${Math.floor(remaining)} 秒`;
-    if (remaining < 3600) return `${Math.floor(remaining / 60)} 分钟`;
-    return `${Math.floor(remaining / 3600)} 小时`;
+    if (remaining < 60) return `${Math.floor(remaining)} ${t('form.seconds')}`;
+    if (remaining < 3600) return `${Math.floor(remaining / 60)} ${t('form.minutes')}`;
+    return `${Math.floor(remaining / 3600)} ${t('form.hours')}`;
   };
 
   // 处理提交
@@ -64,7 +66,7 @@ export function FormModal() {
       title={
         <Space>
           <QuestionCircleOutlined style={{ color: '#52c41a' }} />
-          <span>{currentForm.from_npc} 的提问</span>
+          <span>{currentForm.from_npc} {t('form.question')}</span>
         </Space>
       }
       open={!!currentForm}
@@ -74,10 +76,10 @@ export function FormModal() {
       footer={
         <Space>
           <Button icon={<CloseOutlined />} onClick={handleCancel} danger>
-            取消
+            {t('form.cancelBtn')}
           </Button>
           <Button onClick={handleClose}>
-            稍后回答
+            {t('form.later')}
           </Button>
           <Button
             type="primary"
@@ -86,7 +88,7 @@ export function FormModal() {
             disabled={!answer.trim()}
             onClick={handleSubmit}
           >
-            提交回复
+            {t('form.submit')}
           </Button>
         </Space>
       }
@@ -97,7 +99,7 @@ export function FormModal() {
           <Space direction="vertical" size={4}>
             <Text type="secondary">
               <ClockCircleOutlined style={{ marginRight: 4 }} />
-              剩余时间: {formatRemainingTime(currentForm.expires_at)}
+              {t('form.remaining')} {formatRemainingTime(currentForm.expires_at)}
             </Text>
           </Space>
         </div>
@@ -146,13 +148,13 @@ export function FormModal() {
         {/* 回复输入 */}
         <div style={{ marginTop: 16 }}>
           <Text style={{ color: 'var(--text-primary)', marginBottom: 8, display: 'block' }}>
-            你的回复:
+            {t('form.yourReply')}
           </Text>
           <TextArea
             rows={4}
             value={answer}
             onChange={(e) => setAnswer(e.target.value)}
-            placeholder="请输入你的回答..."
+            placeholder={t('form.replyPlaceholder')}
             style={{
               backgroundColor: '#1a1a1a',
               color: 'var(--text-white)',

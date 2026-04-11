@@ -2,69 +2,71 @@ import { useState } from 'react';
 import { Modal } from 'antd';
 import { QuestionCircleOutlined } from '@ant-design/icons';
 import { PixelButton } from '@/components/ui';
-
-const SECTIONS = [
-  {
-    title: '地图操作',
-    icon: '🗺️',
-    items: [
-      { key: '鼠标拖拽', desc: '平移视角' },
-      { key: '滚轮', desc: '缩放 (0.5x ~ 3x)' },
-      { key: '点击 NPC', desc: '选中并进入上帝模式' },
-      { key: '右下角小地图', desc: '查看全局 + 视口范围' },
-    ],
-  },
-  {
-    title: '上帝模式',
-    icon: '👑',
-    items: [
-      { key: 'WASD / 方向键', desc: '控制 NPC 移动' },
-      { key: 'ESC', desc: '退出控制' },
-      { key: '左侧 NPC 列表', desc: '点击切换控制目标' },
-      { key: '指挥 Tab → 下达任务', desc: '给 NPC 分配任务 (如前往某地)' },
-    ],
-  },
-  {
-    title: '面板说明',
-    icon: '📋',
-    items: [
-      { key: '指挥', desc: 'NPC 记忆查看 + 任务下达' },
-      { key: '对话', desc: '以玩家身份与 NPC 实时对话' },
-      { key: '动态', desc: 'NPC 之间的自动对话日志' },
-      { key: '世界', desc: '世界观 / 场景设定管理' },
-    ],
-  },
-  {
-    title: 'NPC 状态图标',
-    icon: '💬',
-    items: [
-      { key: '📧 信封', desc: '正在对话中' },
-      { key: '⏱️ 计时器', desc: '刚开始移动' },
-      { key: '💭 气泡', desc: '刚停下来 (思考中)' },
-      { key: '灰色半透明', desc: 'NPC 已禁用' },
-    ],
-  },
-  {
-    title: '悬浮功能',
-    icon: '✉️',
-    items: [
-      { key: '📬 邮箱图标', desc: 'NPC 之间的邮件系统' },
-      { key: '📝 表单图标', desc: '查看 NPC 提交的表单' },
-    ],
-  },
-  {
-    title: '快捷操作',
-    icon: '⚡',
-    items: [
-      { key: '☀️/🌙 按钮', desc: '切换亮色 / 暗色主题' },
-      { key: 'NPC 配置面板', desc: '在 NPC 列表中点击齿轮图标' },
-      { key: '窗口失焦', desc: '自动停止 NPC 移动 (防粘键)' },
-    ],
-  },
-];
+import { useT } from '@/i18n';
 
 export function HelpModal() {
+  const t = useT();
   const [open, setOpen] = useState(false);
+
+  const SECTIONS = [
+    {
+      title: t('help.section.map'),
+      icon: '',
+      items: [
+        { key: t('help.map.drag'), desc: t('help.map.dragDesc') },
+        { key: t('help.map.scroll'), desc: t('help.map.scrollDesc') },
+        { key: t('help.map.clickNPC'), desc: t('help.map.clickNPCDesc') },
+        { key: t('help.map.minimap'), desc: t('help.map.minimapDesc') },
+      ],
+    },
+    {
+      title: t('help.section.god'),
+      icon: '',
+      items: [
+        { key: t('help.god.wasd'), desc: t('help.god.wasdDesc') },
+        { key: t('help.god.esc'), desc: t('help.god.escDesc') },
+        { key: t('help.god.npcList'), desc: t('help.god.npcListDesc') },
+        { key: t('help.god.taskTab'), desc: t('help.god.taskTabDesc') },
+      ],
+    },
+    {
+      title: t('help.section.panels'),
+      icon: '',
+      items: [
+        { key: t('help.panel.command'), desc: t('help.panel.commandDesc') },
+        { key: t('help.panel.chat'), desc: t('help.panel.chatDesc') },
+        { key: t('help.panel.activity'), desc: t('help.panel.activityDesc') },
+        { key: t('help.panel.world'), desc: t('help.panel.worldDesc') },
+      ],
+    },
+    {
+      title: t('help.section.status'),
+      icon: '',
+      items: [
+        { key: t('help.status.envelope'), desc: t('help.status.envelopeDesc') },
+        { key: t('help.status.timer'), desc: t('help.status.timerDesc') },
+        { key: t('help.status.bubble'), desc: t('help.status.bubbleDesc') },
+        { key: t('help.status.dimmed'), desc: t('help.status.dimmedDesc') },
+      ],
+    },
+    {
+      title: t('help.section.floating'),
+      icon: '',
+      items: [
+        { key: t('help.float.mailbox'), desc: t('help.float.mailboxDesc') },
+        { key: t('help.float.form'), desc: t('help.float.formDesc') },
+      ],
+    },
+    {
+      title: t('help.section.shortcuts'),
+      icon: '',
+      items: [
+        { key: t('help.shortcut.theme'), desc: t('help.shortcut.themeDesc') },
+        { key: t('help.shortcut.npcConfig'), desc: t('help.shortcut.npcConfigDesc') },
+        { key: t('help.shortcut.blur'), desc: t('help.shortcut.blurDesc') },
+      ],
+    },
+  ];
 
   return (
     <>
@@ -72,7 +74,7 @@ export function HelpModal() {
         variant="style1"
         size="sm"
         onClick={() => setOpen(true)}
-        title="帮助"
+        title={t('help.title')}
         style={{ minWidth: 36 }}
       >
         <QuestionCircleOutlined style={{ fontSize: 14 }} />
@@ -192,8 +194,7 @@ export function HelpModal() {
             color: 'var(--text-muted)',
             lineHeight: 1.6,
           }}>
-            NPC 会自动在地图上漫步，相遇时触发 AI 对话。
-            你可以用上帝模式控制 NPC 移动，或通过对话面板以玩家身份参与交互。
+            {t('help.footer')}
           </div>
         </div>
       </Modal>

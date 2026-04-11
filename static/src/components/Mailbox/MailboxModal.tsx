@@ -18,10 +18,12 @@ import {
 import { useMailboxStore } from '@/store/useMailboxStore';
 import type { Mail } from '@/api';
 import { MailContent } from './MailContent';
+import { useT } from '@/i18n';
 
 const { Text } = Typography;
 
 export function MailboxModal() {
+  const t = useT();
   const {
     mails,
     loading,
@@ -45,10 +47,10 @@ export function MailboxModal() {
     const hours = Math.floor(diff / 3600000);
     const days = Math.floor(diff / 86400000);
 
-    if (minutes < 1) return '刚刚';
-    if (minutes < 60) return `${minutes} 分钟前`;
-    if (hours < 24) return `${hours} 小时前`;
-    if (days < 7) return `${days} 天前`;
+    if (minutes < 1) return t('mail.justNow');
+    if (minutes < 60) return `${minutes} ${t('mail.minutesAgo')}`;
+    if (hours < 24) return `${hours} ${t('mail.hoursAgo')}`;
+    if (days < 7) return `${days} ${t('mail.daysAgo')}`;
     return date.toLocaleDateString('zh-CN');
   };
 
@@ -119,7 +121,7 @@ export function MailboxModal() {
       return (
         <Empty
           image={Empty.PRESENTED_IMAGE_SIMPLE}
-          description={`加载失败: ${error}`}
+          description={`${t('mail.loadFailed')}: ${error}`}
           style={{ padding: 40 }}
         />
       );
@@ -129,7 +131,7 @@ export function MailboxModal() {
       return (
         <Empty
           image={Empty.PRESENTED_IMAGE_SIMPLE}
-          description="暂无邮件"
+          description={t('mail.noMails')}
           style={{ padding: 40 }}
         />
       );
@@ -158,7 +160,7 @@ export function MailboxModal() {
               }
               title={
                 <Space>
-                  {!mail.read && <Tag color="red">新</Tag>}
+                  {!mail.read && <Tag color="red">{t('common.new')}</Tag>}
                   <Text strong={!mail.read} style={{ fontSize: 14, color: mail.read ? '#999' : '#fff' }}>
                     {mail.title}
                   </Text>
@@ -169,7 +171,7 @@ export function MailboxModal() {
               }
               description={
                 <Space split={<Text type="secondary">|</Text>}>
-                  <Text type="secondary">来自: {mail.from}</Text>
+                  <Text type="secondary">{t('mail.from')} {mail.from}</Text>
                   <Text type="secondary">{formatTime(mail.created_at)}</Text>
                 </Space>
               }
@@ -182,11 +184,11 @@ export function MailboxModal() {
                 onClick={(e) => handleToggleStar(mail.id, e)}
               />
               <Popconfirm
-                title="确定删除这封邮件？"
+                title={t('mail.deleteConfirm')}
                 onConfirm={(e) => handleDelete(mail.id, e as unknown as React.MouseEvent)}
                 onCancel={(e) => e?.stopPropagation()}
-                okText="删除"
-                cancelText="取消"
+                okText={t('common.delete')}
+                cancelText={t('common.cancel')}
               >
                 <Button
                   type="text"
@@ -210,7 +212,7 @@ export function MailboxModal() {
         title={
           <Space>
             <MailOutlined />
-            <span>邮箱</span>
+            <span>{t('mail.title')}</span>
             {mails.some((m) => !m.read) && (
               <Button
                 type="link"
@@ -218,7 +220,7 @@ export function MailboxModal() {
                 icon={<CheckOutlined />}
                 onClick={handleMarkAllRead}
               >
-                全部已读
+                {t('mail.markAllRead')}
               </Button>
             )}
           </Space>
@@ -254,20 +256,20 @@ export function MailboxModal() {
                 icon={selectedMail.starred ? <StarFilled style={{ color: '#faad14' }} /> : <StarOutlined />}
                 onClick={() => toggleStar(selectedMail.id)}
               >
-                {selectedMail.starred ? '取消星标' : '星标'}
+                {selectedMail.starred ? t('mail.unstar') : t('mail.star')}
               </Button>
               <Popconfirm
-                title="确定删除这封邮件？"
+                title={t('mail.deleteConfirm')}
                 onConfirm={() => deleteMail(selectedMail.id)}
-                okText="删除"
-                cancelText="取消"
+                okText={t('common.delete')}
+                cancelText={t('common.cancel')}
               >
                 <Button danger icon={<DeleteOutlined />}>
-                  删除
+                  {t('common.delete')}
                 </Button>
               </Popconfirm>
               <Button type="primary" onClick={() => selectMail(null)}>
-                返回列表
+                {t('mail.backToList')}
               </Button>
             </Space>
           )
@@ -281,11 +283,11 @@ export function MailboxModal() {
             <div style={{ marginBottom: 16, paddingBottom: 16, borderBottom: '1px solid #f0f0f0' }}>
               <Space direction="vertical" size={4}>
                 <Text>
-                  <Text type="secondary">发件人：</Text>
+                  <Text type="secondary">{t('mail.sender')}</Text>
                   {selectedMail.from}
                 </Text>
                 <Text>
-                  <Text type="secondary">时间：</Text>
+                  <Text type="secondary">{t('mail.time')}</Text>
                   {new Date(selectedMail.created_at).toLocaleString('zh-CN')}
                 </Text>
               </Space>

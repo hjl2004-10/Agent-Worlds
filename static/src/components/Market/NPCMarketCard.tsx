@@ -1,5 +1,6 @@
 import type { MarketNPCData } from '@/api/types';
 import { calcStats, getRank, STAT_DEFS } from './MarketStats';
+import { useT } from '@/i18n';
 
 const AVATARS = [
   '/ui/avatars/soldier.png', '/ui/avatars/hacker.png',
@@ -23,6 +24,7 @@ interface Props {
 }
 
 export function NPCMarketCard({ npc, onDetail, onExport }: Props) {
+  const t = useT();
   const stats = calcStats(npc);
   const rank = getRank(stats.overall);
 
@@ -52,7 +54,7 @@ export function NPCMarketCard({ npc, onDetail, onExport }: Props) {
       <div className="market-skill-tag">
         {npc.skills.length > 0
           ? npc.skills.slice(0, 2).map(s => <span key={s}>{s}</span>)
-          : <span style={{ color: '#475569' }}>无技能</span>
+          : <span style={{ color: '#475569' }}>{t('market.noSkill')}</span>
         }
       </div>
 
@@ -60,7 +62,7 @@ export function NPCMarketCard({ npc, onDetail, onExport }: Props) {
       <div className="market-stats">
         {STAT_DEFS.map(def => (
           <div className="market-stat-row" key={def.key}>
-            <span className="market-stat-label">{def.label}</span>
+            <span className="market-stat-label">{t(def.label)}</span>
             <div className="market-stat-bar">
               <div
                 className="market-stat-fill"
@@ -74,17 +76,17 @@ export function NPCMarketCard({ npc, onDetail, onExport }: Props) {
 
       {/* 标签行 */}
       <div className="market-tags">
-        {npc.wechat_status === 'bound' && <span className="market-tag market-tag--wechat">微信</span>}
+        {npc.wechat_status === 'bound' && <span className="market-tag market-tag--wechat">{t('market.wechat')}</span>}
         {npc.has_mcp && <span className="market-tag market-tag--mcp">MCP</span>}
-        {npc.is_player && <span className="market-tag market-tag--player">玩家</span>}
-        {npc.tools.length > 5 && <span className="market-tag market-tag--tools">工具达人</span>}
-        {npc.history_count > 50 && <span className="market-tag market-tag--veteran">老手</span>}
+        {npc.is_player && <span className="market-tag market-tag--player">{t('market.player')}</span>}
+        {npc.tools.length > 5 && <span className="market-tag market-tag--tools">{t('market.toolExpert')}</span>}
+        {npc.history_count > 50 && <span className="market-tag market-tag--veteran">{t('market.veteran')}</span>}
       </div>
 
       {/* 操作按钮 */}
       <div className="market-actions">
-        <button onClick={(e) => { e.stopPropagation(); onDetail(npc); }}>详情</button>
-        <button onClick={(e) => { e.stopPropagation(); onExport(npc.name); }}>导出</button>
+        <button onClick={(e) => { e.stopPropagation(); onDetail(npc); }}>{t('market.detail')}</button>
+        <button onClick={(e) => { e.stopPropagation(); onExport(npc.name); }}>{t('common.export')}</button>
       </div>
     </div>
   );

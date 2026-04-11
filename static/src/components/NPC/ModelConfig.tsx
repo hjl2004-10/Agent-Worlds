@@ -15,6 +15,7 @@ import {
   addLLMModel, deleteLLMModel, updateLLMRouting,
   fetchRemoteModels,
 } from '@/api/god';
+import { useT } from '@/i18n';
 
 const { Text } = Typography;
 
@@ -34,6 +35,7 @@ interface ChannelManagerProps {
 }
 
 function ChannelManager({ open, onClose, onRefresh }: ChannelManagerProps) {
+  const t = useT();
   const [channels, setChannels] = useState<LLMChannel[]>([]);
   const [defaultChannel, setDefaultChannel] = useState('');
   const [loading, setLoading] = useState(false);
@@ -170,12 +172,12 @@ function ChannelManager({ open, onClose, onRefresh }: ChannelManagerProps) {
       const res = await fetchRemoteModels(channelId);
       if (res.data.status === 'ok' && res.data.models) {
         setRemoteModels(prev => ({ ...prev, [channelId]: res.data.models! }));
-        message.success(`获取到 ${res.data.models.length} 个模型，Key 验证通过`);
+        message.success(`${res.data.models.length} ${t('model.fetchSuccess')}`);
       } else {
-        message.error(res.data.message || '获取失败');
+        message.error(res.data.message || t('model.fetchFailed'));
       }
     } catch (e: any) {
-      message.error(`请求失败: ${e.message}`);
+      message.error(`${t('model.requestFailed')}: ${e.message}`);
     } finally {
       setFetchingModelsFor(null);
     }
@@ -189,7 +191,7 @@ function ChannelManager({ open, onClose, onRefresh }: ChannelManagerProps) {
       max_tokens: 500,
     });
     if (res.data.status === 'ok') {
-      message.success(`已添加 ${modelName}`);
+      message.success(`${t('common.add')} ${modelName}`);
       loadData();
       onRefresh();
     } else {
@@ -199,7 +201,7 @@ function ChannelManager({ open, onClose, onRefresh }: ChannelManagerProps) {
 
   return (
     <Modal
-      title="LLM 渠道管理"
+      title={t('model.channelManager')}
       open={open}
       onCancel={onClose}
       footer={null}
@@ -221,7 +223,7 @@ function ChannelManager({ open, onClose, onRefresh }: ChannelManagerProps) {
                     <StarOutlined
                       style={{ cursor: 'pointer', color: '#999' }}
                       onClick={() => handleSetDefault(ch.id)}
-                      title="设为默认渠道"
+                      title={t('model.setDefault')}
                     />
                   )}
                   <span style={{ fontWeight: 600 }}>{ch.id}</span>
@@ -240,7 +242,7 @@ function ChannelManager({ open, onClose, onRefresh }: ChannelManagerProps) {
                       editForm.resetFields();
                     }}
                   />
-                  <Popconfirm title={`确定删除渠道 "${ch.id}"？`} onConfirm={() => handleDeleteChannel(ch.id)}>
+                  <Popconfirm title={`${t('model.confirmDeleteChannel')} "${ch.id}"?`} onConfirm={() => handleDeleteChannel(ch.id)}>
                     <Button type="text" size="small" danger icon={<DeleteOutlined />} />
                   </Popconfirm>
                 </Space>
@@ -252,8 +254,8 @@ function ChannelManager({ open, onClose, onRefresh }: ChannelManagerProps) {
                   <Form form={editForm} size="small" layout="vertical">
                     <Form.Item name="provider" label="Provider" initialValue={ch.provider}>
                       <Select options={[
-                        { value: 'openai', label: 'OpenAI 兼容' },
-                        { value: 'claude', label: 'Claude 兼容' },
+                        { value: 'openai', label: t('model.openaiCompat') },
+                        { value: 'claude', label: t('model.claudeCompat') },
                       ]} />
                     </Form.Item>
                     <Form.Item name="base_url" label="Base URL">
@@ -263,7 +265,7 @@ function ChannelManager({ open, onClose, onRefresh }: ChannelManagerProps) {
                       <Input.Password placeholder="sk-..." />
                     </Form.Item>
                     <Button type="primary" size="small" onClick={() => handleUpdateChannel(ch.id)}>
-                      保存
+                      {t('common.save')}
                     </Button>
                   </Form>
                 </div>
@@ -287,7 +289,7 @@ function ChannelManager({ open, onClose, onRefresh }: ChannelManagerProps) {
                   style={{ borderStyle: 'dashed', cursor: 'pointer' }}
                   onClick={() => { setAddingModelTo(addingModelTo === ch.id ? null : ch.id); modelForm.resetFields(); }}
                 >
-                  <PlusOutlined /> 手动
+                  <PlusOutlined /> {t('model.manual')}
                 </Tag>
 
                 {/* 从远程获取 */}
@@ -295,7 +297,7 @@ function ChannelManager({ open, onClose, onRefresh }: ChannelManagerProps) {
                   style={{ borderStyle: 'dashed', cursor: 'pointer', color: '#1677ff' }}
                   onClick={() => handleFetchRemoteModels(ch.id)}
                 >
-                  {fetchingModelsFor === ch.id ? <LoadingOutlined /> : <ApiOutlined />} 获取模型
+                  {fetchingModelsFor === ch.id ? <LoadingOutlined /> : <ApiOutlined />} {t('model.fetchModels')}
                 </Tag>
               </div>
 
@@ -303,8 +305,8 @@ function ChannelManager({ open, onClose, onRefresh }: ChannelManagerProps) {
               {addingModelTo === ch.id && (
                 <div style={{ marginTop: 8 }}>
                   <Form form={modelForm} size="small" layout="inline">
-                    <Form.Item name="model_name" rules={[{ required: true, message: '模型名' }]}>
-                      <Input placeholder="模型名称" style={{ width: 150 }} />
+                    <Form.Item name="model_name" rules={[{ required: true, message: t('model.modelNameRequired') }]}>
+                      <Input placeholder={t('model.modelNamePlaceholder')} style={{ width: 150 }} />
                     </Form.Item>
                     <Form.Item name="temperature" initialValue={0.8}>
                       <InputNumber placeholder="temp" step={0.1} min={0} max={2} style={{ width: 70 }} />
@@ -312,8 +314,8 @@ function ChannelManager({ open, onClose, onRefresh }: ChannelManagerProps) {
                     <Form.Item name="max_tokens" initialValue={500}>
                       <InputNumber placeholder="tokens" step={100} min={100} style={{ width: 80 }} />
                     </Form.Item>
-                    <Button type="primary" size="small" onClick={() => handleAddModel(ch.id)}>添加</Button>
-                    <Button size="small" onClick={() => { setAddingModelTo(null); modelForm.resetFields(); }}>取消</Button>
+                    <Button type="primary" size="small" onClick={() => handleAddModel(ch.id)}>{t('common.add')}</Button>
+                    <Button size="small" onClick={() => { setAddingModelTo(null); modelForm.resetFields(); }}>{t('common.cancel')}</Button>
                   </Form>
                 </div>
               )}
@@ -324,13 +326,13 @@ function ChannelManager({ open, onClose, onRefresh }: ChannelManagerProps) {
                   <div style={{ marginBottom: 4 }}>
                     <Text type="secondary" style={{ fontSize: 11 }}>
                       <CheckCircleOutlined style={{ color: '#52c41a', marginRight: 4 }} />
-                      Key 验证通过 · 点击模型名快速添加
+                      {t('model.keyVerified')}
                     </Text>
                     <Button
                       type="link" size="small" style={{ float: 'right', fontSize: 11, padding: 0 }}
                       onClick={() => setRemoteModels(prev => { const next = { ...prev }; delete next[ch.id]; return next; })}
                     >
-                      收起
+                      {t('model.collapse')}
                     </Button>
                   </div>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
@@ -361,15 +363,15 @@ function ChannelManager({ open, onClose, onRefresh }: ChannelManagerProps) {
 
         {/* 添加新渠道 */}
         {addingChannel ? (
-          <Card size="small" title="添加新渠道">
+          <Card size="small" title={t('model.newChannel')}>
             <Form form={channelForm} size="small" layout="vertical">
-              <Form.Item name="id" label="渠道 ID" rules={[{ required: true, message: '请输入渠道 ID' }]}>
-                <Input placeholder="如: openai, deepseek, zhipu" />
+              <Form.Item name="id" label={t('model.channelId')} rules={[{ required: true, message: t('model.channelIdRequired') }]}>
+                <Input placeholder={t('model.channelIdPlaceholder')} />
               </Form.Item>
               <Form.Item name="provider" label="Provider" initialValue="openai">
                 <Select options={[
-                  { value: 'openai', label: 'OpenAI 兼容' },
-                  { value: 'claude', label: 'Claude 兼容' },
+                  { value: 'openai', label: t('model.openaiCompat') },
+                  { value: 'claude', label: t('model.claudeCompat') },
                 ]} />
               </Form.Item>
               <Form.Item name="base_url" label="Base URL">
@@ -378,12 +380,12 @@ function ChannelManager({ open, onClose, onRefresh }: ChannelManagerProps) {
               <Form.Item name="api_key" label="API Key">
                 <Input.Password placeholder="sk-..." />
               </Form.Item>
-              <Form.Item name="default_model" label="默认模型">
-                <Input placeholder="模型名称（可选）" />
+              <Form.Item name="default_model" label={t('model.defaultModel')}>
+                <Input placeholder={t('model.modelNameOptional')} />
               </Form.Item>
               <Space>
-                <Button type="primary" onClick={handleCreateChannel}>创建</Button>
-                <Button onClick={() => { setAddingChannel(false); channelForm.resetFields(); }}>取消</Button>
+                <Button type="primary" onClick={handleCreateChannel}>{t('common.create')}</Button>
+                <Button onClick={() => { setAddingChannel(false); channelForm.resetFields(); }}>{t('common.cancel')}</Button>
               </Space>
             </Form>
           </Card>
@@ -393,7 +395,7 @@ function ChannelManager({ open, onClose, onRefresh }: ChannelManagerProps) {
             icon={<PlusOutlined />}
             onClick={() => setAddingChannel(true)}
           >
-            添加渠道
+            {t('model.addChannel')}
           </Button>
         )}
       </Spin>
@@ -405,6 +407,7 @@ function ChannelManager({ open, onClose, onRefresh }: ChannelManagerProps) {
 // ============ 主组件 ============
 
 export function ModelConfig({ channel, model, onChange, disabled }: ModelConfigProps) {
+  const t = useT();
   const [loading, setLoading] = useState(false);
   const [channels, setChannels] = useState<LLMChannel[]>([]);
   const [defaultChannel, setDefaultChannel] = useState<string>('');
@@ -419,7 +422,7 @@ export function ModelConfig({ channel, model, onChange, disabled }: ModelConfigP
         setDefaultChannel(res.data.default_channel);
       }
     } catch (err) {
-      console.error('加载渠道列表失败:', err);
+      console.error(t('model.loadFailed'), err);
     } finally {
       setLoading(false);
     }
@@ -471,20 +474,20 @@ export function ModelConfig({ channel, model, onChange, disabled }: ModelConfigP
         <div>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
             <Text type="secondary" style={{ fontSize: 12 }}>
-              <CloudDownloadOutlined /> 快速选择模型
+              <CloudDownloadOutlined /> {t('model.quickSelect')}
             </Text>
             <Button
               type="text" size="small"
               icon={<SettingOutlined />}
               onClick={() => setManagerOpen(true)}
             >
-              管理渠道
+              {t('model.manageChannels')}
             </Button>
           </div>
           <Select
             value={channel && model ? `${channel}::${model}` : undefined}
             onChange={handleQuickSelectModel}
-            placeholder="从所有渠道中选择模型"
+            placeholder={t('model.selectFromAll')}
             allowClear
             showSearch
             filterOption={(input, option) =>
@@ -497,17 +500,17 @@ export function ModelConfig({ channel, model, onChange, disabled }: ModelConfigP
           />
         </div>
 
-        <Divider style={{ margin: '4px 0' }}>或分别指定</Divider>
+        <Divider style={{ margin: '4px 0' }}>{t('model.orSpecify')}</Divider>
 
         {/* 渠道选择 */}
         <div>
           <Text type="secondary" style={{ fontSize: 12, display: 'block', marginBottom: 4 }}>
-            LLM 渠道
+            {t('model.channel')}
           </Text>
           <Select
             value={channel || undefined}
             onChange={handleChannelChange}
-            placeholder={defaultChannel ? `默认: ${defaultChannel}` : '选择渠道'}
+            placeholder={defaultChannel ? `${t('creator.default')}: ${defaultChannel}` : t('model.selectChannel')}
             allowClear
             style={{ width: '100%' }}
             disabled={disabled}
@@ -527,12 +530,12 @@ export function ModelConfig({ channel, model, onChange, disabled }: ModelConfigP
         {/* 模型选择 */}
         <div>
           <Text type="secondary" style={{ fontSize: 12, display: 'block', marginBottom: 4 }}>
-            模型
+            {t('model.modelLabel')}
           </Text>
           <Select
             value={model || undefined}
             onChange={handleModelChange}
-            placeholder={currentChannel?.default_model || '选择模型'}
+            placeholder={currentChannel?.default_model || t('model.selectModel')}
             allowClear
             style={{ width: '100%' }}
             disabled={disabled || !channel}
@@ -546,7 +549,7 @@ export function ModelConfig({ channel, model, onChange, disabled }: ModelConfigP
         {/* 提示信息 */}
         {!channel && (
           <Text type="secondary" style={{ fontSize: 11 }}>
-            未选择时将使用系统默认渠道 ({defaultChannel || '未设置'})
+            {t('model.defaultHint')} ({defaultChannel || t('model.notSet')})
           </Text>
         )}
       </Space>

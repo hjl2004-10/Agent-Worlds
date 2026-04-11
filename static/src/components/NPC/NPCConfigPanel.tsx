@@ -45,6 +45,7 @@ import { ModelConfig } from './ModelConfig';
 import { PromptConfig } from './PromptConfig';
 import { BehaviorConfig } from './BehaviorConfig';
 import { ToolboxDrawer } from './ToolboxDrawer';
+import { useT } from '@/i18n';
 
 /** 微信二维码组件 — 将 iLink 返回的文本内容生成二维码 */
 function WechatQRCode({ value }: { value: string }) {
@@ -75,6 +76,7 @@ interface TransferItem {
 }
 
 export function NPCConfigPanel({ npcName, open, onClose, onSave }: NPCConfigPanelProps) {
+  const t = useT();
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [config, setConfig] = useState<NPCConfig | null>(null);
@@ -145,7 +147,7 @@ export function NPCConfigPanel({ npcName, open, onClose, onSave }: NPCConfigPane
           setSelectedSkills((configRes.data.config as any)?.skills || []);
           setMcpServers((configRes.data.config as any)?.mcp_servers || []);
         } else {
-          message.error(configRes.data.message || '加载配置失败');
+          message.error(configRes.data.message || t('config.loadFailed'));
         }
 
         if (spritesRes.data.status === 'ok') {
@@ -189,7 +191,7 @@ export function NPCConfigPanel({ npcName, open, onClose, onSave }: NPCConfigPane
           if (wcRes.data.ilink_bot_id) setWechatBotId(wcRes.data.ilink_bot_id);
         } catch { /* 微信模块不可用则忽略 */ }
       } catch (err) {
-        message.error('加载配置失败');
+        message.error(t('config.loadFailed'));
         console.error(err);
       } finally {
         setLoading(false);
@@ -226,14 +228,14 @@ export function NPCConfigPanel({ npcName, open, onClose, onSave }: NPCConfigPane
       ]);
 
       if (configRes.data.status === 'ok' && inventoryRes.data.status === 'ok') {
-        message.success('配置已保存');
+        message.success(t('config.saved'));
         onSave?.();
         onClose();
       } else {
-        message.error(configRes.data.message || inventoryRes.data.message || '保存失败');
+        message.error(configRes.data.message || inventoryRes.data.message || t('common.saveFailed'));
       }
     } catch (err) {
-      message.error('保存失败');
+      message.error(t('common.saveFailed'));
       console.error(err);
     } finally {
       setSaving(false);
@@ -264,11 +266,11 @@ export function NPCConfigPanel({ npcName, open, onClose, onSave }: NPCConfigPane
   // 添加新属性
   const handleAddAttr = () => {
     if (!newAttrName.trim()) {
-      message.warning('请输入属性名称');
+      message.warning(t('config.inventory.warnName'));
       return;
     }
     if (inventorySchema[newAttrName]) {
-      message.warning('属性已存在');
+      message.warning(t('config.inventory.warnExists'));
       return;
     }
     setInventorySchema(prev => ({
@@ -293,7 +295,7 @@ export function NPCConfigPanel({ npcName, open, onClose, onSave }: NPCConfigPane
     setNewAttrWritable(true);
     setNewAttrWritableByOthers(false);
     setNewAttrRequiresAuth(false);
-    message.success('属性已添加');
+    message.success(t('config.inventory.attrAdded'));
   };
 
   // 删除属性
@@ -304,7 +306,7 @@ export function NPCConfigPanel({ npcName, open, onClose, onSave }: NPCConfigPane
     delete newInventory[key];
     setInventorySchema(newSchema);
     setInventory(newInventory);
-    message.success('属性已删除');
+    message.success(t('config.inventory.attrDeleted'));
   };
 
   // 更新 schema 属性
@@ -324,7 +326,7 @@ export function NPCConfigPanel({ npcName, open, onClose, onSave }: NPCConfigPane
   const handleAddTimer = async () => {
     if (!npcName) return;
     if (!newTimerName.trim() || !newTimerDesc.trim()) {
-      message.warning('请输入定时器名称和提示内容');
+      message.warning(t('config.timer.createHint'));
       return;
     }
 
@@ -343,12 +345,12 @@ export function NPCConfigPanel({ npcName, open, onClose, onSave }: NPCConfigPane
         setNewTimerDesc('');
         setNewTimerInterval(120);
         setNewTimerMaxTriggers(-1);
-        message.success('定时器已创建');
+        message.success(t('config.timer.created'));
       } else {
-        message.error('创建失败');
+        message.error(t('config.timer.createFailed'));
       }
     } catch (err) {
-      message.error('创建失败');
+      message.error(t('config.timer.createFailed'));
       console.error(err);
     }
   };
@@ -359,12 +361,12 @@ export function NPCConfigPanel({ npcName, open, onClose, onSave }: NPCConfigPane
       const res = await deleteTimer(timerId);
       if (res.data.status === 'ok') {
         setTimers(timers.filter(t => t.id !== timerId));
-        message.success('定时器已删除');
+        message.success(t('config.timer.deleted'));
       } else {
-        message.error('删除失败');
+        message.error(t('config.timer.deleteFailed'));
       }
     } catch (err) {
-      message.error('删除失败');
+      message.error(t('config.timer.deleteFailed'));
       console.error(err);
     }
   };
@@ -373,10 +375,10 @@ export function NPCConfigPanel({ npcName, open, onClose, onSave }: NPCConfigPane
   const formatInterval = (ticks: number) => {
     if (ticks >= 2880) {
       const days = ticks / 2880;
-      return `${days} 天`;
+      return `${days} ${t('config.timer.day')}`;
     } else if (ticks >= 120) {
       const hours = ticks / 120;
-      return `${hours} 小时`;
+      return `${hours} ${t('config.timer.hour')}`;
     } else {
       return `${ticks} tick`;
     }
@@ -396,7 +398,7 @@ export function NPCConfigPanel({ npcName, open, onClose, onSave }: NPCConfigPane
     return (
       <Modal open={open} onCancel={onClose} footer={null} width={700}>
         <div style={{ textAlign: 'center', padding: 60 }}>
-          <Text type="secondary">无法加载配置</Text>
+          <Text type="secondary">{t('config.noConfig')}</Text>
         </div>
       </Modal>
     );
@@ -408,8 +410,8 @@ export function NPCConfigPanel({ npcName, open, onClose, onSave }: NPCConfigPane
       title={
         <Space>
           <UserOutlined />
-          <span>NPC 配置 - {npcName}</span>
-          {config.is_player && <Tag color="cyan">玩家</Tag>}
+          <span>{t('config.title')} - {npcName}</span>
+          {config.is_player && <Tag color="cyan">{t('config.player')}</Tag>}
         </Space>
       }
       open={open}
@@ -419,7 +421,7 @@ export function NPCConfigPanel({ npcName, open, onClose, onSave }: NPCConfigPane
       styles={{ body: { maxHeight: '70vh', overflowY: 'auto' } }}
       footer={[
         <Button key="cancel" onClick={onClose}>
-          取消
+          {t('common.cancel')}
         </Button>,
         <Button
           key="save"
@@ -428,7 +430,7 @@ export function NPCConfigPanel({ npcName, open, onClose, onSave }: NPCConfigPane
           loading={saving}
           onClick={handleSave}
         >
-          保存
+          {t('common.save')}
         </Button>,
       ]}
     >
@@ -441,7 +443,7 @@ export function NPCConfigPanel({ npcName, open, onClose, onSave }: NPCConfigPane
             label: (
               <Space>
                 <UserOutlined />
-                基础设置
+                {t('config.tab.basic')}
               </Space>
             ),
             children: (
@@ -451,9 +453,9 @@ export function NPCConfigPanel({ npcName, open, onClose, onSave }: NPCConfigPane
                   <Space>
                     <PoweroffOutlined style={{ color: config.enabled ? '#4ade80' : '#f87171' }} />
                     <Text style={{ color: config.enabled ? '#4ade80' : '#f87171' }}>
-                      {config.enabled ? 'NPC 已启用' : 'NPC 已禁用'}
+                      {config.enabled ? t('config.npcEnabled') : t('config.npcDisabled')}
                     </Text>
-                    <Tooltip title={config.enabled ? '禁用后 NPC 将停止所有活动' : '启用后 NPC 将恢复正常活动'}>
+                    <Tooltip title={config.enabled ? t('config.enabledTip') : t('config.disabledTip')}>
                       <InfoCircleOutlined style={{ color: 'var(--text-icon-muted)', fontSize: 12 }} />
                     </Tooltip>
                   </Space>
@@ -464,24 +466,24 @@ export function NPCConfigPanel({ npcName, open, onClose, onSave }: NPCConfigPane
                         const res = await setNPCEnabled(npcName!, checked);
                         if (res.data.status === 'ok') {
                           updateConfig('enabled', checked);
-                          message.success(checked ? 'NPC 已启用' : 'NPC 已禁用');
+                          message.success(checked ? t('config.npcEnabled') : t('config.npcDisabled'));
                         } else {
-                          message.error(res.data.message || '操作失败');
+                          message.error(res.data.message || t('common.operationFailed'));
                         }
                       } catch (err) {
-                        message.error('操作失败');
+                        message.error(t('common.operationFailed'));
                         console.error(err);
                       }
                     }}
-                    checkedChildren="启用"
-                    unCheckedChildren="禁用"
+                    checkedChildren={t('common.enabled')}
+                    unCheckedChildren={t('common.disabled')}
                   />
                 </div>
 
                 {/* 精灵选择 */}
                 <div>
                   <Text type="secondary" style={{ fontSize: 12, display: 'block', marginBottom: 4 }}>
-                    精灵图
+                    {t('config.sprite')}
                   </Text>
                   <Select
                     value={config.sprite_id}
@@ -502,7 +504,7 @@ export function NPCConfigPanel({ npcName, open, onClose, onSave }: NPCConfigPane
                 {/* 群组关系 */}
                 <div>
                   <Text type="secondary" style={{ fontSize: 12, display: 'block', marginBottom: 4 }}>
-                    群组关系
+                    {t('config.groups')}
                   </Text>
                   <Space wrap style={{ marginBottom: 8 }}>
                     {groups.map(g => (
@@ -518,13 +520,13 @@ export function NPCConfigPanel({ npcName, open, onClose, onSave }: NPCConfigPane
                   </Space>
                   <Space.Compact style={{ width: '100%' }}>
                     <Input
-                      placeholder="关系:名称 (如 朋友:Alice)"
+                      placeholder={t('config.groupPlaceholder')}
                       value={newGroup}
                       onChange={(e) => setNewGroup(e.target.value)}
                       onPressEnter={handleAddGroup}
                     />
                     <Button type="primary" onClick={handleAddGroup}>
-                      添加
+                      {t('common.add')}
                     </Button>
                   </Space.Compact>
                 </div>
@@ -547,9 +549,9 @@ export function NPCConfigPanel({ npcName, open, onClose, onSave }: NPCConfigPane
                   }}
                 >
                   <div style={{ textAlign: 'left' }}>
-                    <div style={{ fontSize: 14, fontWeight: 500 }}>配置工具箱</div>
+                    <div style={{ fontSize: 14, fontWeight: 500 }}>{t('config.toolbox')}</div>
                     <div style={{ fontSize: 11, color: 'var(--text-icon-muted)', fontWeight: 'normal' }}>
-                      技能 {selectedSkills.length} 个 · 工具 {selectedTools.length} 个 · MCP {mcpServers.length} 个
+                      {t('config.toolboxSummary.skills')} {selectedSkills.length} · {t('config.toolboxSummary.tools')} {selectedTools.length} · {t('config.toolboxSummary.mcp')} {mcpServers.length}
                     </div>
                   </div>
                 </Button>
@@ -565,20 +567,20 @@ export function NPCConfigPanel({ npcName, open, onClose, onSave }: NPCConfigPane
                     <Space>
                       <WechatOutlined style={{ color: wechatStatus === 'bound' ? '#07c160' : 'var(--text-icon-muted)', fontSize: 16 }} />
                       <div>
-                        <div style={{ fontSize: 14, fontWeight: 500 }}>微信绑定</div>
+                        <div style={{ fontSize: 14, fontWeight: 500 }}>{t('config.wechat')}</div>
                         <div style={{ fontSize: 11, color: 'var(--text-icon-muted)' }}>
                           {wechatStatus === 'bound'
-                            ? `已绑定 (${wechatBotId.slice(0, 8)}...)`
+                            ? `${t('config.wechatBound')} (${wechatBotId.slice(0, 8)}...)`
                             : wechatStatus === 'qr_pending'
-                              ? '等待扫码...'
-                              : '未绑定'}
+                              ? t('config.wechatPending')
+                              : t('config.wechatUnbound')}
                         </div>
                       </div>
                     </Space>
                     <Space>
                       {wechatStatus === 'bound' ? (
                         <Popconfirm
-                          title="确定解除微信绑定？"
+                          title={t('config.wechatUnbindConfirm')}
                           onConfirm={async () => {
                             try {
                               const { wechatApi } = await import('@/api/wechat');
@@ -586,11 +588,11 @@ export function NPCConfigPanel({ npcName, open, onClose, onSave }: NPCConfigPane
                               setWechatStatus('unbound');
                               setWechatBotId('');
                               setWechatQrUrl('');
-                              message.success('已解除绑定');
-                            } catch { message.error('解绑失败'); }
+                              message.success(t('config.wechatUnbindSuccess'));
+                            } catch { message.error(t('config.wechatUnbindFailed')); }
                           }}
                         >
-                          <Button size="small" danger icon={<DisconnectOutlined />}>解绑</Button>
+                          <Button size="small" danger icon={<DisconnectOutlined />}>{t('config.wechatUnbind')}</Button>
                         </Popconfirm>
                       ) : (
                         <Button
@@ -610,7 +612,7 @@ export function NPCConfigPanel({ npcName, open, onClose, onSave }: NPCConfigPane
                               } else if (res.data.qrcode_url) {
                                 setWechatQrUrl(res.data.qrcode_url);
                                 setWechatStatus('qr_pending');
-                                message.info('请用微信扫描二维码');
+                                message.info(t('config.wechatScanQR'));
                                 // 轮询绑定状态
                                 const pollId = setInterval(async () => {
                                   try {
@@ -620,7 +622,7 @@ export function NPCConfigPanel({ npcName, open, onClose, onSave }: NPCConfigPane
                                       setWechatStatus('bound');
                                       setWechatBotId(statusRes.data.ilink_bot_id || '');
                                       setWechatQrUrl('');
-                                      message.success('微信绑定成功！');
+                                      message.success(t('config.wechatBindSuccess'));
                                     } else if (statusRes.data.status !== 'qr_pending') {
                                       clearInterval(pollId);
                                       setWechatStatus('unbound');
@@ -634,21 +636,21 @@ export function NPCConfigPanel({ npcName, open, onClose, onSave }: NPCConfigPane
                                   setWechatQrUrl('');
                                   if (wechatStatus === 'qr_pending') {
                                     setWechatStatus('unbound');
-                                    message.warning('二维码已过期');
+                                    message.warning(t('config.wechatQRExpired'));
                                   }
                                 }, 180000);
                               }
-                            } catch { message.error('获取二维码失败'); }
+                            } catch { message.error(t('config.wechatQRFailed')); }
                             setWechatBinding(false);
                           }}
                         >
-                          绑定微信
+                          {t('config.wechatBind')}
                         </Button>
                       )}
                     </Space>
                   </div>
 
-                  {/* 二维码显示区 — qrcode_img_content 是文本内容，需要前端生成二维码 */}
+                  {/* 二维码显示区 */}
                   {wechatQrUrl && (
                     <div style={{
                       textAlign: 'center',
@@ -658,7 +660,7 @@ export function NPCConfigPanel({ npcName, open, onClose, onSave }: NPCConfigPane
                     }}>
                       <WechatQRCode value={wechatQrUrl} />
                       <div style={{ marginTop: 8, fontSize: 12, color: '#666' }}>
-                        用微信扫码完成绑定
+                        {t('config.wechatScanComplete')}
                       </div>
                     </div>
                   )}
@@ -673,7 +675,7 @@ export function NPCConfigPanel({ npcName, open, onClose, onSave }: NPCConfigPane
             label: (
               <Space>
                 <RobotOutlined />
-                提示词
+                {t('config.tab.prompt')}
               </Space>
             ),
             children: (
@@ -696,7 +698,7 @@ export function NPCConfigPanel({ npcName, open, onClose, onSave }: NPCConfigPane
             label: (
               <Space>
                 <RobotOutlined />
-                LLM 模型
+                {t('config.tab.model')}
               </Space>
             ),
             children: (
@@ -716,7 +718,7 @@ export function NPCConfigPanel({ npcName, open, onClose, onSave }: NPCConfigPane
             label: (
               <Space>
                 <ThunderboltOutlined />
-                行为参数
+                {t('config.tab.behavior')}
               </Space>
             ),
             children: (
@@ -742,7 +744,7 @@ export function NPCConfigPanel({ npcName, open, onClose, onSave }: NPCConfigPane
             label: (
               <Space>
                 <ShoppingOutlined />
-                背包
+                {t('config.tab.inventory')}
               </Space>
             ),
             children: (
@@ -756,25 +758,25 @@ export function NPCConfigPanel({ npcName, open, onClose, onSave }: NPCConfigPane
                   border: '1px solid var(--border-primary)'
                 }}>
                   <Text type="secondary" style={{ display: 'block', marginBottom: 8, fontSize: 12 }}>
-                    添加新属性
+                    {t('config.inventory.addNew')}
                   </Text>
                   <div style={{ display: 'flex', gap: 8, marginBottom: 8, flexWrap: 'wrap' }}>
                     <Input
-                      placeholder="属性名"
+                      placeholder={t('config.inventory.attrName')}
                       value={newAttrName}
                       onChange={(e) => setNewAttrName(e.target.value)}
                       style={{ width: 100 }}
                       size="small"
                     />
                     <Input
-                      placeholder="数值"
+                      placeholder={t('config.inventory.attrValue')}
                       value={newAttrValue}
                       onChange={(e) => setNewAttrValue(e.target.value)}
                       style={{ width: 80 }}
                       size="small"
                     />
                     <Input
-                      placeholder="描述（可选）"
+                      placeholder={t('config.inventory.attrDesc')}
                       value={newAttrDesc}
                       onChange={(e) => setNewAttrDesc(e.target.value)}
                       style={{ width: 150 }}
@@ -782,7 +784,7 @@ export function NPCConfigPanel({ npcName, open, onClose, onSave }: NPCConfigPane
                     />
                   </div>
                   <Space wrap>
-                    <Tooltip title="公开=别人可见">
+                    <Tooltip title={t('config.inventory.publicTip')}>
                       <Tag
                         color={newAttrVisibility === 'public' ? 'green' : 'orange'}
                         style={{ cursor: 'pointer' }}
@@ -791,7 +793,7 @@ export function NPCConfigPanel({ npcName, open, onClose, onSave }: NPCConfigPane
                         {newAttrVisibility === 'public' ? <EyeOutlined /> : <EyeInvisibleOutlined />}
                       </Tag>
                     </Tooltip>
-                    <Tooltip title="可写=NPC自己能改">
+                    <Tooltip title={t('config.inventory.writableTip')}>
                       <Tag
                         color={newAttrWritable ? 'blue' : 'default'}
                         style={{ cursor: 'pointer' }}
@@ -800,7 +802,7 @@ export function NPCConfigPanel({ npcName, open, onClose, onSave }: NPCConfigPane
                         {newAttrWritable ? <UnlockOutlined /> : <LockOutlined />}
                       </Tag>
                     </Tooltip>
-                    <Tooltip title="他人可写=别人能改">
+                    <Tooltip title={t('config.inventory.otherWritableTip')}>
                       <Tag
                         color={newAttrWritableByOthers ? 'purple' : 'default'}
                         style={{ cursor: 'pointer' }}
@@ -809,7 +811,7 @@ export function NPCConfigPanel({ npcName, open, onClose, onSave }: NPCConfigPane
                         他
                       </Tag>
                     </Tooltip>
-                    <Tooltip title="需授权=修改要授权码">
+                    <Tooltip title={t('config.inventory.authTip')}>
                       <Tag
                         color={newAttrRequiresAuth ? 'red' : 'default'}
                         style={{ cursor: 'pointer' }}
@@ -819,7 +821,7 @@ export function NPCConfigPanel({ npcName, open, onClose, onSave }: NPCConfigPane
                       </Tag>
                     </Tooltip>
                     <Button type="primary" icon={<PlusOutlined />} onClick={handleAddAttr} size="small">
-                      添加
+                      {t('common.add')}
                     </Button>
                   </Space>
                 </div>
@@ -844,10 +846,10 @@ export function NPCConfigPanel({ npcName, open, onClose, onSave }: NPCConfigPane
                     >
                       {/* 删除按钮 */}
                       <Popconfirm
-                        title="确定删除?"
+                        title={t('config.inventory.confirmDelete')}
                         onConfirm={() => handleDeleteAttr(key)}
-                        okText="删除"
-                        cancelText="取消"
+                        okText={t('common.delete')}
+                        cancelText={t('common.cancel')}
                       >
                         <Button
                           size="small"
@@ -894,7 +896,7 @@ export function NPCConfigPanel({ npcName, open, onClose, onSave }: NPCConfigPane
 
                       {/* 权限标签 */}
                       <div style={{ display: 'flex', gap: 2, marginTop: 4 }}>
-                        <Tooltip title={schema.visibility === 'public' ? '公开' : '私有'}>
+                        <Tooltip title={schema.visibility === 'public' ? t('config.inventory.publicLabel') : t('config.inventory.privateLabel')}>
                           <Tag
                             color={schema.visibility === 'public' ? 'green' : 'orange'}
                             style={{ fontSize: 10, margin: 0, padding: '0 4px', cursor: 'pointer' }}
@@ -903,7 +905,7 @@ export function NPCConfigPanel({ npcName, open, onClose, onSave }: NPCConfigPane
                             {schema.visibility === 'public' ? <EyeOutlined /> : <EyeInvisibleOutlined />}
                           </Tag>
                         </Tooltip>
-                        <Tooltip title={schema.writable_by_owner ? '自己可写' : '自己只读'}>
+                        <Tooltip title={schema.writable_by_owner ? t('config.inventory.selfWritable') : t('config.inventory.selfReadOnly')}>
                           <Tag
                             color={schema.writable_by_owner ? 'blue' : 'default'}
                             style={{ fontSize: 10, margin: 0, padding: '0 4px', cursor: 'pointer' }}
@@ -912,7 +914,7 @@ export function NPCConfigPanel({ npcName, open, onClose, onSave }: NPCConfigPane
                             {schema.writable_by_owner ? <UnlockOutlined /> : <LockOutlined />}
                           </Tag>
                         </Tooltip>
-                        <Tooltip title={schema.writable_by_others ? '他人可写' : '他人不可写'}>
+                        <Tooltip title={schema.writable_by_others ? t('config.inventory.otherWritable') : t('config.inventory.otherReadOnly')}>
                           <Tag
                             color={schema.writable_by_others ? 'purple' : 'default'}
                             style={{ fontSize: 10, margin: 0, padding: '0 4px', cursor: 'pointer' }}
@@ -932,13 +934,13 @@ export function NPCConfigPanel({ npcName, open, onClose, onSave }: NPCConfigPane
                 {/* 空状态 */}
                 {Object.keys(inventorySchema).length === 0 && (
                   <div style={{ textAlign: 'center', padding: 40, color: 'var(--text-icon)' }}>
-                    背包空空如也，添加一些属性吧
+                    {t('config.inventory.empty')}
                   </div>
                 )}
 
                 {/* 提示 */}
                 <div style={{ textAlign: 'center', marginTop: 12, color: 'var(--text-icon)', fontSize: 11 }}>
-                  修改后点击底部"保存"按钮生效
+                  {t('config.inventory.saveHint')}
                 </div>
               </div>
             ),
@@ -950,7 +952,7 @@ export function NPCConfigPanel({ npcName, open, onClose, onSave }: NPCConfigPane
             label: (
               <Space>
                 <ClockCircleOutlined />
-                定时器
+                {t('config.tab.timers')}
               </Space>
             ),
             children: (
@@ -964,18 +966,18 @@ export function NPCConfigPanel({ npcName, open, onClose, onSave }: NPCConfigPane
                   border: '1px solid var(--border-primary)'
                 }}>
                   <Text type="secondary" style={{ display: 'block', marginBottom: 8, fontSize: 12 }}>
-                    创建定时提醒 (120 tick = 1游戏小时, 2880 tick = 1游戏天)
+                    {t('config.timer.createHint')}
                   </Text>
                   <div style={{ display: 'flex', gap: 8, marginBottom: 8, flexWrap: 'wrap' }}>
                     <Input
-                      placeholder="定时器名称"
+                      placeholder={t('config.timer.name')}
                       value={newTimerName}
                       onChange={(e) => setNewTimerName(e.target.value)}
                       style={{ width: 120 }}
                       size="small"
                     />
                     <Input
-                      placeholder="提醒内容 (如: 该喝水了)"
+                      placeholder={t('config.timer.descPlaceholder')}
                       value={newTimerDesc}
                       onChange={(e) => setNewTimerDesc(e.target.value)}
                       style={{ flex: 1, minWidth: 150 }}
@@ -983,24 +985,24 @@ export function NPCConfigPanel({ npcName, open, onClose, onSave }: NPCConfigPane
                     />
                   </div>
                   <div style={{ display: 'flex', gap: 8, marginBottom: 8, alignItems: 'center', flexWrap: 'wrap' }}>
-                    <Tooltip title="触发间隔 (tick)">
+                    <Tooltip title={t('config.timer.interval')}>
                       <InputNumber
                         value={newTimerInterval}
                         onChange={(v) => setNewTimerInterval(v || 120)}
                         min={1}
                         style={{ width: 100 }}
                         size="small"
-                        addonBefore="间隔"
+                        addonBefore={t('config.timer.interval')}
                       />
                     </Tooltip>
-                    <Tooltip title="-1 = 无限次">
+                    <Tooltip title={t('config.timer.infiniteTip')}>
                       <InputNumber
                         value={newTimerMaxTriggers}
                         onChange={(v) => setNewTimerMaxTriggers(v ?? -1)}
                         min={-1}
                         style={{ width: 100 }}
                         size="small"
-                        addonBefore="次数"
+                        addonBefore={t('config.timer.count')}
                       />
                     </Tooltip>
                     <Text type="secondary" style={{ fontSize: 11 }}>
@@ -1008,7 +1010,7 @@ export function NPCConfigPanel({ npcName, open, onClose, onSave }: NPCConfigPane
                     </Text>
                   </div>
                   <Button type="primary" icon={<PlusOutlined />} onClick={handleAddTimer} size="small">
-                    创建
+                    {t('common.create')}
                   </Button>
                 </div>
 
@@ -1031,7 +1033,7 @@ export function NPCConfigPanel({ npcName, open, onClose, onSave }: NPCConfigPane
                         <div style={{ marginBottom: 4 }}>
                           <Text strong style={{ color: 'var(--text-primary)' }}>{timer.name}</Text>
                           {!timer.enabled && (
-                            <Tag color="red" style={{ marginLeft: 8 }}>已禁用</Tag>
+                            <Tag color="red" style={{ marginLeft: 8 }}>{t('config.timer.disabled')}</Tag>
                           )}
                         </div>
                         <Text type="secondary" style={{ fontSize: 12 }}>
@@ -1039,25 +1041,25 @@ export function NPCConfigPanel({ npcName, open, onClose, onSave }: NPCConfigPane
                         </Text>
                         <div style={{ marginTop: 4 }}>
                           <Tag color="blue" style={{ fontSize: 10 }}>
-                            每 {formatInterval(timer.interval_ticks)}
+                            {t('config.timer.every')}{formatInterval(timer.interval_ticks)}
                           </Tag>
                           {timer.max_triggers > 0 && (
                             <Tag color="orange" style={{ fontSize: 10 }}>
-                              剩余 {timer.max_triggers - timer.triggered_count} 次
+                              {t('config.timer.remaining')}{timer.max_triggers - timer.triggered_count} {t('config.timer.times')}
                             </Tag>
                           )}
                           {timer.triggered_count > 0 && (
                             <Tag style={{ fontSize: 10 }}>
-                              已触发 {timer.triggered_count} 次
+                              {t('config.timer.triggered')}{timer.triggered_count} {t('config.timer.times')}
                             </Tag>
                           )}
                         </div>
                       </div>
                       <Popconfirm
-                        title="确定删除此定时器?"
+                        title={t('config.timer.confirmDelete')}
                         onConfirm={() => handleDeleteTimer(timer.id)}
-                        okText="删除"
-                        cancelText="取消"
+                        okText={t('common.delete')}
+                        cancelText={t('common.cancel')}
                       >
                         <Button danger size="small" icon={<DeleteOutlined />} />
                       </Popconfirm>
@@ -1068,13 +1070,13 @@ export function NPCConfigPanel({ npcName, open, onClose, onSave }: NPCConfigPane
                 {/* 空状态 */}
                 {timers.length === 0 && (
                   <div style={{ textAlign: 'center', padding: 40, color: 'var(--text-icon)' }}>
-                    没有定时器，创建一个来提醒 {npcName} 吧
+                    {t('config.timer.emptyHint')}
                   </div>
                 )}
 
                 {/* 提示 */}
                 <div style={{ textAlign: 'center', marginTop: 12, color: 'var(--text-icon)', fontSize: 11 }}>
-                  定时器触发时会消耗 NPC 主动值并发起对话
+                  {t('config.timer.triggerHint')}
                 </div>
               </div>
             ),

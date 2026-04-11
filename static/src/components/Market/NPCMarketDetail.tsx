@@ -3,6 +3,7 @@ import { Drawer, Tag, Divider, Space } from 'antd';
 import { calcStats, getRank, STAT_DEFS } from './MarketStats';
 import { getSkillDetail, getAvailableTools } from '@/api/god';
 import type { MarketNPCData, SkillDetail } from '@/api/types';
+import { useT } from '@/i18n';
 
 const AVATARS = [
   '/ui/avatars/soldier.png', '/ui/avatars/hacker.png',
@@ -39,6 +40,7 @@ interface Props {
 }
 
 export function NPCMarketDetail({ npc, open, onClose, onExport }: Props) {
+  const t = useT();
   const [expandedSkill, setExpandedSkill] = useState<string | null>(null);
   const [skillCache, setSkillCache] = useState<Record<string, SkillDetail>>({});
   const [expandedTool, setExpandedTool] = useState<string | null>(null);
@@ -118,7 +120,7 @@ export function NPCMarketDetail({ npc, open, onClose, onExport }: Props) {
           </span>
         </div>
         <div style={{ fontSize: 11, color: '#64748b', marginTop: 2 }}>
-          综合评分 {stats.overall} · {npc.enabled ? '在线' : '休眠'}
+          {t('market.overallScore')} {stats.overall} · {npc.enabled ? t('market.filterOnline') : t('market.dormant')}
           {npc.llm_channel && ` · ${npc.llm_channel}`}
         </div>
       </div>
@@ -133,10 +135,10 @@ export function NPCMarketDetail({ npc, open, onClose, onExport }: Props) {
 
         {/* 能力属性 */}
         <div className="market-detail-section">
-          <div className="market-detail-section-title">能力属性</div>
+          <div className="market-detail-section-title">{t('market.abilities')}</div>
           {STAT_DEFS.map(def => (
             <div className="market-detail-stat-row" key={def.key}>
-              <span className="market-detail-stat-label">{def.icon} {def.label}</span>
+              <span className="market-detail-stat-label">{def.icon} {t(def.label)}</span>
               <div className="market-detail-stat-bar">
                 <div
                   className="market-detail-stat-fill"
@@ -152,7 +154,7 @@ export function NPCMarketDetail({ npc, open, onClose, onExport }: Props) {
 
         {/* 技能 — 可展开详情 */}
         <div className="market-detail-section">
-          <div className="market-detail-section-title">装备技能 ({npc.skills.length})</div>
+          <div className="market-detail-section-title">{t('market.equippedSkills')} ({npc.skills.length})</div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
             {npc.skills.length > 0
               ? npc.skills.map(s => (
@@ -196,40 +198,40 @@ export function NPCMarketDetail({ npc, open, onClose, onExport }: Props) {
                       </div>
                     )}
                     {expandedSkill === s && !skillCache[s] && (
-                      <div style={{ ...expandStyle, color: '#475569' }}>加载中...</div>
+                      <div style={{ ...expandStyle, color: '#475569' }}>{t('common.loading')}</div>
                     )}
                   </div>
                 ))
-              : <span style={{ color: '#475569', fontSize: 11 }}>暂无技能</span>
+              : <span style={{ color: '#475569', fontSize: 11 }}>{t('market.noSkills')}</span>
             }
           </div>
         </div>
 
         {/* 工具 — 可展开描述 */}
         <div className="market-detail-section">
-          <div className="market-detail-section-title">可用工具 ({npc.tools.length})</div>
+          <div className="market-detail-section-title">{t('market.availableTools')} ({npc.tools.length})</div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-            {npc.tools.map(t => (
-              <div key={t}>
+            {npc.tools.map(tl => (
+              <div key={tl}>
                 <span
                   className="market-detail-chip"
-                  onClick={() => handleToolClick(t)}
+                  onClick={() => handleToolClick(tl)}
                   style={{
                     cursor: 'pointer',
-                    borderColor: expandedTool === t ? '#3b82f6' : undefined,
-                    background: expandedTool === t ? '#172554' : undefined,
+                    borderColor: expandedTool === tl ? '#3b82f6' : undefined,
+                    background: expandedTool === tl ? '#172554' : undefined,
                   }}
                 >
-                  {t} {expandedTool === t ? '▲' : '▼'}
+                  {tl} {expandedTool === tl ? '▲' : '▼'}
                 </span>
-                {expandedTool === t && toolMap[t] && (
+                {expandedTool === tl && toolMap[tl] && (
                   <div style={{ ...expandStyle, borderLeftColor: '#3b82f6' }}>
-                    {toolMap[t]}
+                    {toolMap[tl]}
                   </div>
                 )}
-                {expandedTool === t && !toolMap[t] && (
+                {expandedTool === tl && !toolMap[tl] && (
                   <div style={{ ...expandStyle, borderLeftColor: '#3b82f6', color: '#475569' }}>
-                    {t.startsWith('@') ? '工具组' : '无描述'}
+                    {tl.startsWith('@') ? t('market.toolGroup') : t('market.noDescription')}
                   </div>
                 )}
               </div>
@@ -240,7 +242,7 @@ export function NPCMarketDetail({ npc, open, onClose, onExport }: Props) {
         {/* 社交关系 */}
         {npc.groups.length > 0 && (
           <div className="market-detail-section">
-            <div className="market-detail-section-title">社交关系 ({npc.groups.length})</div>
+            <div className="market-detail-section-title">{t('market.socialRelations')} ({npc.groups.length})</div>
             <div className="market-detail-chips">
               {npc.groups.map(g => (
                 <span key={g} className="market-detail-chip">{g}</span>
@@ -255,19 +257,19 @@ export function NPCMarketDetail({ npc, open, onClose, onExport }: Props) {
         <div style={{ display: 'flex', gap: 12, justifyContent: 'center', fontSize: 11, color: '#94a3b8' }}>
           <div style={{ textAlign: 'center' }}>
             <div style={{ fontSize: 18, color: '#e2e8f0', fontFamily: 'monospace' }}>{npc.history_count}</div>
-            <div>记忆</div>
+            <div>{t('market.memoryLabel')}</div>
           </div>
           <div style={{ textAlign: 'center' }}>
             <div style={{ fontSize: 18, color: '#e2e8f0', fontFamily: 'monospace' }}>{npc.tools.length}</div>
-            <div>工具</div>
+            <div>{t('market.toolsLabel')}</div>
           </div>
           <div style={{ textAlign: 'center' }}>
             <div style={{ fontSize: 18, color: '#e2e8f0', fontFamily: 'monospace' }}>{npc.inventory_count}</div>
-            <div>物品</div>
+            <div>{t('market.itemsLabel')}</div>
           </div>
           <div style={{ textAlign: 'center' }}>
             <div style={{ fontSize: 18, color: '#e2e8f0', fontFamily: 'monospace' }}>{npc.initiative}/{npc.max_initiative}</div>
-            <div>主动值</div>
+            <div>{t('market.initiativeLabel')}</div>
           </div>
         </div>
 
@@ -275,10 +277,10 @@ export function NPCMarketDetail({ npc, open, onClose, onExport }: Props) {
 
         {/* 标签 */}
         <Space wrap size={4} style={{ justifyContent: 'center', width: '100%' }}>
-          {npc.wechat_status === 'bound' && <Tag color="green">微信已绑定</Tag>}
-          {npc.has_mcp && <Tag color="purple">MCP 已配置</Tag>}
-          {npc.is_player && <Tag color="blue">玩家角色</Tag>}
-          <Tag color={npc.enabled ? 'green' : 'default'}>{npc.enabled ? '在线' : '休眠'}</Tag>
+          {npc.wechat_status === 'bound' && <Tag color="green">{t('market.wechatBound')}</Tag>}
+          {npc.has_mcp && <Tag color="purple">{t('market.mcpConfigured')}</Tag>}
+          {npc.is_player && <Tag color="blue">{t('market.playerRole')}</Tag>}
+          <Tag color={npc.enabled ? 'green' : 'default'}>{npc.enabled ? t('market.filterOnline') : t('market.dormant')}</Tag>
         </Space>
 
         {/* 操作按钮 */}
@@ -288,14 +290,14 @@ export function NPCMarketDetail({ npc, open, onClose, onExport }: Props) {
             style={{ flex: 1, padding: '6px 0' }}
             onClick={() => onExport(npc.name)}
           >
-            导出
+            {t('common.export')}
           </button>
           <button
             className="market-filter-btn"
             style={{ flex: 1, padding: '6px 0' }}
             onClick={onClose}
           >
-            关闭
+            {t('common.close')}
           </button>
         </div>
       </div>

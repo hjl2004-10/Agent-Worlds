@@ -19,11 +19,13 @@ import {
 import { getLore, updateLore } from '@/api/god';
 import { useWorldStore } from '@/store/useWorldStore';
 import type { LoreData } from '@/api/types';
+import { useT } from '@/i18n';
 
 const { Text } = Typography;
 const { TextArea } = Input;
 
 export function LorePanel() {
+  const t = useT();
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [lore, setLore] = useState<LoreData>({});
@@ -56,10 +58,10 @@ export function LorePanel() {
         if (res.data.status === 'ok') {
           setLore(res.data.lore || {});
         } else {
-          message.error('加载世界观失败');
+          message.error(t('lore.loadFailed'));
         }
       } catch (err) {
-        message.error('加载世界观失败');
+        message.error(t('lore.loadFailed'));
         console.error(err);
       } finally {
         setLoading(false);
@@ -74,12 +76,12 @@ export function LorePanel() {
     try {
       const res = await updateLore(lore);
       if (res.data.status === 'ok') {
-        message.success('世界观已保存');
+        message.success(t('lore.saved'));
       } else {
-        message.error('保存失败');
+        message.error(t('common.saveFailed'));
       }
     } catch (err) {
-      message.error('保存失败');
+      message.error(t('common.saveFailed'));
       console.error(err);
     } finally {
       setSaving(false);
@@ -89,13 +91,13 @@ export function LorePanel() {
   // 切换世界
   const handleSwitchWorld = async (worldId: string) => {
     if (worldId === currentWorld) return;
-    message.loading({ content: '切换世界中...', key: 'switch' });
+    message.loading({ content: t('lore.switchingWorld'), key: 'switch' });
     await switchWorld(worldId);
   };
 
   const handleSwitchScene = async (sceneId: string) => {
     if (sceneId === currentScene) return;
-    message.loading({ content: '切换场景中...', key: 'switch-scene' });
+    message.loading({ content: t('lore.switchingScene'), key: 'switch-scene' });
     await switchScene(sceneId);
   };
 
@@ -148,7 +150,7 @@ export function LorePanel() {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <Space>
             <GlobalOutlined style={{ color: '#38bdf8', fontSize: 18 }} />
-            <Text strong style={{ color: 'var(--text-primary)' }}>世界管理</Text>
+            <Text strong style={{ color: 'var(--text-primary)' }}>{t('lore.title')}</Text>
           </Space>
           <Button
             type="primary"
@@ -157,7 +159,7 @@ export function LorePanel() {
             loading={saving}
             onClick={handleSave}
           >
-            保存
+            {t('common.save')}
           </Button>
         </div>
 
@@ -169,7 +171,7 @@ export function LorePanel() {
           border: '1px solid var(--border-primary)'
         }}>
           <div style={{ marginBottom: 8 }}>
-            <Text type="secondary" style={{ fontSize: 12 }}>当前世界</Text>
+            <Text type="secondary" style={{ fontSize: 12 }}>{t('lore.currentWorld')}</Text>
           </div>
           <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
             <Select
@@ -191,13 +193,13 @@ export function LorePanel() {
           </div>
           <div style={{ marginTop: 8 }}>
             <Text type="secondary" style={{ fontSize: 11 }}>
-              切换世界将刷新页面
+              {t('lore.switchWorldHint')}
             </Text>
           </div>
           {!!currentWorldInfo?.available_scenes?.length && (
             <div style={{ marginTop: 12 }}>
               <div style={{ marginBottom: 8 }}>
-                <Text type="secondary" style={{ fontSize: 12 }}>当前场景</Text>
+                <Text type="secondary" style={{ fontSize: 12 }}>{t('lore.currentScene')}</Text>
               </div>
               <Select
                 value={currentScene}
@@ -218,12 +220,12 @@ export function LorePanel() {
         {/* 世界名称 */}
         <div>
           <Text type="secondary" style={{ fontSize: 12, display: 'block', marginBottom: 4 }}>
-            世界名称
+            {t('lore.worldName')}
           </Text>
           <Input
             value={lore.world_name || ''}
             onChange={(e) => setLore({ ...lore, world_name: e.target.value })}
-            placeholder="输入世界名称"
+            placeholder={t('lore.worldNamePlaceholder')}
             style={{ background: 'var(--bg-input)', borderColor: 'var(--border-primary)', color: 'var(--text-primary)' }}
           />
         </div>
@@ -231,12 +233,12 @@ export function LorePanel() {
         {/* 背景描述 */}
         <div>
           <Text type="secondary" style={{ fontSize: 12, display: 'block', marginBottom: 4 }}>
-            背景描述
+            {t('lore.background')}
           </Text>
           <TextArea
             value={lore.background || ''}
             onChange={(e) => setLore({ ...lore, background: e.target.value })}
-            placeholder="描述这个世界的背景、设定、风格..."
+            placeholder={t('lore.backgroundPlaceholder')}
             rows={4}
             style={{ background: 'var(--bg-input)', borderColor: 'var(--border-primary)', color: 'var(--text-primary)' }}
           />
@@ -246,7 +248,7 @@ export function LorePanel() {
         <div>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
             <Text type="secondary" style={{ fontSize: 12 }}>
-              世界规则
+              {t('lore.rules')}
             </Text>
             <Button
               type="dashed"
@@ -254,7 +256,7 @@ export function LorePanel() {
               icon={<PlusOutlined />}
               onClick={addRule}
             >
-              添加
+              {t('common.add')}
             </Button>
           </div>
           <Space direction="vertical" style={{ width: '100%' }} size={4}>
@@ -263,7 +265,7 @@ export function LorePanel() {
                 <Input
                   value={rule}
                   onChange={(e) => updateRule(index, e.target.value)}
-                  placeholder={`规则 ${index + 1}`}
+                  placeholder={`${t('lore.rulePlaceholder')} ${index + 1}`}
                   style={{ background: 'var(--bg-input)', borderColor: 'var(--border-primary)', color: 'var(--text-primary)', flex: 1 }}
                   size="small"
                 />
@@ -277,7 +279,7 @@ export function LorePanel() {
             ))}
             {(lore.rules || []).length === 0 && (
               <Text type="secondary" style={{ fontSize: 11, fontStyle: 'italic' }}>
-                暂无规则
+                {t('lore.noRules')}
               </Text>
             )}
           </Space>
@@ -287,7 +289,7 @@ export function LorePanel() {
         <div>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
             <Text type="secondary" style={{ fontSize: 12 }}>
-              历史事件
+              {t('lore.history')}
             </Text>
             <Button
               type="dashed"
@@ -295,7 +297,7 @@ export function LorePanel() {
               icon={<PlusOutlined />}
               onClick={addHistory}
             >
-              添加
+              {t('common.add')}
             </Button>
           </div>
           <Space direction="vertical" style={{ width: '100%' }} size={4}>
@@ -304,7 +306,7 @@ export function LorePanel() {
                 <Input
                   value={event}
                   onChange={(e) => updateHistory(index, e.target.value)}
-                  placeholder={`事件 ${index + 1}`}
+                  placeholder={`${t('lore.eventPlaceholder')} ${index + 1}`}
                   style={{ background: 'var(--bg-input)', borderColor: 'var(--border-primary)', color: 'var(--text-primary)', flex: 1 }}
                   size="small"
                 />
@@ -318,7 +320,7 @@ export function LorePanel() {
             ))}
             {(lore.history || []).length === 0 && (
               <Text type="secondary" style={{ fontSize: 11, fontStyle: 'italic' }}>
-                暂无历史事件
+                {t('lore.noHistory')}
               </Text>
             )}
           </Space>
