@@ -6,7 +6,11 @@
 import json
 from pathlib import Path
 
-from neo4j import GraphDatabase
+# 热拔插兼容: 未安装 neo4j 驱动时功能整体静默关闭, 基础存储不受影响
+try:
+    from neo4j import GraphDatabase
+except ImportError:
+    GraphDatabase = None
 
 # 配置文件路径 (项目根 / config / graph.json)
 _CONFIG_PATH = Path(__file__).resolve().parent.parent.parent / "config" / "graph.json"
@@ -93,6 +97,10 @@ def init():
     if cfg is None:
         return
     _config = cfg
+
+    if GraphDatabase is None:
+        print("[Graph] 未安装 neo4j 驱动 (pip install neo4j)，图谱功能关闭")
+        return
 
     if not cfg.get("enabled", True):
         print("[Graph] 已在 config 中禁用，功能关闭")
