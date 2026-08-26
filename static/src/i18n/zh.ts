@@ -339,6 +339,9 @@ export const zh: Record<string, string> = {
   'prompt.varDesc.task_tools_text': '任务动态工具提示',
   'prompt.varDesc.memory_text': '历史记忆 (按相关性筛选)',
   'prompt.varDesc.memory_note': 'NPC 笔记 (手动编辑的备忘)',
+  'prompt.varDesc.graph_text': '知识图谱 (与对方的社交关系+共同经历, 需配 @graph 工具组)',
+  'prompt.varDesc.graph_relation': '图谱·情境 (我与对话对象的关系+共同事件)',
+  'prompt.varDesc.graph_path': '图谱·关系网 (我记过的全部关系)',
 
   // ===== Phase 3 =====
 

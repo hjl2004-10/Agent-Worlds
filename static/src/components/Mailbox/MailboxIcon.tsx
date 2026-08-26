@@ -72,7 +72,7 @@ export function MailboxIcon({ pollInterval = 5000 }: MailboxIconProps) {
         badgeCount={unreadCount}
         backgroundColor="#1890ff"
         onClick={handleClick}
-        initialPosition={{ x: window.innerWidth - 80, y: window.innerHeight - 80 }}
+        initialPosition={{ x: window.innerWidth - 280, y: window.innerHeight - 80 }}
       />
 
       {alive && (

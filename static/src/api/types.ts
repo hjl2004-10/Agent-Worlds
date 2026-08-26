@@ -12,7 +12,7 @@ export interface StatusResponse {
   tick: number;
   npc_count: number;
   date: string;
-  date_iso?: string;
+  date_iso: string;
   period_key?: string;
   time: string;
   period: string;

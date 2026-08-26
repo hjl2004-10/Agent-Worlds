@@ -339,6 +339,9 @@ export const en: Record<string, string> = {
   'prompt.varDesc.task_tools_text': 'Task dynamic tool prompt',
   'prompt.varDesc.memory_text': 'History memory (filtered by relevance)',
   'prompt.varDesc.memory_note': 'NPC notes (manually edited memo)',
+  'prompt.varDesc.graph_text': 'Knowledge graph (social relations + shared events with partner, requires @graph tools)',
+  'prompt.varDesc.graph_relation': 'Graph·context (relations + shared events with partner)',
+  'prompt.varDesc.graph_path': 'Graph·network (all relations I recorded)',
 
   // ===== Phase 3 =====
 

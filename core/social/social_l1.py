@@ -184,6 +184,19 @@ def run_conversation(npc_a, npc_b):
                         channel=speaker.llm_channel,
                         model=speaker.llm_model
                     )
+                    # [调试] 记录这次 LLM 调用 (无工具分支)
+                    try:
+                        from core.debug import debug_log
+                        debug_log.record_llm_call(
+                            speaker_name=speaker.name,
+                            listener_name=listener.name if listener else None,
+                            messages=messages, response=response,
+                            tool_calls=[],
+                            channel=speaker.llm_channel, model=speaker.llm_model,
+                            conv_type='npc',
+                        )
+                    except Exception as _e:
+                        print(f"[Debug] 记录失败: {_e}")
 
             # 4. 输出对话
             print(f"  [{round_count}] {speaker.name}: {response}")
@@ -475,6 +488,19 @@ def _chat_with_tool_loop(messages, context, speaker, listener, channel, model, e
         max_tool_loops=30,
         cancel_event=cancel_event,
     )
+
+    # [调试] 记录这次 LLM 调用 (请求 messages + 返回 + 工具), 供前端调试面板查看
+    try:
+        from core.debug import debug_log
+        debug_log.record_llm_call(
+            speaker_name=speaker.name,
+            listener_name=listener.name if listener else None,
+            messages=messages, response=result.get('text', ''),
+            tool_calls=result.get('tool_calls', []),
+            channel=channel, model=model, conv_type='npc',
+        )
+    except Exception as _e:
+        print(f"[Debug] 记录失败: {_e}")
 
     # 如果有工具调用记录，生成摘要存入 ram_buffer（用于记忆持久化）
     # 这样中断后下次对话时，NPC 知道上次做了什么

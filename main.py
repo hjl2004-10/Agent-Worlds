@@ -337,6 +337,10 @@ def boot():
     map_module.init()
     world_time.init()  # 初始化时间系统
 
+    # 初始化知识图谱 (Neo4j) — 失败自动降级为关闭, 不影响主流程
+    from core.graph import graph as graph_module
+    graph_module.init()
+
     # 初始化工具工作目录
     from tools.tool import set_workdir, add_allowed_dir
     from pathlib import Path
@@ -365,6 +369,13 @@ def boot():
     from tools.loader import load_npcs_for_world
     npcs = load_npcs_for_world(map_module._current_world)
     print(f"[Boot] 加载 {len(npcs)} 个NPC: {[n.name for n in npcs]}")
+
+    # 预建已知 NPC 的正式 entity (图谱归一用, 避免 NPC 名进待归一队列)
+    try:
+        from core.graph import graph as graph_module
+        graph_module.ensure_entities([n.name for n in npcs], map_module._current_world)
+    except Exception as _e:
+        print(f"[Boot] 预建图谱 entity 失败(可忽略): {_e}")
 
     # 加载地点注册表
     map_module.load_locations()
@@ -500,6 +511,10 @@ def shutdown():
     # 关闭 MCP 连接
     from tools import mcp_client
     mcp_client.shutdown()
+
+    # 关闭知识图谱连接
+    from core.graph import graph as graph_module
+    graph_module.shutdown()
 
     print("[Shutdown] 完成")
     state_bus.process_all()

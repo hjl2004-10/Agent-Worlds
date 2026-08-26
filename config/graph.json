@@ -1,0 +1,12 @@
+{
+  "_comment": "知识图谱(Neo4j)配置 — 用于存 NPC 社交关系与事件经历，对话时检索子图注入 prompt",
+  "enabled": true,
+  "uri": "bolt://localhost:7688",
+  "user": "neo4j",
+  "password": "kuafuai",
+  "common_event_limit": 3,
+  "relation_overview_limit": 5,
+  "show_relation_overview": true,
+  "desc_max_chars": 80,
+  "graph_text_max_chars": 800
+}

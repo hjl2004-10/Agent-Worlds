@@ -48,6 +48,7 @@ const DEFAULT_PROMPT_TEMPLATE = [
   '{tasks_text}',
   '{task_tools_text}',
   '[你的记忆]:\n{memory_text}',
+  '[你的知识图谱]:\n{graph_text}',
 ];
 
 export function NPCCreator({ open, onClose, onSuccess }: NPCCreatorProps) {

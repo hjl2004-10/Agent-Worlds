@@ -53,6 +53,45 @@ export const godApi = {
     client.get<RamBufferResponse>(`/conversation/ram/${encodeURIComponent(npcName)}`),
 };
 
+// 调试: LLM 调用日志 (按 NPC 查看每次对话的请求 messages / 返回 / 工具调用)
+export const debugApi = {
+  getLLMLogs: (npc?: string, limit: number = 100) =>
+    client.get<{ status: string; items: any[] }>(
+      `/debug/llm_logs?limit=${limit}${npc ? `&npc=${encodeURIComponent(npc)}` : ''}`,
+    ),
+  getLLMLog: (logId: number) =>
+    client.get<{ status: string; entry: any }>(`/debug/llm_logs/${logId}`),
+};
+
+// 图谱: 关系网可视化 (前端力导向图, 返回 nodes + edges)
+export const graphApi = {
+  getSubgraph: (npc?: string, includeEvents: boolean = false) => {
+    const params = new URLSearchParams();
+    if (npc) params.set('npc', npc);
+    if (includeEvents) params.set('include_events', 'true');
+    const qs = params.toString();
+    return client.get<{ status: string; nodes: any[]; edges: any[] }>(
+      `/graph/subgraph${qs ? `?${qs}` : ''}`,
+    );
+  },
+  getPending: (worldId?: string) =>
+    client.get<{ status: string; items: any[] }>(
+      `/graph/pending${worldId ? `?world_id=${encodeURIComponent(worldId)}` : ''}`,
+    ),
+  resolvePending: (entityId: string, worldId: string, mergeTo?: string) =>
+    client.post<{ status: string; action?: string }>(
+      `/graph/resolve/${encodeURIComponent(entityId)}`,
+      { world_id: worldId, merge_to: mergeTo },
+    ),
+};
+
+// 运行时配置 (memory + graph 的 limit 等, 前端可调, 改完即时生效)
+export const configApi = {
+  get: () => client.get<{ status: string; memory: any; graph: any }>('/config'),
+  set: (memory?: Record<string, unknown>, graph?: Record<string, unknown>) =>
+    client.post<{ status: string; memory: any; graph: any }>('/config', { memory, graph }),
+};
+
 // 获取所有可用工具
 export const getAvailableTools = () =>
   client.get<AvailableToolsResponse>('/tools/available');

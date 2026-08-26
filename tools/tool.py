@@ -882,6 +882,71 @@ TOOL_REGISTRY = {
             "handler": None,
             "enabled": True,
         },
+
+        # ========== 知识图谱工具 (Neo4j 通用关系 + 事件经历) ==========
+        "relate": {
+            "description": "往知识图谱记一条关系（三元组）：主体 -关系-> 客体。这是图谱最基础、最常用的工具，图谱的核心就是关系。"
+            "【必须用 relate 的情况】任何'谁和谁是什么关系'、'谁喜欢/拥有/讨厌什么'、'谁在哪工作'——听到这类就调用："
+            " 人际: Boss和秘书是恋人 → relation=恋人, object=秘书, subject=Boss"
+            " 偏好: Alex喜欢操作系统 → relation=喜欢, object=操作系统, object_kind=topic"
+            " 归属: Alex拥有rCore手册 → relation=拥有, object=rCore手册, object_kind=item"
+            "【主体】默认是你自己; 记别人的关系时填 subject（如 Boss 让你记他和秘书，subject 填 Boss）。"
+            "【重要】记关系就用 relate，千万别用 record_event（那是记事件的）。",
+            "input_schema": {
+                "type": "object",
+                "properties": {
+                    "relation": {"type": "string", "description": "关系类型, 如: 恋人/朋友/喜欢/拥有/工作于/讨厌"},
+                    "object": {"type": "string", "description": "客体名 (人/物品/地点/概念, 如: 秘书/操作系统/rCore手册/银行)"},
+                    "subject": {"type": "string", "description": "主体名, 默认是你自己; 记别人的关系时填 (如 Boss 让你记他和秘书, subject 填 Boss)"},
+                    "object_kind": {"type": "string", "enum": ["person", "item", "place", "topic", "concept"], "description": "客体类型 (默认 person)"},
+                    "intimacy": {"type": "integer", "minimum": 0, "maximum": 100, "description": "亲密度 0-100 (可选, 多用于人际)"},
+                    "note": {"type": "string", "description": "备注 (可选)"},
+                    "confidence": {"type": "string", "enum": ["high", "medium", "low"], "description": "置信度 (可选, 默认自动推断: 自己的事=high, 转述他人=medium, 道听途说=low)"},
+                },
+                "required": ["relation", "object"],
+                "additionalProperties": False,
+            },
+            "handler": None,
+            "enabled": True,
+        },
+        "record_event": {
+            "description": "记一次真正发生了的、有结果的【事件/行动】到经历图谱（带时间、参与者、时序因果）。供未来检索'我和谁一起做过什么'。"
+            "【适用】实际发生的事: 完成交易、达成合作、发生冲突、交接任务、执行了约定。"
+            "【不要用 record_event 记关系】'谁和谁是什么关系'(如 Boss和秘书是恋人) 不是事件，必须用 relate 工具记成三元组。"
+            "【不要】普通对话、瞬时想法、偏好(偏好用 relate)。description 是一句事实(谁做了什么、结果)，不超过80字。",
+            "input_schema": {
+                "type": "object",
+                "properties": {
+                    "description": {"type": "string", "description": "事件的自然语言描述，一句完整事实(谁做了什么、结果)，不超过80字"},
+                    "participants": {
+                        "type": "array",
+                        "items": {"type": "string"},
+                        "description": "参与者姓名列表 (默认已含自己和当前对话对象，可补充更多人)",
+                    },
+                    "cause_event_id": {"type": "string", "description": "(可选)前因事件的 id，用于建立因果链"},
+                },
+                "required": ["description"],
+                "additionalProperties": False,
+            },
+            "handler": None,
+            "enabled": True,
+        },
+        "graph_search": {
+            "description": "按关键词搜索你的知识图谱, 找相关实体(人/物/概念)和它们的关系。"
+            "【何时该调用】你想确认记过关于某话题/某人的关系时(如'我和操作系统相关吗'、'Boss和秘书什么关系')。"
+            "【不要】每次对话都搜(关系会自动注入 prompt); 只在你主动想查证时用。",
+            "input_schema": {
+                "type": "object",
+                "properties": {
+                    "keyword": {"type": "string", "description": "搜索关键词 (实体名/话题, 如 操作系统/秘书/金币)"},
+                    "limit": {"type": "integer", "description": "返回实体数上限 (默认 10)", "default": 10},
+                },
+                "required": ["keyword"],
+                "additionalProperties": False,
+            },
+            "handler": None,
+            "enabled": True,
+        },
     },
 }
 

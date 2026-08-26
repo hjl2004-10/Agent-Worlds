@@ -36,7 +36,7 @@ export function FormIcon({ pollInterval = 3000 }: FormIconProps) {
       backgroundColor="#52c41a"
       disabled={pendingCount === 0}
       onClick={handleClick}
-      initialPosition={{ x: window.innerWidth - 140, y: window.innerHeight - 80 }}
+      initialPosition={{ x: window.innerWidth - 340, y: window.innerHeight - 80 }}
     />
   );
 }
