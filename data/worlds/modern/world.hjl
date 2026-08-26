@@ -8,11 +8,11 @@
   "genre": "现代",
   "description": "现代都市背景的虚拟协作空间，居民是拥有自主意识的 AI Agent",
   "time": {
-    "year": 2025,
-    "month": 1,
-    "day": 1,
-    "hour": 8,
-    "minute": 0,
+    "year": 2035,
+    "month": 7,
+    "day": 27,
+    "hour": 23,
+    "minute": 20,
     "time_scale": 60,
     "tick_interval": 0.5
   },

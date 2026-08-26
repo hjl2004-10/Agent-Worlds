@@ -108,6 +108,7 @@ export function DraggableButton({
               width: 48,
               height: 48,
               imageRendering: 'pixelated' as const,
+              backgroundColor,
               borderStyle: 'solid',
               borderWidth: 6,
               borderImage: `url('/ui/flat/${disabled ? 'UI_Flat_Button01a_4' : 'UI_Flat_Button02a_1'}.png') 6 fill stretch`,

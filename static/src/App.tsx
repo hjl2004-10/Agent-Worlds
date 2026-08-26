@@ -16,6 +16,7 @@ import { ActivityPanel } from '@/components/Activity/ActivityPanel';
 import { LorePanel } from '@/components/World/LorePanel';
 import { MailboxIcon, MailboxModal } from '@/components/Mailbox';
 import { FormIcon, FormModal } from '@/components/Form';
+import { DebugIcon } from '@/components/Debug/DebugIcon';
 import { PixelPanel } from '@/components/ui';
 
 import { usePolling } from '@/hooks/usePolling';
@@ -151,6 +152,9 @@ function App() {
       {/* 表单悬浮图标和模态框 */}
       <FormIcon />
       <FormModal />
+
+      {/* 对话调试悬浮图标 */}
+      <DebugIcon />
     </AppLayout>
   );
 }

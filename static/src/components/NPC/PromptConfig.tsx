@@ -24,7 +24,7 @@ const PROMPT_VARIABLE_NAMES = [
   'time_str', 'period', 'persona', 'listener_name', 'speaker_name',
   'relation_desc', 'lore_text', 'scene_name', 'scene_desc',
   'tools_prompt', 'extra_prompt', 'tasks_text', 'task_tools_text',
-  'memory_text', 'memory_note',
+  'memory_text', 'memory_note', 'graph_text', 'graph_relation', 'graph_path',
 ];
 
 export function PromptConfig({ description, prompt, extraPrompt, onChange, disabled }: PromptConfigProps) {

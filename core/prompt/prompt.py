@@ -72,13 +72,44 @@ PRESETS = {
 # ========== 当前激活的预设 ==========
 ACTIVE_PRESET = "full"
 
-# ========== 运行时配置 ==========
-CONFIG = {
+# ========== 运行时配置 (持久化到 config/prompt.json, 前端可调) ==========
+import json as _json
+from pathlib import Path as _Path
+
+_CONFIG_PATH = _Path(__file__).resolve().parent.parent.parent / "config" / "prompt.json"
+
+_DEFAULT_CONFIG = {
     "memory_relevant_limit": 10,     # 与对话对象/地点相关的记忆条数
     "memory_other_limit": 10,        # 其他记忆条数
     "inject_listener_brief": True,  # 是否注入对方简介
     "enable_relation_filter": True, # 是否按相关性过滤记忆
 }
+
+
+def _load_config():
+    """读 config/prompt.json 覆盖默认值; 文件缺失用默认。"""
+    cfg = dict(_DEFAULT_CONFIG)
+    try:
+        with open(_CONFIG_PATH, encoding="utf-8") as _f:
+            cfg.update(_json.load(_f))
+    except Exception as _e:
+        print(f"[Prompt] 读取运行时配置失败: {_e}")
+    return cfg
+
+
+CONFIG = _load_config()
+
+
+def set_prompt_config(updates):
+    """运行时更新 prompt 配置并持久化到 config/prompt.json (前端改完即时生效)。"""
+    CONFIG.update(updates or {})
+    try:
+        with open(_CONFIG_PATH, "w", encoding="utf-8") as _f:
+            _json.dump(CONFIG, _f, ensure_ascii=False, indent=2)
+        return True
+    except Exception as _e:
+        print(f"[Prompt] 保存配置失败: {_e}")
+        return False
 
 
 def build(speaker, listener, preset=None):

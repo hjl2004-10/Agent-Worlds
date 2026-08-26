@@ -18,6 +18,9 @@ def register_all_routers(app: FastAPI):
     from api.mailbox import router as mailbox_router
     from api.misc import router as misc_router
     from api.wechat import router as wechat_router
+    from api.debug import router as debug_router
+    from api.graph import router as graph_router
+    from api.config import router as config_router
 
     app.include_router(status_router)
     app.include_router(god_router)
@@ -29,3 +32,6 @@ def register_all_routers(app: FastAPI):
     app.include_router(mailbox_router)
     app.include_router(misc_router)
     app.include_router(wechat_router)
+    app.include_router(debug_router)
+    app.include_router(graph_router)
+    app.include_router(config_router)

@@ -1170,6 +1170,12 @@ def _init_handlers():
     from tools.video_l1 import _tool_make_video
     tool_module.TOOL_REGISTRY["anthropic"]["make_video"]["handler"] = _tool_make_video
 
+    # 知识图谱工具 (从 graph_l1 导入)
+    from tools.graph_l1 import _tool_relate, _tool_record_event, _tool_graph_search
+    tool_module.TOOL_REGISTRY["anthropic"]["relate"]["handler"] = _tool_relate
+    tool_module.TOOL_REGISTRY["anthropic"]["record_event"]["handler"] = _tool_record_event
+    tool_module.TOOL_REGISTRY["anthropic"]["graph_search"]["handler"] = _tool_graph_search
+
 
 _init_handlers()
 

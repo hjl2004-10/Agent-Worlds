@@ -5,6 +5,8 @@
 
 from env import time as world_time
 
+from core.graph import graph_l1
+
 
 def _get_mcp_tool_defs(speaker):
     """获取已连接的 MCP 工具定义
@@ -61,6 +63,11 @@ def build_context(speaker, listener, config):
         # 记忆
         'memory_text': format_memory(speaker, listener, config),
         'memory_note': speaker.memory.get('hdd_memory_note', ''),
+
+        # 知识图谱 (Neo4j; 未启用时各返回空串)
+        'graph_text': graph_l1.format_graph_text(speaker, listener, config),        # 组合(兼容旧模板)
+        'graph_relation': graph_l1.recall_relation(speaker, listener, config),     # 我与对话对象的关系+共同事件
+        'graph_path': graph_l1.recall_path(speaker, config),                       # 我的关系网
 
         # 任务
         'tasks_text': format_tasks(speaker, listener),

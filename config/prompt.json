@@ -1,0 +1,7 @@
+{
+  "memory_relevant_limit": 10,
+  "memory_other_limit": 10,
+  "inject_listener_brief": true,
+  "enable_relation_filter": true,
+  "_comment": "提示词/记忆运行时配置 (前端可调, 改完即时生效)"
+}

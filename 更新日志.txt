@@ -1,0 +1,64 @@
+更新日志
+
+## 2026-06-22 [修复] 地图贴图不跟随缩放 + 缩到最小黑边（用户实测反馈，命中真因）
+
+上一轮自作主张修了一堆代码审查分析出来的问题，没命中用户实际遇到的两个症状。本轮定位真因：
+
+1. 贴图不跟随缩放：建筑图片 buildingSize 写死 32（画布像素）没乘 renderScale，地图缩放时建筑大小不变；无建筑地点的菱形标记光晕(28)/菱形(14)同理固定。→ buildingSize=32*renderScale，光晕/菱形尺寸也乘 renderScale。
+2. 缩到最小黑边：原 renderScale=min(w,h)/213*scale，scale=0.5 时地图只画成约 450 宽却要填 800 画布，视口(568)>地图(320)，地图缩到左上角、右下大片黑边。→ 重定义 renderScale=coverMin*scale，coverMin=max(w/MAP_W,h/MAP_H)=地图刚好铺满画布较长边所需的缩放，MIN_SCALE 改 1.0（=铺满），保证视口永远≤地图、无黑边；scale 语义改为 1.0=铺满、>1 放大。renderScale 计算抽成 computeRenderScale()，render/handleClick/handleWheel/handleMouseMove 四处统一调用。
+
+涉及文件: static/src/components/Map/MapView.tsx
+验证: tsc --noEmit 通过；待浏览器实测（建筑跟随缩放、缩到最小铺满无黑边）。
+
+## 2026-06-22 [修复] 前端地图缩放/拖动/图案渲染 7 处问题
+
+MapView.tsx（地图核心，canvas 渲染）在缩放、拖动、图案附件（精灵/障碍物 GIF/状态图标/建筑）上的 7 处修复：
+
+1. 点击命中：原 distance<5（地图像素）半径太小，NPC 缩小后基本点不中 → 改为按精灵 drawWidth/drawHeight 矩形包围盒命中 + 最小屏幕 14px 保证，多个重叠取最近。
+2. 障碍物遮挡：原带 sprite 的障碍物用 DOM <img> overlay，永远盖住 canvas 里的 NPC（NPC 走到树前也被挡）→ 静态第一帧画进 canvas，与建筑统一按底部 y 做 Y-sort；仅动画播放期间才 DOM overlay 浮起。
+3. 渲染性能：原 render 循环每帧 setStatusIconOverlays/setObstacleOverlays → 60fps 每帧重渲染整个组件 → 成员签名变化才 setState，坐标每帧用 ref 直接改 DOM style。
+4. 触控板缩放：原 wheel 每事件固定 ±0.1，触控板连续事件一滑冲到 MAX/MIN → 按 deltaY 累积到阈值(40)才缩放一次。
+5. isZooming 保护：render effect 依赖数组漏了 isZooming，闭包里恒 false，"缩放后暂停跟随"失效 → 改用 isZoomingRef.current。
+6. 拖动跟手：拖动基准点用 state（dragStart），高频 mousemove 读到未 flush 旧值会跳跃 → 改用 dragStartRef。
+7. 代码：resolveSpriteLayout 里 assetId 两边相同的三元清理为 assetId: rawId。
+
+涉及文件: static/src/components/Map/MapView.tsx
+验证: tsc --noEmit 通过（exit 0），MapView 无类型错误。取舍：障碍物静态帧进 canvas 后 NPC 会盖障碍物（解决"被无故盖住"），代价是 NPC 在障碍物正后方也盖障碍物（Y-sort 折中，俯视地图可接受）。
+
+## 2026-06-21 [重构] 知识图谱泛化为通用图（任意实体 + 任意关系）
+
+原设计把图谱限死在「NPC 自己的社交关系 + 事件」两张窄表——记不了第三方关系（Boss↔秘书，
+因工具只记 NPC 自己出边）、记不了非人客体（Alex 喜欢操作系统），用户判定「这跟记文字没区别，
+图数据库白搭」。重构为通用知识图谱：
+
+- 节点统一 :Entity {id, name, kind, world_id}，kind 区分 person/item/place/topic/concept（人不再特殊）
+- 关系工具 remember_relation → relate：参数 subject(默认自己, 可第三方) + relation + object + object_kind，
+  能记任意「主体-关系-客体」（Boss-恋人-秘书 / Alex-喜欢-操作系统 / Alex-拥有-rCore手册）
+- 检索 format_graph_text 加「我的关系网」注入（泛化, 含人/物/概念）
+- record_event 保留（事件时序/因果链是图独有价值）
+- schema 清理：drop 旧 :Character 约束，建 :Entity 约束
+
+涉及文件: core/graph/{graph,graph_l1,graph_l2}.py / tools/{tool,tool_l1,graph_l1}.py / config/tool_groups.json
+验证: relate 记第三方关系 + 非人客体 + 默认主体均通过，7475 可见关系网络，检索注入正确。
+
+## 2026-06-21 新增 Neo4j 知识图谱块（社交关系 + 事件经历）
+
+为提示词系统增加一个独立的知识图谱数据源：用 Neo4j 存 NPC 的社交关系与事件经历这类
+关系型知识，对话时按情境（以对话对象为主信号）检索相关子图注入 prompt，并给 NPC 一组
+显式工具在对话中主动写入。全新功能，不迁移/不动现有 rom_groups / hdd_history / inventory。
+
+新增模块（遵循 总控 / 业务_l1 / 原子_l2 分层）：
+- core/graph/graph.py    总控：driver 单例、init/shutdown、降级、schema、session 助手
+- core/graph/graph_l1.py 业务：format_graph_text 检索编排 + write_relation/write_event 写入编排
+- core/graph/graph_l2.py 原子：Cypher 模板常量 + 文本格式化纯函数
+- tools/graph_l1.py      工具 handler：relate / record_event
+
+接入点：
+- 读侧：core/prompt/prompt_l2.py 的 build_context() 加 {graph_text} 占位符
+- 写侧：tools/tool.py 注册工具 + tools/tool_l1.py 挂载 handler + config/tool_groups.json 加 @graph 组
+- 生命周期：main.py 的 boot()/shutdown() 挂 graph.init()/shutdown()
+- 配置：config/graph.json（enabled 开关 + 检索限量参数）
+- 前端：PromptConfig 可用变量加 {graph_text}、NPCCreator 默认模板加图谱块（zh/en i18n 同步）
+- 测试 NPC：data/individuals/alex.hjl 接入 @graph 工具组与 {graph_text} 模板
+
+关键设计：Neo4j 不可用时自动降级（绝不拖垮对话）；图谱数据只存 Neo4j 不镜像 HJL；event_id 用 md5 幂等。

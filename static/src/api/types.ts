@@ -12,8 +12,10 @@ export interface StatusResponse {
   tick: number;
   npc_count: number;
   date: string;
+  date_iso: string;
   time: string;
   period: string;
+  period_key: string;
 }
 
 export interface EventResponse {

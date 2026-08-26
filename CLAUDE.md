@@ -12,6 +12,48 @@
 > 🗂️ **【素材库】像素素材统一放在 `static/public/` 下使用。**
 ---
 
+## 架构总览：概念坐标系（先看这张图）
+
+本系统是一个 agent 平台（AI_OS）。代码骨架与业界 agent 架构**趋同**：横向是多子系统、纵向是作用域分层，两者正交。先建立这张坐标系，再看下面的分层原则与目录职责，每块代码的"身份"就清楚了。
+
+> **核心链**：`Scaffolding（拼脚手架）→ 经 Harness（驾驭层）→ 跑出 Agentic Loop（循环）→ 实例化为 Agent（带运行时状态的个体）`。
+> 一个 NPC 的 hjl = 一份 scaffolding；`core/` 运行时 = harness；跑起来带记忆/坐标/关系 = agent。
+
+### 横向：子系统（业界术语 ↔ 本项目目录）
+
+| 业界概念 | 本项目目录 | 职责 |
+|---|---|---|
+| **Gateway 网关** | `main.py` + `api/auth.py` | 请求入口、路由挂载、token/CORS 守卫 |
+| **Channel 渠道**·LLM 出站 | `tools/llm/`、`tools/llm_l1.py`、`llm_l2.py` | 选 LLM 供应商（zhipu/volcano/local/claude），代码内已用 `channel` 命名 |
+| **Channel 渠道**·对话入站 | `core/wechat/`、`tools/qq_bot*.py` | 对话从哪个外部来源进来 |
+| **Scaffolding 脚手架** | `tools/loader_l1.py`、`core/prompt/`、`data/*.hjl`、`config/` | **装配 agent**：提示词变量槽 + 工具组 + 技能 + MCP + persona + 记忆/图谱策略。hjl 即脚手架载体 |
+| **Harness 驾驭层** | `core/social/`、`drive/`、`mem/`、`graph/`、`tools/tool_l1.py` | **运行时引擎**：让脚手架跑起来（对话、移动、记忆、图谱、工具执行） |
+| **Agentic Loop** | `core/social/social_l1.py::_chat_with_tool_loop` | plan→act→observe 循环（寄生在 harness 内） |
+| **Context Engineering** | `core/prompt/prompt_l2.py::build_context` | 运行时策展有限上下文：注入哪些变量、各多少限量 |
+| **State Bus 状态总线** | `core/state_bus.py`、`api/_state.py` | 子系统间事件推送/共享态（神经系统） |
+| **Frontend 前端** | `static/` | 像素风 UI、地图、调试面板。**构建部署**：`npm run build` → `static/dist/` → `main.py` 经 StaticFiles serve（非 dev 热部署） |
+
+> 术语参考：[HuggingFace·agent-glossary](https://huggingface.co/blog/agent-glossary)、[Martin Fowler·Harness Engineering](https://martinfowler.com/articles/harness-engineering.html)、[Anthropic·Context Engineering](https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents)。
+
+**两个易混点**：
+- `core/prompt/` 同时承担 **scaffolding 装配**（哪些变量槽/工具，静态）和 **context engineering**（每轮塞多少，动态）——两件事，目前同模块。
+- **Channel 有两个方向**：LLM 出站（选模型）和 对话入站（消息来源），别混。
+
+### 纵向：作用域分层（每个子系统内部都按此三层）
+
+详见下文「§1 核心分层架构原则」。后缀 = 业务粒度：总控（无后缀，配置/接口）→ `_l1`（个体业务/流程组装）→ `_l2`（原子计算，无状态）。
+
+### 正交二维（横×纵 = 网格，不是树）
+
+```
+            scaffolding     harness      channel      gateway
+总控(无后缀) prompt.py       social.py    tools/llm/   main.py
+业务(_l1)    prompt_l1.py    social_l1    llm_l1.py    api/*
+原子(_l2)    prompt_l2.py    social_l2    llm_l2.py    auth.py
+```
+
+定位任何一块代码：先问"属哪个子系统"（横），再问"在哪层"（纵）。
+
 ## Worktree 多开协作 (按需启用)
 
 需要前后端并行开发时，用 git worktree 创建独立副本，避免两个 Claude Code 同时写同一文件冲突。

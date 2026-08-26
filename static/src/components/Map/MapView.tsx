@@ -141,7 +141,7 @@ function resolveSpriteLayout(spriteId?: string): SpriteLayout {
     frameHeight: 32,     // 16x32 帧
     drawWidth: 16,
     drawHeight: 24,      // 渲染时稍微压缩
-    assetId: rawId.endsWith('_16x16') ? rawId : rawId,
+    assetId: rawId,
     walkRowY: 32,        // 行走动画在第二行
   };
 }
@@ -179,17 +179,24 @@ const LOCATION_COLORS: Record<string, string> = {
 };
 
 // 视口配置
-const VIEWPORT_SCALE = 1.5;
 const SMOOTH_FACTOR = 0.08;
 
 // 平滑移动配置
 const POSITION_LERP_FACTOR = 0.15;  // 位置插值因子 (越大越快)
 const GOD_MOVE_SPEED = 60;         // 上帝模式客户端预测速度 (像素/秒)
 
-// 缩放范围
-const MIN_SCALE = 0.5;   // 最小缩放 (看更大范围)
-const MAX_SCALE = 3.0;   // 最大缩放 (看更小范围)
+// 缩放范围: scale 是相对"刚好铺满画布"的倍数。1.0 = 地图铺满画布(无黑边), >1 放大。
+const MIN_SCALE = 1.0;   // 最小缩放 = 刚好铺满 (再小会出现黑边, 故不允许)
+const MAX_SCALE = 4.0;   // 最大缩放 (看更小范围)
 const SCALE_STEP = 0.1;  // 每次滚轮缩放步长
+
+// 计算渲染缩放系数 (每个地图像素对应多少画布像素)
+// coverMin = 让地图刚好铺满画布较长边所需的缩放; scale 是用户放大倍数。
+// renderScale = coverMin * scale 恒 ≥ coverMin, 保证视口永远 ≤ 地图尺寸, 不出现黑边。
+function computeRenderScale(width: number, height: number, scale: number): number {
+  const coverMin = Math.max(width / MAP_WIDTH, height / MAP_HEIGHT);
+  return coverMin * scale;
+}
 
 // ============ 统一相机目标坐标函数 ============
 // 所有需要计算相机目标的地方都调用此函数，确保一致性
@@ -280,8 +287,6 @@ export function MapView({ onNPCClick }: MapViewProps) {
   // 障碍物动画状态: 记录哪些障碍物当前在播放动画
   const [animatingObstacles, setAnimatingObstacles] = useState<Set<string>>(new Set());
   const obstacleAnimTimersRef = useRef<Record<string, { startTimer: ReturnType<typeof setTimeout>; stopTimer?: ReturnType<typeof setTimeout> }>>({});
-  // 障碍物静态帧存储 (第一帧的 data URL)
-  const obstacleStaticFramesRef = useRef<Record<string, string>>({});
   const npcsRef = useRef(useNPCStore.getState().npcs);
   const selectedNPCRef = useRef(useGodStore.getState().selectedNPC);
 
@@ -306,11 +311,21 @@ export function MapView({ onNPCClick }: MapViewProps) {
   const [scale, setScale] = useState(1.0);
   const [isDragging, setIsDragging] = useState(false);
   const [isZooming, setIsZooming] = useState(false);
-  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  // 拖动基准点用 ref (不用 state): mousemove 高频触发, state 来不及 flush 会读到旧基准点 -> 拖动跳跃/不跟手
+  const dragStartRef = useRef({ x: 0, y: 0 });
   const [manualOffset, setManualOffset] = useState({ x: 0, y: 0 });
   const [hasMoved, setHasMoved] = useState(false); // 是否发生了实际拖动
   const DRAG_THRESHOLD = 5; // 拖动阈值 (像素)
   const zoomTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // 缩放节流累积: 触控板/高精度滚轮 deltaY 小但事件密集, 累积到阈值才缩放一次, 避免一滑冲到 MAX/MIN
+  const wheelAccumRef = useRef(0);
+  // isZooming 用 ref 同步给 render 循环: render effect 依赖数组不含 isZooming, 闭包里的 state 会失效
+  const isZoomingRef = useRef(false);
+  // overlay (障碍物 GIF / 状态图标) 的 DOM 节点表: 坐标每帧用 ref 直接改 style, 不走 setState, 避免 60fps 重渲染
+  const overlayElsRef = useRef<Map<string, HTMLImageElement>>(new Map());
+  const lastOverlaySigRef = useRef<{ icons: string; obstacles: string }>({ icons: '', obstacles: '' });
+  // 障碍物 sprite 静态帧 Image (第一帧), 画进 canvas 参与 Y-sort; 动画时才用 DOM overlay 浮起
+  const obstacleSpriteImagesRef = useRef<Record<string, HTMLImageElement>>({});
 
   // 加载地点数据
   useEffect(() => {
@@ -369,6 +384,18 @@ export function MapView({ onNPCClick }: MapViewProps) {
       })
       .catch(err => console.error('Failed to load obstacles:', err));
   }, []);
+
+  // 预加载障碍物 sprite 的静态第一帧 Image (canvas 画 GIF 只取第一帧; 用于画进 canvas 参与 Y-sort)
+  useEffect(() => {
+    obstacles.forEach(obs => {
+      if (obs.sprite && !obstacleSpriteImagesRef.current[obs.id]) {
+        const img = new Image();
+        const assetPath = normalizePublicAssetPath(obs.sprite);
+        img.src = assetPath || obs.sprite;
+        obstacleSpriteImagesRef.current[obs.id] = img;
+      }
+    });
+  }, [obstacles]);
 
   // 障碍物随机动画控制: 5-10秒随机触发一次，播放2-3秒
   useEffect(() => {
@@ -532,6 +559,11 @@ export function MapView({ onNPCClick }: MapViewProps) {
     scaleRef.current = scale;
   }, [scale]);
 
+  // 同步 isZooming 到 ref (render 循环读 ref, 不读闭包里失效的 state)
+  useEffect(() => {
+    isZoomingRef.current = isZooming;
+  }, [isZooming]);
+
   useEffect(() => {
     manualOffsetRef.current = manualOffset;
   }, [manualOffset]);
@@ -648,7 +680,7 @@ export function MapView({ onNPCClick }: MapViewProps) {
       const { x: targetX, y: targetY } = getCameraTargetPosition(npcs, selectedNPC, renderPositions);
 
       // 平滑跟随 (仅在没有手动操作时)
-      if (!isDragging && !isZooming) {
+      if (!isDragging && !isZoomingRef.current) {
         const finalTargetX = targetX + manualOffsetRef.current.x;
         const finalTargetY = targetY + manualOffsetRef.current.y;
         // 上帝模式下镜头更紧跟，普通模式下更丝滑
@@ -662,12 +694,8 @@ export function MapView({ onNPCClick }: MapViewProps) {
       const currentScale = scaleRef.current;
 
       // 计算视口范围 - 填满整个长方形画布
-      // 基准视口大小 (在 1x 缩放下的可视地图范围)
-      const baseViewSize = MAP_WIDTH / VIEWPORT_SCALE;
-
-      // 分别计算 X 和 Y 方向的可视范围，填满画布
-      // renderScale 表示每个地图像素对应多少画布像素
-      const renderScale = Math.min(width, height) / baseViewSize * currentScale;
+      // renderScale: 每个地图像素对应多少画布像素; scale=1 时刚好铺满画布(无黑边), >1 放大
+      const renderScale = computeRenderScale(width, height, currentScale);
 
       // 视口在地图上的实际宽高 (保持 1:1 像素比例)
       const viewWidth = width / renderScale;
@@ -837,177 +865,201 @@ export function MapView({ onNPCClick }: MapViewProps) {
         ctx.restore();
       });
 
-      // 收集障碍物 GIF 覆盖层数据
+      // ============ Y-sorted 场景物件渲染 (建筑 + 障碍物统一按底部 y 排序) ============
+      // 把建筑、障碍物合并按各自底部 y 排序后统一绘制, 实现正确的前后遮挡。
+      // 障碍物 sprite 的静态第一帧画进 canvas (之后绘制的 NPC 可正确盖住); 仅当障碍物处于
+      // 动画状态时, 才额外用 DOM overlay 浮起播放 GIF (短暂覆盖, 可接受)。
+      // obsOverlays: 只收集"正在播放动画"的障碍物, 坐标每帧由 ref DOM 更新, 成员变化才 setState。
       const obsOverlays: { id: string; sprite: string; screenX: number; screenY: number; size: number }[] = [];
 
-      // 绘制障碍物 (有 sprite 字段的用 GIF 覆盖层，无 sprite 的用 Canvas 绘制)
+      type SceneItem =
+        | { kind: 'loc'; bottomY: number; loc: Location }
+        | { kind: 'obs'; bottomY: number; obs: Obstacle };
+      const sceneItems: SceneItem[] = [];
+      locations.forEach(loc => sceneItems.push({ kind: 'loc', bottomY: loc.y, loc }));
       obstacles.forEach(obs => {
-        // 检查是否在视口内
-        const obsWidth = obs.type === 'rect' ? (obs.width || 48) : (obs.radius || 12) * 2;
-        const obsHeight = obs.type === 'rect' ? (obs.height || 48) : (obs.radius || 12) * 2;
-        if (obs.x + obsWidth < minX - 5 || obs.x > maxX + 5 || obs.y + obsHeight < minY - 5 || obs.y > maxY + 5) {
-          return;
-        }
-
-        if (obs.sprite) {
-          // 有 sprite 字段: 收集到 GIF 覆盖层
-          const { x: screenX, y: screenY } = mapToCanvas(obs.x, obs.y);
-          const size = 48 * renderScale;  // 48x48 素材
-          obsOverlays.push({
-            id: obs.id,
-            sprite: obs.sprite,
-            screenX: screenX,
-            screenY: screenY,
-            size: size,
-          });
-        } else if (obs.type === 'rect') {
-          // 矩形障碍物 (墙壁/建筑)
-          const topLeft = mapToCanvas(obs.x, obs.y);
-          const bottomRight = mapToCanvas(obs.x + (obs.width || 0), obs.y + (obs.height || 0));
-          const rectWidth = bottomRight.x - topLeft.x;
-          const rectHeight = bottomRight.y - topLeft.y;
-
-          // 障碍物填充 (深色)
-          ctx.fillStyle = '#1a1410';
-          ctx.fillRect(topLeft.x, topLeft.y, rectWidth, rectHeight);
-
-          // 障碍物边框 (深棕色)
-          ctx.strokeStyle = '#3d2817';
-          ctx.lineWidth = 2;
-          ctx.strokeRect(topLeft.x, topLeft.y, rectWidth, rectHeight);
-
-          // 内部纹理 (更深的阴影)
-          ctx.fillStyle = '#0f0a07';
-          const innerPadding = 3;
-          ctx.fillRect(
-            topLeft.x + innerPadding,
-            topLeft.y + innerPadding,
-            rectWidth - innerPadding * 2,
-            rectHeight - innerPadding * 2
-          );
-        } else if (obs.type === 'circle') {
-          // 圆形障碍物 (树木/石头)
-          const { x, y } = mapToCanvas(obs.x, obs.y);
-          const radius = (obs.radius || 5) * renderScale;
-
-          // 树木/石头阴影
-          ctx.beginPath();
-          ctx.arc(x + 2, y + 2, radius, 0, Math.PI * 2);
-          ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
-          ctx.fill();
-
-          // 主体 (深色)
-          ctx.beginPath();
-          ctx.arc(x, y, radius, 0, Math.PI * 2);
-          ctx.fillStyle = obs.desc?.includes('树') ? '#0d2d0d' : '#2a2a2a';
-          ctx.fill();
-
-          // 高光 (稍微亮一点)
-          ctx.beginPath();
-          ctx.arc(x - radius * 0.3, y - radius * 0.3, radius * 0.4, 0, Math.PI * 2);
-          ctx.fillStyle = obs.desc?.includes('树') ? '#1a4a1a' : '#4a4a4a';
-          ctx.fill();
-        }
+        let bottomY: number;
+        if (obs.sprite) bottomY = obs.y + 48;
+        else if (obs.type === 'rect') bottomY = obs.y + (obs.height || 48);
+        else bottomY = obs.y + (obs.radius || 12);
+        sceneItems.push({ kind: 'obs', bottomY, obs });
       });
+      sceneItems.sort((a, b) => a.bottomY - b.bottomY);
 
-      // 更新障碍物 GIF 覆盖层
-      setObstacleOverlays(obsOverlays);
+      sceneItems.forEach(item => {
+        if (item.kind === 'loc') {
+          const loc = item.loc;
+          if (loc.x < minX - 30 || loc.x > maxX + 30 || loc.y < minY - 30 || loc.y > maxY + 30) {
+            return;
+          }
 
-      // ============ Y-sorted 场景渲染 (建筑 + 地点) ============
-      // 先按 Y 坐标排序，实现正确的遮挡关系
-      const sortedLocations = [...locations].sort((a, b) => a.y - b.y);
+          const { x, y } = mapToCanvas(loc.x, loc.y);
+          const color = LOCATION_COLORS[loc.name] || '#e879f9';
 
-      sortedLocations.forEach(loc => {
-        if (loc.x < minX - 30 || loc.x > maxX + 30 || loc.y < minY - 30 || loc.y > maxY + 30) {
-          return;
-        }
+          // 建筑尺寸 (48x48 图片缩放到 32x32)
+          // 建筑尺寸: 48x48 图缩放到 32x32 地图像素, 再按 renderScale 转画布像素 (跟随缩放)
+          const buildingSize = 32 * renderScale;
+          const halfSize = buildingSize / 2;
 
-        const { x, y } = mapToCanvas(loc.x, loc.y);
-        const color = LOCATION_COLORS[loc.name] || '#e879f9';
+          if (loc.building && buildingImages[loc.building]) {
+            // === 建筑阴影 ===
+            ctx.save();
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.25)';
+            ctx.beginPath();
+            ctx.ellipse(x + 3, y + halfSize + 2, halfSize * 0.9, halfSize * 0.3, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
 
-        // 建筑尺寸 (48x48 图片缩放到 32x32)
-        const buildingSize = 32;
-        const halfSize = buildingSize / 2;
+            // === 建筑地面光晕 (温暖的灯光) ===
+            const glowGradient = ctx.createRadialGradient(x, y, 2, x, y + 5, halfSize * 1.8);
+            glowGradient.addColorStop(0, color + '18');
+            glowGradient.addColorStop(0.5, color + '08');
+            glowGradient.addColorStop(1, 'transparent');
+            ctx.fillStyle = glowGradient;
+            ctx.beginPath();
+            ctx.arc(x, y + 5, halfSize * 1.8, 0, Math.PI * 2);
+            ctx.fill();
 
-        if (loc.building && buildingImages[loc.building]) {
-          // === 建筑阴影 ===
-          ctx.save();
-          ctx.fillStyle = 'rgba(0, 0, 0, 0.25)';
-          ctx.beginPath();
-          ctx.ellipse(x + 3, y + halfSize + 2, halfSize * 0.9, halfSize * 0.3, 0, 0, Math.PI * 2);
-          ctx.fill();
-          ctx.restore();
+            // === 渲染建筑图片 ===
+            ctx.drawImage(
+              buildingImages[loc.building],
+              x - halfSize,
+              y - halfSize,
+              buildingSize,
+              buildingSize
+            );
 
-          // === 建筑地面光晕 (温暖的灯光) ===
-          const glowGradient = ctx.createRadialGradient(x, y, 2, x, y + 5, halfSize * 1.8);
-          glowGradient.addColorStop(0, color + '18');
-          glowGradient.addColorStop(0.5, color + '08');
-          glowGradient.addColorStop(1, 'transparent');
-          ctx.fillStyle = glowGradient;
-          ctx.beginPath();
-          ctx.arc(x, y + 5, halfSize * 1.8, 0, Math.PI * 2);
-          ctx.fill();
+            // === 地点名称 (像素风名牌) ===
+            ctx.font = 'bold 10px "Press Start 2P", monospace';
+            ctx.textAlign = 'center';
+            const nameWidth = ctx.measureText(loc.name).width;
 
-          // === 渲染建筑图片 ===
-          ctx.drawImage(
-            buildingImages[loc.building],
-            x - halfSize,
-            y - halfSize,
-            buildingSize,
-            buildingSize
-          );
+            // 名牌背景
+            const nameY = y + halfSize + 14;
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.65)';
+            const pad = 4;
+            ctx.fillRect(x - nameWidth / 2 - pad, nameY - 9, nameWidth + pad * 2, 13);
+            // 名牌边框
+            ctx.strokeStyle = color + '80';
+            ctx.lineWidth = 1;
+            ctx.strokeRect(x - nameWidth / 2 - pad, nameY - 9, nameWidth + pad * 2, 13);
+            // 名字文字
+            ctx.fillStyle = color;
+            ctx.fillText(loc.name, x, nameY);
+          } else {
+            // 无建筑时使用原来的菱形标记 + 增强光晕 (尺寸跟随 renderScale)
+            const haloR = 28 * renderScale;
+            const markerSize = 14 * renderScale;
+            const gradient = ctx.createRadialGradient(x, y, 0, x, y, haloR);
+            gradient.addColorStop(0, color + '50');
+            gradient.addColorStop(0.4, color + '20');
+            gradient.addColorStop(1, 'transparent');
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            ctx.arc(x, y, haloR, 0, Math.PI * 2);
+            ctx.fill();
 
-          // === 地点名称 (像素风名牌) ===
-          ctx.font = 'bold 10px "Press Start 2P", monospace';
-          ctx.textAlign = 'center';
-          const nameWidth = ctx.measureText(loc.name).width;
+            // 地点标记 (菱形 + 脉动动画)
+            const pulse = 0.9 + Math.sin(Date.now() / 800) * 0.1;
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.rotate(Math.PI / 4);
+            ctx.scale(pulse, pulse);
+            ctx.fillStyle = color;
+            ctx.fillRect(-markerSize / 2, -markerSize / 2, markerSize, markerSize);
+            ctx.strokeStyle = '#fff';
+            ctx.lineWidth = Math.max(1, 1.5 * renderScale);
+            ctx.strokeRect(-markerSize / 2, -markerSize / 2, markerSize, markerSize);
+            ctx.restore();
 
-          // 名牌背景
-          const nameY = y + halfSize + 14;
-          ctx.fillStyle = 'rgba(0, 0, 0, 0.65)';
-          const pad = 4;
-          ctx.fillRect(x - nameWidth / 2 - pad, nameY - 9, nameWidth + pad * 2, 13);
-          // 名牌边框
-          ctx.strokeStyle = color + '80';
-          ctx.lineWidth = 1;
-          ctx.strokeRect(x - nameWidth / 2 - pad, nameY - 9, nameWidth + pad * 2, 13);
-          // 名字文字
-          ctx.fillStyle = color;
-          ctx.fillText(loc.name, x, nameY);
+            // 地点名称
+            ctx.font = 'bold 10px "Press Start 2P", monospace';
+            ctx.textAlign = 'center';
+            ctx.fillStyle = color;
+            ctx.strokeStyle = '#000';
+            ctx.lineWidth = 3;
+            ctx.strokeText(loc.name, x, y + 25);
+            ctx.fillText(loc.name, x, y + 25);
+          }
         } else {
-          // 无建筑时使用原来的菱形标记 + 增强光晕
-          const gradient = ctx.createRadialGradient(x, y, 0, x, y, 28);
-          gradient.addColorStop(0, color + '50');
-          gradient.addColorStop(0.4, color + '20');
-          gradient.addColorStop(1, 'transparent');
-          ctx.fillStyle = gradient;
-          ctx.beginPath();
-          ctx.arc(x, y, 28, 0, Math.PI * 2);
-          ctx.fill();
+          const obs = item.obs;
+          // 视口裁剪
+          const obsWidth = obs.type === 'rect' ? (obs.width || 48) : (obs.radius || 12) * 2;
+          const obsHeight = obs.type === 'rect' ? (obs.height || 48) : (obs.radius || 12) * 2;
+          const checkW = obs.sprite ? 48 : obsWidth;
+          const checkH = obs.sprite ? 48 : obsHeight;
+          if (obs.x + checkW < minX - 5 || obs.x > maxX + 5 || obs.y + checkH < minY - 5 || obs.y > maxY + 5) {
+            return;
+          }
 
-          // 地点标记 (菱形 + 脉动动画)
-          const pulse = 0.9 + Math.sin(Date.now() / 800) * 0.1;
-          ctx.save();
-          ctx.translate(x, y);
-          ctx.rotate(Math.PI / 4);
-          ctx.scale(pulse, pulse);
-          ctx.fillStyle = color;
-          ctx.fillRect(-7, -7, 14, 14);
-          ctx.strokeStyle = '#fff';
-          ctx.lineWidth = 1.5;
-          ctx.strokeRect(-7, -7, 14, 14);
-          ctx.restore();
+          if (obs.sprite) {
+            // 带 sprite: canvas 画静态第一帧 (参与 Y-sort, 之后绘制的 NPC 可正确盖住); 动画时额外 DOM overlay 浮起
+            const { x: screenX, y: screenY } = mapToCanvas(obs.x, obs.y);
+            const size = 48 * renderScale;
+            const spriteImg = obstacleSpriteImagesRef.current[obs.id];
+            if (spriteImg && spriteImg.complete && spriteImg.naturalWidth > 0) {
+              ctx.drawImage(spriteImg, screenX, screenY, size, size);
+            }
+            if (animatingObstacles.has(obs.id)) {
+              obsOverlays.push({ id: obs.id, sprite: obs.sprite, screenX, screenY, size });
+            }
+          } else if (obs.type === 'rect') {
+            // 矩形障碍物 (墙壁/建筑)
+            const topLeft = mapToCanvas(obs.x, obs.y);
+            const bottomRight = mapToCanvas(obs.x + (obs.width || 0), obs.y + (obs.height || 0));
+            const rectWidth = bottomRight.x - topLeft.x;
+            const rectHeight = bottomRight.y - topLeft.y;
 
-          // 地点名称
-          ctx.font = 'bold 10px "Press Start 2P", monospace';
-          ctx.textAlign = 'center';
-          ctx.fillStyle = color;
-          ctx.strokeStyle = '#000';
-          ctx.lineWidth = 3;
-          ctx.strokeText(loc.name, x, y + 25);
-          ctx.fillText(loc.name, x, y + 25);
+            // 障碍物填充 (深色)
+            ctx.fillStyle = '#1a1410';
+            ctx.fillRect(topLeft.x, topLeft.y, rectWidth, rectHeight);
+
+            // 障碍物边框 (深棕色)
+            ctx.strokeStyle = '#3d2817';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(topLeft.x, topLeft.y, rectWidth, rectHeight);
+
+            // 内部纹理 (更深的阴影)
+            ctx.fillStyle = '#0f0a07';
+            const innerPadding = 3;
+            ctx.fillRect(
+              topLeft.x + innerPadding,
+              topLeft.y + innerPadding,
+              rectWidth - innerPadding * 2,
+              rectHeight - innerPadding * 2
+            );
+          } else if (obs.type === 'circle') {
+            // 圆形障碍物 (树木/石头)
+            const { x, y } = mapToCanvas(obs.x, obs.y);
+            const radius = (obs.radius || 5) * renderScale;
+
+            // 树木/石头阴影
+            ctx.beginPath();
+            ctx.arc(x + 2, y + 2, radius, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+            ctx.fill();
+
+            // 主体 (深色)
+            ctx.beginPath();
+            ctx.arc(x, y, radius, 0, Math.PI * 2);
+            ctx.fillStyle = obs.desc?.includes('树') ? '#0d2d0d' : '#2a2a2a';
+            ctx.fill();
+
+            // 高光 (稍微亮一点)
+            ctx.beginPath();
+            ctx.arc(x - radius * 0.3, y - radius * 0.3, radius * 0.4, 0, Math.PI * 2);
+            ctx.fillStyle = obs.desc?.includes('树') ? '#1a4a1a' : '#4a4a4a';
+            ctx.fill();
+          }
         }
       });
+
+      // 更新障碍物 GIF 覆盖层 (仅 animating 的; 成员签名变化才 setState, 坐标由 ref DOM 每帧更新)
+      const obsSig = obsOverlays.map(o => o.id).join('|');
+      if (obsSig !== lastOverlaySigRef.current.obstacles) {
+        lastOverlaySigRef.current.obstacles = obsSig;
+        setObstacleOverlays(obsOverlays);
+      }
 
       // 绘制 NPC
       const iconOverlays: { npcName: string; iconType: string; screenX: number; screenY: number; iconSize: number }[] = [];
@@ -1299,8 +1351,33 @@ export function MapView({ onNPCClick }: MapViewProps) {
         }
       });
 
-      // 更新状态图标覆盖层
-      setStatusIconOverlays(iconOverlays);
+      // 更新状态图标覆盖层 (成员签名变化才 setState; 坐标每帧由 ref DOM 直接更新, 不走 setState)
+      const iconSig = iconOverlays.map(o => o.npcName + ':' + o.iconType).join('|');
+      if (iconSig !== lastOverlaySigRef.current.icons) {
+        lastOverlaySigRef.current.icons = iconSig;
+        setStatusIconOverlays(iconOverlays);
+      }
+
+      // ============ 通过 ref 直接更新 overlay DOM 坐标 (避免每帧 setState 触发 60fps 重渲染) ============
+      const overlayEls = overlayElsRef.current;
+      for (const o of iconOverlays) {
+        const el = overlayEls.get('icon:' + o.npcName);
+        if (el) {
+          el.style.left = o.screenX + 'px';
+          el.style.top = o.screenY + 'px';
+          el.style.width = o.iconSize + 'px';
+          el.style.height = o.iconSize + 'px';
+        }
+      }
+      for (const o of obsOverlays) {
+        const el = overlayEls.get('obs:' + o.id);
+        if (el) {
+          el.style.left = o.screenX + 'px';
+          el.style.top = o.screenY + 'px';
+          el.style.width = o.size + 'px';
+          el.style.height = o.size + 'px';
+        }
+      }
 
       // ============ 环境粒子系统 ============
       const particles = particlesRef.current;
@@ -1522,8 +1599,7 @@ export function MapView({ onNPCClick }: MapViewProps) {
     const currentScale = scaleRef.current;
 
     // 计算视口范围 - 与 render 函数一致
-    const baseViewSize = MAP_WIDTH / VIEWPORT_SCALE;
-    const renderScale = Math.min(width, height) / baseViewSize * currentScale;
+    const renderScale = computeRenderScale(width, height, currentScale);
     const viewWidth = width / renderScale;
     const viewHeight = height / renderScale;
 
@@ -1543,14 +1619,24 @@ export function MapView({ onNPCClick }: MapViewProps) {
 
     const { x: mapX, y: mapY } = canvasToMap(clickX, clickY);
 
-    // 查找点击的 NPC
+    // 查找点击的 NPC —— 用精灵包围盒命中 (含最小屏幕尺寸保证, 缩小后也能点中)
+    // 多个 NPC 重叠时选取离点击点最近 (y 方向最贴近脚底) 的那个
+    const MIN_HIT_PX = 14; // 屏幕上至少这么大的命中半宽/半高, 保证缩小后可点
+    let bestHit: { name: string; dist: number } | null = null;
     for (const npc of npcs) {
-      const distance = Math.sqrt((mapX - npc.x) ** 2 + (mapY - npc.y) ** 2);
-      if (distance < 5) {
-        onNPCClick?.(npc.name);
-        break;
+      const layout = resolveSpriteLayout((npc as any).sprite_id);
+      const hitW = Math.max(layout.drawWidth, (MIN_HIT_PX * 2) / renderScale);
+      const hitH = Math.max(layout.drawHeight, (MIN_HIT_PX * 2) / renderScale);
+      const left = npc.x - hitW / 2;
+      const right = npc.x + hitW / 2;
+      const top = npc.y - hitH;
+      const bottom = npc.y + hitH * 0.2; // 脚底略向下容差
+      if (mapX >= left && mapX <= right && mapY >= top && mapY <= bottom) {
+        const dist = Math.abs(mapY - npc.y);
+        if (!bestHit || dist < bestHit.dist) bestHit = { name: npc.name, dist };
       }
     }
+    if (bestHit) onNPCClick?.(bestHit.name);
   };
 
   // 滚轮缩放 - 以鼠标位置为中心
@@ -1575,8 +1661,7 @@ export function MapView({ onNPCClick }: MapViewProps) {
     const currentScale = scaleRef.current;
     const viewport = viewportRef.current;
 
-    const baseViewSize = MAP_WIDTH / VIEWPORT_SCALE;
-    const renderScale = Math.min(width, height) / baseViewSize * currentScale;
+    const renderScale = computeRenderScale(width, height, currentScale);
     const viewWidth = width / renderScale;
     const viewHeight = height / renderScale;
 
@@ -1588,12 +1673,23 @@ export function MapView({ onNPCClick }: MapViewProps) {
     const mouseMapX = minX + (mouseX / width) * (maxX - minX);
     const mouseMapY = minY + (mouseY / height) * (maxY - minY);
 
-    // 计算新缩放
-    const delta = e.deltaY > 0 ? -SCALE_STEP : SCALE_STEP;
+    // 计算新缩放 (按 deltaY 累积节流: 触控板事件密集且 deltaY 小, 累积到阈值才缩放一次;
+    // 鼠标滚轮一格 deltaY~100 直接超阈值缩放一次。避免触控板一滑冲到 MAX/MIN)
+    const WHEEL_THRESHOLD = 40;
+    wheelAccumRef.current += e.deltaY;
+    if (Math.abs(wheelAccumRef.current) < WHEEL_THRESHOLD) {
+      // 不足以触发一次缩放, 仅重置"暂停跟随"恢复定时器后返回
+      if (zoomTimeoutRef.current) clearTimeout(zoomTimeoutRef.current);
+      zoomTimeoutRef.current = setTimeout(() => setIsZooming(false), 500);
+      return;
+    }
+    const wheelSteps = Math.trunc(wheelAccumRef.current / WHEEL_THRESHOLD);
+    wheelAccumRef.current -= wheelSteps * WHEEL_THRESHOLD;
+    const delta = -Math.sign(wheelSteps) * SCALE_STEP * Math.min(3, Math.abs(wheelSteps));
     const newScale = Math.max(MIN_SCALE, Math.min(MAX_SCALE, currentScale + delta));
 
     // 计算缩放后的视口位置 (保持鼠标位置不变)
-    const newRenderScale = Math.min(width, height) / baseViewSize * newScale;
+    const newRenderScale = computeRenderScale(width, height, newScale);
     const newViewWidth = width / newRenderScale;
     const newViewHeight = height / newRenderScale;
 
@@ -1634,7 +1730,7 @@ export function MapView({ onNPCClick }: MapViewProps) {
     if (e.button === 0) { // 左键
       setIsDragging(true);
       setHasMoved(false); // 重置移动标记
-      setDragStart({ x: e.clientX, y: e.clientY });
+      dragStartRef.current = { x: e.clientX, y: e.clientY };
     }
   };
 
@@ -1642,8 +1738,8 @@ export function MapView({ onNPCClick }: MapViewProps) {
   const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
     if (!isDragging) return;
 
-    const dx = e.clientX - dragStart.x;
-    const dy = e.clientY - dragStart.y;
+    const dx = e.clientX - dragStartRef.current.x;
+    const dy = e.clientY - dragStartRef.current.y;
 
     // 检查是否超过拖动阈值
     const distance = Math.sqrt(dx * dx + dy * dy);
@@ -1657,8 +1753,7 @@ export function MapView({ onNPCClick }: MapViewProps) {
     // 计算地图坐标偏移 (考虑当前缩放)
     const currentScale = scaleRef.current;
     const { width, height } = dimensions;
-    const baseViewSize = MAP_WIDTH / VIEWPORT_SCALE;
-    const renderScale = Math.min(width, height) / baseViewSize * currentScale;
+    const renderScale = computeRenderScale(width, height, currentScale);
 
     // 转换为地图坐标偏移
     const mapDx = -dx / renderScale;
@@ -1681,7 +1776,7 @@ export function MapView({ onNPCClick }: MapViewProps) {
     viewportRef.current.x = Math.max(minX, Math.min(maxX, newX));
     viewportRef.current.y = Math.max(minY, Math.min(maxY, newY));
 
-    setDragStart({ x: e.clientX, y: e.clientY });
+    dragStartRef.current = { x: e.clientX, y: e.clientY };
   };
 
   // 结束拖动并保存偏移量
@@ -1740,45 +1835,31 @@ export function MapView({ onNPCClick }: MapViewProps) {
         onMouseLeave={handleMouseLeave}
         style={{ cursor: isDragging ? 'grabbing' : 'grab' }}
       />
-      {/* 障碍物 GIF 覆盖层 (随机动画: 5-10秒触发一次，播放2-3秒) */}
-      {obstacleOverlays.map(({ id, sprite, screenX, screenY, size }) => {
-        const isAnimating = animatingObstacles.has(id);
-        const staticFrame = obstacleStaticFramesRef.current[id];
-
+      {/* 障碍物 GIF 覆盖层 (仅动画播放期间浮起; 静态第一帧已画进 canvas 参与 Y-sort。坐标由 ref 每帧更新) */}
+      {obstacleOverlays.map(({ id, sprite }) => {
         return (
           <img
-            key={id}
-            src={isAnimating ? sprite : (staticFrame || sprite)}
+            key={'obs:' + id}
+            src={sprite}
             alt={id}
-            onLoad={(e) => {
-              // 首次加载时捕获第一帧作为静态图
-              if (!obstacleStaticFramesRef.current[id]) {
-                const img = e.currentTarget;
-                const canvas = document.createElement('canvas');
-                canvas.width = img.naturalWidth;
-                canvas.height = img.naturalHeight;
-                const ctx = canvas.getContext('2d');
-                if (ctx) {
-                  ctx.imageSmoothingEnabled = false;
-                  ctx.drawImage(img, 0, 0);
-                  obstacleStaticFramesRef.current[id] = canvas.toDataURL('image/png');
-                }
-              }
+            ref={el => {
+              if (el) overlayElsRef.current.set('obs:' + id, el);
+              else overlayElsRef.current.delete('obs:' + id);
             }}
             style={{
               position: 'absolute',
-              left: screenX,
-              top: screenY,
-              width: size,
-              height: size,
+              left: 0,
+              top: 0,
+              width: 48,
+              height: 48,
               pointerEvents: 'none',
               imageRendering: 'pixelated',
             }}
           />
         );
       })}
-      {/* 状态图标覆盖层 (GIF 动画) */}
-      {statusIconOverlays.map(({ npcName, iconType, screenX, screenY, iconSize }) => {
+      {/* 状态图标覆盖层 (GIF 动画; 坐标由 ref 每帧更新) */}
+      {statusIconOverlays.map(({ npcName, iconType }) => {
         const iconFile = iconType === 'talking'
           ? 'UI_mail_48x48.gif'
           : iconType === 'walking'
@@ -1786,15 +1867,19 @@ export function MapView({ onNPCClick }: MapViewProps) {
           : 'UI_thinking_emote_dots_48x48.gif';
         return (
           <img
-            key={npcName}
+            key={'icon:' + npcName}
             src={`/ui/${iconFile}`}
             alt={iconType}
+            ref={el => {
+              if (el) overlayElsRef.current.set('icon:' + npcName, el);
+              else overlayElsRef.current.delete('icon:' + npcName);
+            }}
             style={{
               position: 'absolute',
-              left: screenX,
-              top: screenY,
-              width: iconSize,
-              height: iconSize,
+              left: 0,
+              top: 0,
+              width: 24,
+              height: 24,
               pointerEvents: 'none',
               imageRendering: 'pixelated',
             }}

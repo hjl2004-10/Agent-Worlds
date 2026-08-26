@@ -91,6 +91,14 @@
         "image_to_video",
         "make_video"
       ]
+    },
+    "@graph": {
+      "description": "知识图谱组 (通用关系/事件经历/搜索，写入Neo4j)",
+      "tools": [
+        "relate",
+        "record_event",
+        "graph_search"
+      ]
     }
   }
 }
