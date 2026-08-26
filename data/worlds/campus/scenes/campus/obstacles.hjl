@@ -1,0 +1,298 @@
+{
+  "header": {
+    "version": "v1.0",
+    "type": "OBSTACLES"
+  },
+  "obstacles": [
+    {
+      "id": "fountain",
+      "type": "rect",
+      "x": 136,
+      "y": 166,
+      "width": 34,
+      "height": 14,
+      "desc": "fountain",
+      "sprite": "/obstacles/Campus_Fountain_48x48.gif"
+    },
+    {
+      "id": "statue",
+      "type": "rect",
+      "x": 137,
+      "y": 112,
+      "width": 30,
+      "height": 14,
+      "desc": "statue",
+      "sprite": "/obstacles/Campus_Statue_48x48.gif"
+    },
+    {
+      "id": "bench1",
+      "type": "rect",
+      "x": 93,
+      "y": 151,
+      "width": 32,
+      "height": 12,
+      "desc": "bench1",
+      "sprite": "/obstacles/Campus_Bench_48x48.gif"
+    },
+    {
+      "id": "bench2",
+      "type": "rect",
+      "x": 181,
+      "y": 151,
+      "width": 32,
+      "height": 12,
+      "desc": "bench2",
+      "sprite": "/obstacles/Campus_Bench_48x48.gif"
+    },
+    {
+      "id": "flowers1",
+      "type": "rect",
+      "x": 92,
+      "y": 201,
+      "width": 32,
+      "height": 12,
+      "desc": "flowers1",
+      "sprite": "/obstacles/Campus_FlowerBed_48x48.gif"
+    },
+    {
+      "id": "flowers2",
+      "type": "rect",
+      "x": 182,
+      "y": 201,
+      "width": 32,
+      "height": 12,
+      "desc": "flowers2",
+      "sprite": "/obstacles/Campus_FlowerBed_48x48.gif"
+    },
+    {
+      "id": "lamp1",
+      "type": "rect",
+      "x": 83,
+      "y": 86,
+      "width": 6,
+      "height": 8,
+      "desc": "lamp1",
+      "sprite": "/obstacles/Street_Lamp_Campus_48x48.gif"
+    },
+    {
+      "id": "lamp2",
+      "type": "rect",
+      "x": 205,
+      "y": 86,
+      "width": 6,
+      "height": 8,
+      "desc": "lamp2",
+      "sprite": "/obstacles/Street_Lamp_Campus_48x48.gif"
+    },
+    {
+      "id": "lamp3",
+      "type": "rect",
+      "x": 83,
+      "y": 214,
+      "width": 6,
+      "height": 8,
+      "desc": "lamp3",
+      "sprite": "/obstacles/Street_Lamp_Campus_48x48.gif"
+    },
+    {
+      "id": "lamp4",
+      "type": "rect",
+      "x": 205,
+      "y": 214,
+      "width": 6,
+      "height": 8,
+      "desc": "lamp4",
+      "sprite": "/obstacles/Street_Lamp_Campus_48x48.gif"
+    },
+    {
+      "id": "lamp5",
+      "type": "rect",
+      "x": 116,
+      "y": 245,
+      "width": 6,
+      "height": 8,
+      "desc": "lamp5",
+      "sprite": "/obstacles/Street_Lamp_Campus_48x48.gif"
+    },
+    {
+      "id": "lamp6",
+      "type": "rect",
+      "x": 172,
+      "y": 245,
+      "width": 6,
+      "height": 8,
+      "desc": "lamp6",
+      "sprite": "/obstacles/Street_Lamp_Campus_48x48.gif"
+    },
+    {
+      "id": "tree1",
+      "type": "rect",
+      "x": 78,
+      "y": 34,
+      "width": 12,
+      "height": 12,
+      "desc": "tree1",
+      "sprite": "/obstacles/Campus_Tree_48x48.gif"
+    },
+    {
+      "id": "tree2",
+      "type": "rect",
+      "x": 205,
+      "y": 35,
+      "width": 12,
+      "height": 12,
+      "desc": "tree2",
+      "sprite": "/obstacles/Campus_Tree_48x48.gif"
+    },
+    {
+      "id": "tree3",
+      "type": "rect",
+      "x": 82,
+      "y": 104,
+      "width": 12,
+      "height": 12,
+      "desc": "tree3",
+      "sprite": "/obstacles/Campus_Tree_48x48.gif"
+    },
+    {
+      "id": "tree4",
+      "type": "rect",
+      "x": 210,
+      "y": 110,
+      "width": 12,
+      "height": 12,
+      "desc": "tree4",
+      "sprite": "/obstacles/Campus_Tree_48x48.gif"
+    },
+    {
+      "id": "tree5",
+      "type": "rect",
+      "x": 72,
+      "y": 228,
+      "width": 12,
+      "height": 12,
+      "desc": "tree5",
+      "sprite": "/obstacles/Campus_Tree_48x48.gif"
+    },
+    {
+      "id": "tree6",
+      "type": "rect",
+      "x": 218,
+      "y": 225,
+      "width": 12,
+      "height": 12,
+      "desc": "tree6",
+      "sprite": "/obstacles/Campus_Tree_48x48.gif"
+    },
+    {
+      "id": "tree7",
+      "type": "rect",
+      "x": 5,
+      "y": 205,
+      "width": 12,
+      "height": 12,
+      "desc": "tree7",
+      "sprite": "/obstacles/Campus_Tree_48x48.gif"
+    },
+    {
+      "id": "tree8",
+      "type": "rect",
+      "x": 48,
+      "y": 208,
+      "width": 12,
+      "height": 12,
+      "desc": "tree8",
+      "sprite": "/obstacles/Campus_Tree_48x48.gif"
+    },
+    {
+      "id": "tree9",
+      "type": "rect",
+      "x": 260,
+      "y": 110,
+      "width": 12,
+      "height": 12,
+      "desc": "tree9",
+      "sprite": "/obstacles/Campus_Tree_48x48.gif"
+    },
+    {
+      "id": "tree10",
+      "type": "rect",
+      "x": 275,
+      "y": 190,
+      "width": 12,
+      "height": 12,
+      "desc": "tree10",
+      "sprite": "/obstacles/Campus_Tree_48x48.gif"
+    },
+    {
+      "id": "tree11",
+      "type": "rect",
+      "x": 10,
+      "y": 265,
+      "width": 12,
+      "height": 12,
+      "desc": "tree11",
+      "sprite": "/obstacles/Campus_Tree_48x48.gif"
+    },
+    {
+      "id": "tree12",
+      "type": "rect",
+      "x": 278,
+      "y": 272,
+      "width": 12,
+      "height": 12,
+      "desc": "tree12",
+      "sprite": "/obstacles/Campus_Tree_48x48.gif"
+    },
+    {
+      "id": "notice",
+      "type": "rect",
+      "x": 214,
+      "y": 260,
+      "width": 32,
+      "height": 10,
+      "desc": "notice",
+      "sprite": "/obstacles/Campus_NoticeBoard_48x48.gif"
+    },
+    {
+      "id": "bikes",
+      "type": "rect",
+      "x": 260,
+      "y": 276,
+      "width": 38,
+      "height": 8,
+      "desc": "bikes",
+      "sprite": "/obstacles/Campus_BikeRack_48x48.gif"
+    },
+    {
+      "id": "scooter",
+      "type": "rect",
+      "x": 62,
+      "y": 271,
+      "width": 34,
+      "height": 10,
+      "desc": "scooter",
+      "sprite": "/obstacles/Delivery_Scooter_48x48.gif"
+    },
+    {
+      "id": "hoop1",
+      "type": "rect",
+      "x": 226,
+      "y": 126,
+      "width": 10,
+      "height": 12,
+      "desc": "hoop1",
+      "sprite": "/obstacles/Basketball_Hoop_48x48.gif"
+    },
+    {
+      "id": "hoop2",
+      "type": "rect",
+      "x": 281,
+      "y": 73,
+      "width": 8,
+      "height": 12,
+      "desc": "hoop2",
+      "sprite": "/obstacles/Basketball_Hoop_48x48.gif"
+    }
+  ]
+}

@@ -3,15 +3,28 @@
 from fastapi import APIRouter
 from core import state_bus
 from core.lock import npcs_lock
-from core.drive import drive_l2 as l2
 from env.map import MAP_WIDTH, MAP_HEIGHT
-from core.drive.drive import STEP_SIZE
 from api import _state
 
 router = APIRouter(prefix="/api/god", tags=["god"])
 
-# 上帝模式步长 (与 drive_l1 一致)
-GOD_STEP = STEP_SIZE * 10
+
+def _clamp_pos(x, y):
+    """钳制坐标到地图边界 (与前端预测的钳制一致: 2 ~ MAP-2)"""
+    x = max(2.0, min(float(MAP_WIDTH) - 2.0, float(x)))
+    y = max(2.0, min(float(MAP_HEIGHT) - 2.0, float(y)))
+    return x, y
+
+
+def _sync_client_pos(npc, body):
+    """采信前端预测位置 (松键/转向时同步，消除校正回跳)"""
+    if not isinstance(body, dict):
+        return
+    try:
+        if 'x' in body and 'y' in body:
+            npc.x, npc.y = _clamp_pos(body['x'], body['y'])
+    except (TypeError, ValueError):
+        pass
 
 
 @router.post("/select/{npc_name}")
@@ -25,18 +38,16 @@ async def god_deselect(request: dict = {}):
 
 
 @router.post("/move/{direction}")
-async def god_move(direction: str):
-    """上帝模式移动 — 绕过 state_bus，直接在 API 层同步修改坐标"""
+async def god_move(direction: str, request: dict = {}):
+    """上帝模式移动 — 采信前端当前位置 + 设置方向，移动由驱动循环按统一速度推进"""
     if direction not in ['up', 'down', 'left', 'right']:
         return {"status": "error", "message": "Invalid direction"}
 
     with npcs_lock:
         for npc in _state.get_npcs():
             if npc.god_controlled:
+                _sync_client_pos(npc, request)
                 npc.god_move_direction = direction
-                npc.x, npc.y = l2.god_mode_step(
-                    npc.x, npc.y, direction, GOD_STEP, MAP_WIDTH, MAP_HEIGHT
-                )
                 return {"status": "ok", "npc": npc.name,
                         "direction": direction, "x": npc.x, "y": npc.y}
 
@@ -44,8 +55,16 @@ async def god_move(direction: str):
 
 
 @router.post("/stop")
-async def god_stop():
-    return state_bus.submit("god_stop", wait=True)
+async def god_stop(request: dict = {}):
+    """停止移动 — 采信前端最终位置并清除方向 (原子完成，避免轮询校正回跳)"""
+    with npcs_lock:
+        for npc in _state.get_npcs():
+            if npc.god_controlled:
+                _sync_client_pos(npc, request)
+                npc.god_move_direction = None
+                return {"status": "ok", "npc": npc.name, "x": npc.x, "y": npc.y}
+
+    return {"status": "ok"}
 
 
 @router.get("/status")

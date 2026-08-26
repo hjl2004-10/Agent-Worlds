@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   Space,
   Button,
@@ -9,12 +9,15 @@ import {
   Divider,
   Select,
   Tag,
+  Modal,
 } from 'antd';
 import {
   GlobalOutlined,
   SaveOutlined,
   PlusOutlined,
   DeleteOutlined,
+  DownloadOutlined,
+  UploadOutlined,
 } from '@ant-design/icons';
 import { getLore, updateLore } from '@/api/god';
 import { useWorldStore } from '@/store/useWorldStore';
@@ -99,6 +102,77 @@ export function LorePanel() {
     if (sceneId === currentScene) return;
     message.loading({ content: t('lore.switchingScene'), key: 'switch-scene' });
     await switchScene(sceneId);
+  };
+
+  // ============ 地图导入导出 (.hjlmap) ============
+  const [exporting, setExporting] = useState(false);
+  const [importing, setImporting] = useState(false);
+  const importInputRef = useRef<HTMLInputElement>(null);
+
+  const handleExportWorld = async () => {
+    setExporting(true);
+    try {
+      const res = await fetch(`/api/world/export/${encodeURIComponent(currentWorld)}`);
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        message.error(err.detail || t('lore.importFailed'));
+        return;
+      }
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${currentWorld}.hjlmap`;
+      a.click();
+      URL.revokeObjectURL(url);
+      message.success(`${t('lore.exported')} ${currentWorld}.hjlmap`);
+    } catch (err) {
+      message.error(t('lore.importFailed'));
+      console.error(err);
+    } finally {
+      setExporting(false);
+    }
+  };
+
+  const doImport = async (file: File, overwrite: boolean) => {
+    setImporting(true);
+    try {
+      const fd = new FormData();
+      fd.append('file', file);
+      fd.append('overwrite', String(overwrite));
+      const res = await fetch('/api/world/import', { method: 'POST', body: fd });
+      const data = await res.json().catch(() => ({} as any));
+      if (res.ok && data.status === 'ok') {
+        message.success(`${t('lore.importSuccess')}: ${data.world?.display_name || data.world?.world_id} (${data.installed_assets})`);
+        if (Array.isArray(data.warnings) && data.warnings.length > 0) {
+          console.warn('[MapImport]', data.warnings);
+        }
+        await fetchAvailableWorlds();
+      } else if (res.status === 409) {
+        Modal.confirm({
+          title: t('lore.worldExists'),
+          content: t('lore.overwriteConfirm'),
+          okText: t('lore.overwriteImport'),
+          okType: 'danger',
+          cancelText: t('common.cancel'),
+          onOk: () => doImport(file, true),
+        });
+      } else {
+        message.error(typeof data.detail === 'string' ? data.detail : t('lore.importFailed'));
+      }
+    } catch (err) {
+      message.error(t('lore.importFailed'));
+      console.error(err);
+    } finally {
+      setImporting(false);
+    }
+  };
+
+  const handleImportFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (file) doImport(file, false);
+    importInputRef.current?.blur();
   };
 
   // 更新规则
@@ -213,6 +287,40 @@ export function LorePanel() {
               />
             </div>
           )}
+
+          {/* 地图导入导出 */}
+          <div style={{ marginTop: 12, display: 'flex', gap: 8 }}>
+            <Button
+              size="small"
+              icon={<DownloadOutlined />}
+              loading={exporting}
+              onClick={handleExportWorld}
+              style={{ flex: 1 }}
+            >
+              {t('lore.exportMap')}
+            </Button>
+            <Button
+              size="small"
+              icon={<UploadOutlined />}
+              loading={importing}
+              onClick={() => importInputRef.current?.click()}
+              style={{ flex: 1 }}
+            >
+              {t('lore.importMap')}
+            </Button>
+            <input
+              ref={importInputRef}
+              type="file"
+              accept=".hjlmap,.zip"
+              style={{ display: 'none' }}
+              onChange={handleImportFile}
+            />
+          </div>
+          <div style={{ marginTop: 8 }}>
+            <Text type="secondary" style={{ fontSize: 11 }}>
+              {t('lore.mapIoHint')}
+            </Text>
+          </div>
         </div>
 
         <Divider style={{ margin: '8px 0', borderColor: 'var(--border-primary)' }} />

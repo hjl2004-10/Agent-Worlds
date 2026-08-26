@@ -9,11 +9,14 @@ from body.npc import WalkMode
 
 
 def update_drive_logic(npcs, step_size, map_width, map_height, th_contact, th_leave,
-                       should_recover=False):
+                       should_recover=False, god_step=None):
     """
     核心驱动逻辑 - 状态流转控制器
     协调 移动 与 社交 的切换
     """
+    # 上帝模式步长 (由 drive.py 按 速度×tick间隔 计算；兼容旧调用)
+    if god_step is None:
+        god_step = step_size * 10
     # === 阶段0: 过滤禁用 NPC ===
     active_npcs = [npc for npc in npcs if npc.enabled]
 
@@ -29,8 +32,6 @@ def update_drive_logic(npcs, step_size, map_width, map_height, th_contact, th_le
         if not npc.is_talking:
             # 上帝模式: 玩家控制移动 (持续移动直到方向被清除)
             if npc.god_controlled and npc.god_move_direction:
-                # 上帝模式使用更大的步长 (3倍速度)
-                god_step = step_size * 10
                 npc.x, npc.y = l2.god_mode_step(
                     npc.x, npc.y,
                     npc.god_move_direction,
@@ -69,18 +70,18 @@ def update_drive_logic(npcs, step_size, map_width, map_height, th_contact, th_le
                 # idle -> random: 静默结束，开始随机漫步
                 npc.walk_mode = WalkMode.RANDOM
                 npc.walk_mode_tick = 0
-                print(f"[Walk] {npc.name} idle -> random")
+                print(f"🚶 {npc.name} 行走模式: idle -> random")
             elif npc.walk_mode == WalkMode.RANDOM and npc.walk_mode_tick >= npc.walk_random_duration:
                 # random -> linear: 随机漫步结束，开始直线行走
                 npc.walk_mode = WalkMode.LINEAR
                 npc.walk_mode_tick = 0
                 npc.walk_direction = l2.generate_direction()
-                print(f"[Walk] {npc.name} random -> linear")
+                print(f"🚶 {npc.name} 行走模式: random -> linear")
             elif npc.walk_mode == WalkMode.LINEAR and npc.walk_mode_tick >= npc.walk_linear_duration:
                 # linear -> idle: 直线行走结束，进入静默
                 npc.walk_mode = WalkMode.IDLE
                 npc.walk_mode_tick = 0
-                print(f"[Walk] {npc.name} linear -> idle")
+                print(f"🚶 {npc.name} 行走模式: linear -> idle")
 
             # 根据模式执行移动 (idle 模式不移动)
             if npc.walk_mode == WalkMode.RANDOM:

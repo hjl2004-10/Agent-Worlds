@@ -36,10 +36,11 @@ export const godApi = {
     return client.post<GodStatusResponse>('/god/deselect', payload);
   },
 
-  move: (direction: 'up' | 'down' | 'left' | 'right') =>
-    client.post<GodMoveResponse>(`/god/move/${direction}`),
+  move: (direction: 'up' | 'down' | 'left' | 'right', pos?: { x: number; y: number }) =>
+    client.post<GodMoveResponse>(`/god/move/${direction}`, pos ?? {}),
 
-  stop: () => client.post<GodMoveResponse>('/god/stop'),
+  stop: (pos?: { x: number; y: number }) =>
+    client.post<GodMoveResponse>('/god/stop', pos ?? {}),
 
   getStatus: () => client.get<GodStatusResponse>('/god/status'),
 

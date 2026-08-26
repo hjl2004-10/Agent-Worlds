@@ -1,0 +1,363 @@
+# Building an MCP server and AI skill import system for AI_OS
+
+**The MCP ecosystem has matured rapidly into a rich, multi-registry landscape with over 10,000 servers, standardized configuration formats, and emerging skill distribution standards — but serious security gaps remain.** This report synthesizes findings across all 10 research topics to provide the technical foundation for designing an import system. The ecosystem's key enablers — a de facto JSON config format, a stable official registry API, and three well-defined transport protocols — make a network import system entirely feasible today. However, the first wave of real-world supply chain attacks (CVE-2025-6514, Postmark backdoor, Smithery path traversal) demands that security be a first-class architectural concern.
+
+---
+
+## 一、MCP registries now form a federated hub-and-spoke ecosystem
+
+### The official registry and its API
+
+The **Official MCP Registry** at `registry.modelcontextprotocol.io` launched in preview on September 8, 2025, with an API freeze at v0.1 by October 2025. It was donated to the Agentic AI Foundation (Linux Foundation) in December 2025, co-maintained by contributors from Anthropic, GitHub, Microsoft, and PulseMCP. It functions as a **metaregistry** — hosting metadata about servers while actual code lives on npm, PyPI, Docker Hub, or GitHub Releases.
+
+The REST API requires no authentication for reads:
+
+| Endpoint | Purpose |
+|---|---|
+| `GET /v0/servers?search=filesystem` | Search servers |
+| `GET /v0/servers/{server-id}` | Get specific server |
+| `GET /v0.1/servers?limit=100&cursor=X` | Paginated listing |
+| `GET /v0.1/servers?updated_since=2025-10-23T12:00:00Z` | Incremental sync |
+
+Server metadata follows a JSON Schema at `https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json`:
+
+```json
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.username/email-mcp",
+  "title": "Email Integration",
+  "description": "Send emails and manage accounts",
+  "version": "1.0.0",
+  "repository": { "url": "https://github.com/username/email-mcp", "source": "github" },
+  "packages": [{
+    "registryType": "npm",
+    "identifier": "@username/email-mcp",
+    "version": "1.0.0",
+    "transport": { "type": "stdio" }
+  }],
+  "remotes": [{
+    "type": "streamable-http",
+    "url": "https://yourdomain.com/mcp"
+  }],
+  "_meta": {}
+}
+```
+
+The `_meta` field uses namespaced keys (e.g., `com.pulsemcp/server`, `io.modelcontextprotocol.registry/official`) enabling subregistries to overlay enriched metadata without conflicts.
+
+### Third-party registries and their APIs
+
+**Smithery** (`smithery.ai`) is the most prominent third-party registry, providing both discovery and hosted deployment. Its API at `registry.smithery.ai` requires Bearer token authentication:
+
+```
+GET /servers?q=<query>&page=1&pageSize=10    # Semantic search
+GET /servers/{qualifiedName}                  # Server details
+```
+
+Query filters include `owner:username`, `repo:name`, and `is:deployed`. Response payloads include `connections[]` (with transport type, URL, and `configSchema` as JSON Schema), `tools[]` definitions, and `security.scanPassed` status. The install flow uses `npx @smithery/cli install @owner/server --client claude`, and an SDK provides `createSmitheryUrl()` for programmatic Streamable HTTP connections.
+
+**Glama** (`glama.ai/mcp`) claims the largest server collection. Its API follows the pattern `GET https://glama.ai/api/mcp/v1/servers/{owner}/{repo}` without authentication for basic reads. It also provides an OpenAI-compatible gateway API for using LLMs with MCP tools.
+
+**mcp.run** takes a unique WebAssembly approach — tools are Wasm "servlets" executed in sandboxed environments via the `mcpx` client. Think of it as a Wasm-first package manager for MCP tools, with inherent security through sandboxed execution.
+
+**PulseMCP** (`pulsemcp.com`) reports **10,390+ servers** with daily updates and enriched metadata (visitor estimates, security analysis). It implements the Generic MCP Registry API specification and offers partnership-based API access. Notably, PulseMCP ships an MCP server itself (`npx -y pulsemcp-server`) that lets AI agents search the directory programmatically.
+
+**mcp.so** claims **18,548 servers** (the largest raw count), is open-source (Next.js + Supabase), but lacks a documented REST API. Other directories include **MCPMarket** (`mcpmarket.com`, npm-scoped packages under `@mcpmarket`), **OpenTools** (`opentools.com`, registry + LLM completions API), **Cline MCP Marketplace** (one-click install for the Cline coding agent), **LobeHub** (`lobehub.com/mcp`), and the **GitHub MCP Registry** powering VS Code's one-click install.
+
+**For your AI_OS import system**, the Official Registry API is the canonical source. Smithery's API adds hosted deployment and security scanning. PulseMCP adds popularity metrics. A robust import system should query multiple registries and merge results, using the `_meta` extension mechanism for cross-registry enrichment.
+
+---
+
+## 二、Configuration format is a de facto standard with one notable exception
+
+The `mcpServers` JSON object has become the **ecosystem-wide de facto standard**, originating from Claude Desktop and adopted by Cursor, Claude Code, Windsurf, and most clients. The core portable structure:
+
+```json
+{
+  "mcpServers": {
+    "server-name": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/path"],
+      "env": { "API_KEY": "xxx" }
+    }
+  }
+}
+```
+
+For **stdio transport**, the standard fields are `command` (executable), `args` (string array), and `env` (environment variables). For **remote servers**, modern clients accept `url` and optional `headers` directly:
+
+```json
+{
+  "mcpServers": {
+    "remote-tools": {
+      "url": "https://mcp.example.com/mcp",
+      "headers": { "Authorization": "Bearer token" }
+    }
+  }
+}
+```
+
+**VS Code is the notable exception** — it uses `"servers"` instead of `"mcpServers"`, requires a `"type"` field (`"stdio"`, `"http"`, `"sse"`), and supports `"inputs"` for secure secret prompting and `"envFile"` for `.env` references. Claude Desktop's JSON config only natively supports stdio; remote servers require proxy tools like `mcp-remote` or `mcp-proxy` as stdio bridges. Cursor natively supports all three transports with optional `transport` field.
+
+Here are canonical config examples for each installation method:
+
+**Python via uvx:**
+```json
+{ "command": "uvx", "args": ["mcp-server-fetch"] }
+```
+
+**Docker:**
+```json
+{
+  "command": "docker",
+  "args": ["run", "-i", "--rm", "-e", "GITHUB_PERSONAL_ACCESS_TOKEN",
+           "ghcr.io/github/github-mcp-server"],
+  "env": { "GITHUB_PERSONAL_ACCESS_TOKEN": "ghp_xxx" }
+}
+```
+
+**Remote via mcp-remote proxy (for stdio-only clients):**
+```json
+{ "command": "npx", "args": ["mcp-remote", "https://example.com/mcp"] }
+```
+
+**Your AI_OS import system should normalize all configs to a canonical internal format** that includes transport type detection, and generate client-specific configs as needed for output.
+
+---
+
+## 三、Three transports, two that matter in 2026
+
+The MCP specification (current version: **2025-11-25**) defines two active transports:
+
+**stdio** remains essential for local tools. The client launches the server as a subprocess, writing JSON-RPC 2.0 messages to stdin and reading from stdout (newline-delimited). It offers minimal latency, no network overhead, and the spec states clients "SHOULD support stdio whenever possible." Limitations: single-machine, single-client, no built-in auth.
+
+**Streamable HTTP** (introduced March 2025, spec 2025-03-26) replaced SSE as the standard remote transport. It operates on a **single HTTP endpoint** supporting POST and GET:
+
+```http
+POST /mcp HTTP/1.1
+Content-Type: application/json
+Accept: application/json, text/event-stream
+Mcp-Session-Id: abc123
+
+{"jsonrpc": "2.0", "method": "tools/call", "params": {"name": "greet", "arguments": {"name": "World"}}, "id": 2}
+```
+
+The server responds with either `application/json` (single response) or `text/event-stream` (streaming SSE within the POST response). Session management uses the `Mcp-Session-Id` header. The GET method optionally opens an SSE stream for server-initiated messages. Key advantages over the deprecated SSE: single endpoint, standard HTTP infrastructure compatibility, stateless operation for serverless, and built-in resumability.
+
+**SSE was deprecated** in the 2025-03-26 spec. For backward compatibility, clients should attempt POST first (Streamable HTTP) and fall back to GET if the server returns a legacy SSE stream. The 2026 roadmap explicitly states no new transports will be added — the focus is evolving Streamable HTTP for horizontal scaling.
+
+| Client | stdio | SSE (legacy) | Streamable HTTP |
+|--------|:-----:|:------------:|:---------------:|
+| Claude Desktop (config) | ✅ | via proxy | via proxy |
+| Claude Desktop (UI) | ✅ | ✅ | ✅ |
+| Cursor | ✅ | ✅ | ✅ |
+| VS Code (Copilot) | ✅ | fallback | ✅ preferred |
+| Claude Code | ✅ | ✅ | ✅ |
+
+---
+
+## 四、Installation methods and the rise of one-click flows
+
+Four installation patterns dominate: **npx** (`npx -y @package/name`) for Node.js servers, **uvx** (`uvx mcp-server-name`) for Python servers, **Docker** (`docker run -i --rm image`) for containerized deployment, and **pre-compiled binaries** (Go via `go install`, Rust via `cargo install` or GitHub Releases). Each maps directly to the stdio config format with `command` and `args`.
+
+The ecosystem is converging on one-click installation through multiple mechanisms:
+
+- **CLI tools**: `npx @smithery/cli install server --client claude` auto-modifies the correct config file. `npx install-mcp package --client claude-desktop` supports **17+ clients** and auto-detects package type (npm, pip, URL). `mcp-get` provides a curated registry with `install`/`uninstall`/`list` commands.
+- **Deep links**: Cursor supports `cursor://anysphere.cursor-deeplink/mcp/install?name=XXX&config=BASE64` URLs.
+- **IDE marketplaces**: VS Code's MCP gallery (powered by GitHub MCP Registry), Windsurf's built-in marketplace, and Claude Desktop's Connector Library all provide browse-and-click installation.
+- **Meta-installers**: `mcp-installer` by @anaisbetts is an MCP server that installs other MCP servers via natural language ("Hey Claude, install mcp-server-fetch").
+- **Docker MCP Toolkit** provides a catalog UI within Docker Desktop with toggle-based enablement.
+
+**For your AI_OS**, the optimal approach combines: (1) querying registries for server metadata and config schemas, (2) resolving the appropriate installation method from the `packages[]` field, (3) generating the correct transport configuration, and (4) writing it to the internal config store.
+
+---
+
+## 五、Agent Skills standard emerged as the dominant skill distribution format
+
+The most significant development in AI skill distribution is Anthropic's **Agent Skills specification** (December 2025), which uses a `SKILL.md` file with YAML frontmatter:
+
+```markdown
+---
+name: deploy-production
+description: Deploy the current branch to production
+disable-model-invocation: true
+---
+# Deployment Skill
+
+## Steps
+1. Run tests
+2. Build container image
+3. Push to ECR
+4. Verify health checks
+```
+
+This format has been adopted by **17+ tools** (Claude Code, Cursor, Codex CLI, Gemini CLI, VS Code/Copilot, Windsurf, Goose) and already has **350,000+ skills** across marketplaces like SkillsMP (351K skills), Skills.sh (83K, by Vercel), and ClawHub (~3.2K curated). Growth rate parallels npm's 8-year trajectory compressed into 2 months.
+
+Other distribution approaches remain relevant: OpenAI GPTs use OpenAPI 3.1.0 action schemas, LangChain Hub distributes prompts via `owner/name:commit_hash`, CrewAI uses Python classes with Pydantic schemas, and Semantic Kernel uses prompt directories with `skprompt.txt` + `config.json` pairs.
+
+### Skill package design for network import
+
+For your skill structure (`skill.hjl` + `prompt.md`), network distribution requires these additional fields:
+
+```json
+{
+  "name": "email-assistant",
+  "version": "1.2.0",
+  "description": "Manage email with AI assistance",
+  "author": "user@example.com",
+  "license": "MIT",
+  "tags": ["email", "productivity"],
+  "tools": ["read_email", "send_email"],
+  "prompt_file": "prompt.md",
+  "mcp_server": { "registry": "npm", "package": "@org/email-mcp", "version": "^2.0" },
+  "dependencies": {
+    "mcp_servers": ["@anthropic/filesystem-mcp"],
+    "skills": [{"name": "base-git-workflow", "version": ">=1.0"}]
+  },
+  "compatibility": {
+    "ai_os_version": ">=1.0.0",
+    "llm_models": ["claude-*", "gpt-4*"]
+  },
+  "security": {
+    "sha256": "abc123...",
+    "signature": "...",
+    "permissions": {
+      "filesystem": { "read": ["/data"], "write": [] },
+      "network": ["smtp.company.com"],
+      "tools": {
+        "send_email": { "approval": "required" }
+      }
+    }
+  }
+}
+```
+
+SemVer is the universal standard. **Permission declarations are critical** — a Snyk study found **13.4% of agent skills contained critical security issues** and 5.2% showed patterns suggesting malicious intent.
+
+---
+
+## 六、Security demands defense-in-depth across four layers
+
+### Real attacks have already occurred
+
+The MCP ecosystem experienced its first wave of security incidents in 2025: **CVE-2025-6514** (CVSS 9.6) — OS command injection in `mcp-remote` affecting 437K+ downloads, enabling full RCE from connecting to a malicious remote server. The **Smithery path traversal** (October 2025) exfiltrated API tokens from 3,000+ hosted applications. An unofficial **Postmark MCP server** silently BCC'd all sent emails to attackers. **19 typosquatted npm packages** carried MCP-based malware with embedded prompt injection for credential theft.
+
+The MCP specification acknowledges that servers running as local processes have **full user privileges** — access to SSH keys, API tokens, `.env` files, and the ability to make arbitrary network requests. The spec mandates "there SHOULD always be a human in the loop with the ability to deny tool invocations," but enforcement is left to clients.
+
+### Sandbox and isolation solutions
+
+**ToolHive** (by Stacklok, open source) is the most mature containerized MCP solution — every server runs in a locked-down Docker container with fine-grained permission profiles, SSE/Streamable HTTP proxying, and **Sigstore provenance verification**:
+
+```bash
+thv run --image-verification=enforce --tools "read_file,list_directory" filesystem
+```
+
+**Deno sandboxing** provides lightweight isolation through V8's sandbox technology with explicit permission controls. The `mcp-deno-sandbox` project and Pydantic's `mcp-run-python` (Pyodide in Deno) offer MCP-specific implementations. For maximum isolation, **Firecracker microVMs** boot in ~125ms with <5 MiB overhead, requiring an attacker to escape both the guest kernel and hypervisor — used by AWS Lambda for trillions of invocations.
+
+Hardened Docker configuration for MCP servers should include:
+```yaml
+services:
+  mcp-server:
+    read_only: true
+    security_opt: ["no-new-privileges:true", "seccomp=runtime/default"]
+    cap_drop: ["ALL"]
+    tmpfs: ["/tmp:size=50M"]
+    networks: [mcp-restricted]
+networks:
+  mcp-restricted:
+    internal: true  # No external network access
+```
+
+### Recommended security architecture for your import system
+
+Implement a **four-layer defense**:
+
+- **Layer 1 — Provenance verification**: Verify container image signatures via Sigstore/GitHub Attestations before installation. Check namespace ownership in registries. Scan for typosquatting.
+- **Layer 2 — Sandboxed execution**: Run all imported MCP servers in Docker containers with restricted capabilities. Use ToolHive's permission profile system or similar.
+- **Layer 3 — Tool-level permissions**: Implement risk-tiered approval: auto-approve read-only operations (Tier 1), require single confirmation for writes (Tier 2), require confirmation + audit for destructive operations (Tier 3), multi-party approval for financial/irreversible actions (Tier 4).
+- **Layer 4 — Prompt injection defense**: Scan imported `prompt.md` files for instruction-override patterns, unicode obfuscation, and encoded payloads. Treat all imported skill content as untrusted. Isolate imported prompts from system instructions with clear trust boundaries.
+
+---
+
+## 七、Python MCP SDK provides clean transport-specific client APIs
+
+The official `mcp` package is at **version 1.26.0** (January 2026), supporting protocol version 2025-11-25. Python ≥3.10 required.
+
+All three transports follow an identical pattern — yielding `(read_stream, write_stream)` tuples passed to `ClientSession`:
+
+```python
+from mcp import ClientSession, StdioServerParameters
+from mcp.client.stdio import stdio_client
+from mcp.client.streamable_http import streamable_http_client
+from mcp.client.sse import sse_client
+
+# stdio
+async with stdio_client(StdioServerParameters(command="npx", args=["-y", "server"])) as (read, write):
+    async with ClientSession(read, write) as session:
+        await session.initialize()
+        tools = await session.list_tools()
+        result = await session.call_tool("add", arguments={"a": 1, "b": 2})
+
+# Streamable HTTP (recommended for remote)
+async with streamable_http_client("http://localhost:8000/mcp") as (read, write, _):
+    async with ClientSession(read, write) as session:
+        await session.initialize()
+
+# SSE (deprecated, backward compat only)
+async with sse_client("http://localhost:8000/sse") as (read, write):
+    async with ClientSession(read, write) as session:
+        await session.initialize()
+```
+
+**There is no unified `connect()` method** in the official SDK. Each transport has its own context manager. However, the standalone **`fastmcp` package** (v3.x, separate project) provides auto-detection:
+
+```python
+from fastmcp import Client
+async with Client("http://localhost:8000/mcp") as client:
+    result = await client.call_tool(name="add", arguments={"a": 1, "b": 2})
+```
+
+Key `ClientSession` methods: `initialize()` (required first call), `list_tools()`, `call_tool(name, arguments)`, `list_resources()`, `read_resource(uri)`, `list_prompts()`, `get_prompt(name, arguments)`, `send_ping()`. The `streamable_http_client` now accepts `httpx.AsyncClient` directly for custom headers/auth (changed in v1.26.0 from the earlier `httpx_client_factory` pattern).
+
+For your AI_OS, **build a transport-agnostic wrapper** that inspects the server config: if `command` is present, use `stdio_client`; if `url` is present, use `streamable_http_client` (with SSE fallback). The standalone `fastmcp.Client` provides a reference implementation of this pattern.
+
+```python
+import httpx
+from mcp.client.streamable_http import streamable_http_client
+
+# With authentication
+headers = {"Authorization": "Bearer YOUR_TOKEN"}
+async with streamable_http_client(
+    "https://mcp.example.com/mcp",
+    http_client=httpx.AsyncClient(headers=headers)
+) as (read, write, _):
+    async with ClientSession(read, write) as session:
+        await session.initialize()
+```
+
+For server-side mounting into an ASGI app:
+```python
+from fastapi import FastAPI
+from mcp.server.fastmcp import FastMCP
+app = FastAPI()
+mcp = FastMCP("AI_OS MCP Gateway")
+app.mount("/mcp", mcp.streamable_http_app())
+```
+
+A v2 SDK is in pre-alpha with breaking transport-layer changes planned for Q1 2026. **Pin `mcp>=1.25,<2`** for stability.
+
+---
+
+## Conclusion: architecture recommendations for the AI_OS import system
+
+The research reveals a mature but fragmented ecosystem converging on clear standards. Five architectural decisions emerge:
+
+**Use the Official Registry API as primary source, with Smithery and PulseMCP as enrichment layers.** The `/v0.1/servers` endpoint with `updated_since` filtering enables efficient incremental syncing. Smithery adds hosted deployment options and security scanning; PulseMCP adds popularity metrics and curated quality signals.
+
+**Normalize the de facto `mcpServers` JSON format internally, with transport auto-detection.** Parse configs to determine transport type from the presence of `command` (stdio) vs. `url` (HTTP). Generate client-specific output formats as needed (VS Code's `servers` key, Cursor's native remote format).
+
+**Default to Streamable HTTP for remote servers, stdio for local.** SSE is deprecated and losing client support. For stdio-only clients connecting to remote servers, auto-generate the `mcp-remote` proxy bridge configuration.
+
+**Implement mandatory sandboxing for all imported MCP servers.** Docker container isolation with ToolHive-style permission profiles is the practical minimum. Provenance verification via Sigstore should be enforced in production. Tool-level permission tiers with human-in-the-loop for destructive operations are essential.
+
+**Adopt the Agent Skills SKILL.md format for skill packaging, extended with dependency and security metadata.** The format's adoption by 17+ tools and 350K+ existing skills makes it the clear standard. Your `skill.hjl` should map cleanly to SKILL.md semantics with added fields for MCP server dependencies, version constraints, and permission declarations.

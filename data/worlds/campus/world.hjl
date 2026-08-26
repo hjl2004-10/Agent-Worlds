@@ -1,0 +1,54 @@
+{
+  "header": {
+    "version": "v1.0",
+    "type": "WORLD"
+  },
+  "world_id": "campus",
+  "display_name": "现代大学校园",
+  "genre": "校园",
+  "description": "现代中国大学校园，教师、学生、保安、配送员等角色在校园里生活",
+  "time": {
+    "year": 2025,
+    "month": 9,
+    "day": 1,
+    "hour": 8,
+    "minute": 30,
+    "time_scale": 60,
+    "tick_interval": 0.5
+  },
+  "settings": {
+    "day_ticks": 2880
+  },
+  "lore": {
+    "world_name": "阳光大学",
+    "background": "这是一所现代中国大学校园。校园里有教学楼、图书馆、宿舍、食堂、体育馆和行政楼，中央广场上有喷泉和雕塑。教师授课、学生赶课、保安值守、配送员穿梭，每个人都在校园里过着自己的生活。角色之间可以相遇、聊天、合作。",
+    "rules": [
+      "角色在校园中自由活动，可以上课、自习、吃饭、运动",
+      "中央广场是人流汇集的地方，适合偶遇和聊天",
+      "校园作息以课程表为节奏，上课时段教学楼人多",
+      "对话压缩输出，工作正常使用"
+    ],
+    "history": [
+      "九月开学季，新学期开始",
+      "校园迎来了新的一批学生"
+    ]
+  },
+  "assets": {
+    "tileset": "campus",
+    "building_set": "campus_buildings",
+    "sprite_pool": [
+      "Athlete_1_48x48",
+      "Courier_1_48x48",
+      "Guard_1_48x48",
+      "Photographer_1_48x48",
+      "Player_Student_Blue_48x48",
+      "Student_Green_48x48",
+      "Student_Red_48x48",
+      "Teacher_1_48x48"
+    ]
+  },
+  "available_scenes": [
+    "campus"
+  ],
+  "default_scene": "campus"
+}

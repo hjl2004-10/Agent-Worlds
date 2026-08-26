@@ -4,7 +4,7 @@
 # ============================================
 
 import core.drive.drive_l1 as l1
-from env.map import MAP_WIDTH, MAP_HEIGHT, THRESHOLD_CONTACT, THRESHOLD_LEAVE
+from env.map import MAP_WIDTH, MAP_HEIGHT, THRESHOLD_CONTACT, THRESHOLD_LEAVE, GOD_MOVE_SPEED
 
 # ========== 配置区 ==========
 STEP_SIZE = 1.0              # 每次移动步长
@@ -32,6 +32,9 @@ def update_all(npcs):
     # 每 RECOVERY_INTERVAL tick 恢复一次主动值
     should_recover = (_tick_counter % RECOVERY_INTERVAL == 0)
 
+    # 上帝模式步长 = 速度 × tick间隔 (与前端预测速度一致，避免校正回跳)
+    god_step = GOD_MOVE_SPEED * _get_tick_interval()
+
     return l1.update_drive_logic(
         npcs,
         step_size=STEP_SIZE,
@@ -39,5 +42,15 @@ def update_all(npcs):
         map_height=MAP_HEIGHT,
         th_contact=THRESHOLD_CONTACT,
         th_leave=THRESHOLD_LEAVE,
-        should_recover=should_recover
+        should_recover=should_recover,
+        god_step=god_step,
     )
+
+
+def _get_tick_interval():
+    """获取当前世界的 tick 间隔 (秒)，失败时用默认 0.5"""
+    try:
+        from env import time as time_module
+        return time_module.get_tick_interval()
+    except Exception:
+        return 0.5

@@ -1,0 +1,22 @@
+{
+  "header": {
+    "version": "v1.0",
+    "type": "SCENE"
+  },
+  "scene_id": "campus",
+  "display_name": "大学校园",
+  "description": "教学楼、图书馆、宿舍、食堂、体育馆、行政楼环绕中央广场的大学校园",
+  "map": {
+    "width": 320,
+    "height": 320,
+    "tile_size": 16
+  },
+  "spawn_points": {
+    "default": {
+      "x": 158,
+      "y": 278,
+      "direction": "down"
+    }
+  },
+  "exits": []
+}

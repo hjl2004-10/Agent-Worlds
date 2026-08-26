@@ -23,6 +23,9 @@ THRESHOLD_LEAVE = 24.0     # 解除禁止的距离 (约1.5个图块)
 # 是否启用障碍物碰撞
 OBSTACLES_ENABLED = True
 
+# 上帝模式移动速度 (像素/秒) — 前端 MapView.tsx 的 GOD_MOVE_SPEED 与此保持同步
+GOD_MOVE_SPEED = 60.0
+
 # ========== 运行时状态 ==========
 # 当前世界和场景 (从 runtime/current.hjl 加载)
 _current_world: str = "modern"

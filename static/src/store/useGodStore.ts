@@ -52,7 +52,8 @@ export const useGodStore = create<GodStore>((set, get) => ({
     // 立即设置方向 (客户端预测，不等网络)
     godMoveDirectionRef.current = direction;
     try {
-      await godApi.move(direction);
+      // 携带前端预测位置，后端即时采信 (转向时同步，消除回跳)
+      await godApi.move(direction, godPredictedPositionRef.current ?? undefined);
     } catch {
       // 网络失败不影响前端预测，后端校正会处理
     }
@@ -62,7 +63,8 @@ export const useGodStore = create<GodStore>((set, get) => ({
     // 立即清除方向 (客户端立刻停止)
     godMoveDirectionRef.current = null;
     try {
-      await godApi.stop();
+      // 提交最终预测位置，后端采信 (松键即同步，杜绝校正拉回)
+      await godApi.stop(godPredictedPositionRef.current ?? undefined);
     } catch {
       // 同上
     }

@@ -1,0 +1,85 @@
+{
+  "header": {
+    "version": "v1.0",
+    "type": "LOCATIONS"
+  },
+  "locations": {
+    "教学楼": {
+      "x": 160,
+      "y": 32,
+      "tile": [
+        10,
+        2
+      ],
+      "building": "house/ME_Campus_48x48_TeachingBuilding.png",
+      "desc": "上课和自习的主要场所",
+      "greeting": "教学楼里传来朗朗书声，走廊上贴着新学期的课表。"
+    },
+    "图书馆": {
+      "x": 48,
+      "y": 85,
+      "tile": [
+        3,
+        5
+      ],
+      "building": "house/ME_Campus_48x48_Library.png",
+      "desc": "查阅资料、安静学习的地方",
+      "greeting": "图书馆安静整洁，靠窗的位置最受欢迎，记得把手机调成静音。"
+    },
+    "学生宿舍": {
+      "x": 274,
+      "y": 45,
+      "tile": [
+        17,
+        2
+      ],
+      "building": "house/ME_Campus_48x48_Dormitory.png",
+      "desc": "学生们居住休息的地方",
+      "greeting": "宿舍楼下停满了自行车，宿管阿姨正在登记来访人员。"
+    },
+    "学生食堂": {
+      "x": 42,
+      "y": 163,
+      "tile": [
+        2,
+        10
+      ],
+      "building": "house/ME_Campus_48x48_Canteen.png",
+      "desc": "一日三餐、人间烟火气最浓的地方",
+      "greeting": "食堂飘着饭菜香，今天窗口有新出的红烧排骨，排队的人不少。"
+    },
+    "体育馆": {
+      "x": 279,
+      "y": 262,
+      "tile": [
+        17,
+        16
+      ],
+      "building": "house/ME_Campus_48x48_Gymnasium.png",
+      "desc": "运动训练和体育课的场地",
+      "greeting": "体育馆里正在进行篮球训练，加油声此起彼伏。"
+    },
+    "行政楼": {
+      "x": 230,
+      "y": 88,
+      "tile": [
+        14,
+        5
+      ],
+      "building": "house/ME_Campus_48x48_Administration.png",
+      "desc": "学校行政办公和教务办理的地方",
+      "greeting": "行政楼庄重安静，教务处的窗口前排着办手续的队伍。"
+    },
+    "校门": {
+      "x": 160,
+      "y": 292,
+      "tile": [
+        10,
+        18
+      ],
+      "building": "house/ME_Campus_48x48_MainGate.png",
+      "desc": "学校正门，进出校园的通道",
+      "greeting": "校门口人来人往，门卫师傅认真地核对每一位访客的身份。"
+    }
+  }
+}

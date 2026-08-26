@@ -1,0 +1,363 @@
+# AI 操控浏览器：2025-2026 主流工具全景调研
+
+**AI 浏览器自动化领域正经历爆发式增长，2024 年市场规模约 45 亿美元，预计 2034 年将达到 768 亿美元（CAGR 32.8%）。** 当前已形成三大技术路线：以 DOM 解析为主的轻量级方案（Browser Use、AgentQL）、以视觉识别为主的通用方案（Claude Computer Use、OpenAI CUA）、以及两者融合的混合方案（Stagehand、Skyvern）。传统自动化工具（Playwright、Puppeteer、Selenium）则通过 MCP 协议等新标准快速接入 AI 能力。本报告将全面覆盖 OpenClaw 项目、主流工具对比、无头浏览器技术原理、架构差异分析及实际代码集成方法。
+
+---
+
+## 一、OpenClaw：GitHub 史上增长最快的 AI 助手平台
+
+**OpenClaw 不是专门的浏览器自动化工具，而是一个综合性 AI 个人助手平台，但浏览器自动化是其核心内置能力之一。** 截至 2026 年 3 月，该项目在 GitHub 上已获得约 **31 万颗星**，超越 Linux 和 React，成为 GitHub 历史上增长最快的非聚合类项目。
+
+该项目由奥地利开发者 Peter Steinberger（PSPDFKit 创始人，公司以约 8 亿美元出售）于 2025 年 11 月首次发布，最初名为 "Clawd"，后因 Anthropic 商标投诉于 2026 年 1 月 30 日更名为 OpenClaw。2026 年 2 月 14 日，Steinberger 宣布加入 OpenAI，项目将移交至开源基金会管理。
+
+- **GitHub 仓库**：https://github.com/openclaw/openclaw
+- **官方文档**：https://docs.openclaw.ai/
+- **浏览器文档**：https://docs.openclaw.ai/tools/browser
+- **许可证**：MIT | **运行时**：Node.js ≥ 22
+
+### 浏览器自动化能力
+
+OpenClaw 底层使用 **Playwright** 作为 CDP 控制引擎，支持约 **300 个 CDP 命令**，覆盖 Page、Network、DOM、Runtime、Input 等域。提供三种浏览器控制模式：
+
+- **托管模式**（端口 18800-18899）：隔离的 Chromium 实例，支持 headed 和 **headless** 模式，生产环境推荐 headless
+- **扩展中继模式**（端口 18792）：通过 Chrome 扩展控制现有浏览器标签页，保持登录状态
+- **远程 CDP 模式**：连接 Browserless、Browserbase、Cloudflare Workers 等外部浏览器基础设施
+
+核心浏览器功能包括：URL 导航、元素点击/输入、截图、表单填写、数据抓取、PDF 生成、Cookie 管理、多配置文件等。其 **快照系统** 为每个交互元素分配数字/角色引用，便于 AI 精确操控。
+
+### 安全隐患不容忽视
+
+值得注意的是，**NSFOCUS 和 Cisco 均发现了严重安全风险**。约 10.8% 的 ClawHub 技能（336/3000+）被识别为恶意插件，存在数据外泄和提示注入问题。多个 RCE 漏洞已被披露，中国政府已限制国家机关使用该项目。
+
+---
+
+## 二、无头浏览器技术原理与 CDP 协议详解
+
+### 什么是无头浏览器
+
+无头浏览器是一个 **不渲染图形界面的完整浏览器引擎**。它使用与普通浏览器完全相同的内核（Chromium/Blink、Gecko、WebKit），能解析 HTML、加载 CSS、执行 JavaScript、处理网络请求——只是跳过了像素绘制和 GPU 合成步骤。因此其性能通常比有头模式快 **1.5x-2x**，CPU 和内存占用更低。
+
+Chrome 无头模式经历了重要演进：**旧版无头**（Chrome 112 前）是独立的浏览器实现，与 Chrome 主代码库不共享 `//chrome` 代码，存在独特的 Bug；**新版无头**（Chrome 112+）是真正的 Chrome 浏览器，仅创建平台窗口但不显示——代码库与有头模式完全统一；**Chrome 132+** 旧版无头已从 Chrome 中完全移除，仅作为独立的 `chrome-headless-shell` 二进制文件提供。
+
+### Chrome DevTools Protocol（CDP）工作原理
+
+CDP 是浏览器远程调试协议，也是 Chrome DevTools 内部使用的同一协议。其架构如下：
+
+```
+┌─────────────────┐     WebSocket      ┌──────────────────────┐
+│  客户端           │◄──────────────────►│  Chrome 浏览器         │
+│  (Puppeteer,     │   JSON-RPC 消息     │  (--remote-debugging  │
+│   Playwright)    │                    │   -port=9222)         │
+└─────────────────┘                    └──────────────────────┘
+```
+
+Chrome 启动时附带 `--remote-debugging-port=9222` 参数，开启 WebSocket 服务器。客户端通过 WebSocket 建立持久双向连接，以 JSON-RPC 格式（`{ id, method, params }`）发送命令。CDP 按域组织，**浏览器协议** 包含 Page（页面生命周期）、DOM（DOM 树操作）、Network（网络拦截）、Input（键鼠事件）等；**JavaScript 协议** 包含 Runtime（JS 执行）、Debugger（断点调试）、HeapProfiler（内存分析）等。
+
+### 三大工具的协议差异
+
+| 工具 | 主协议 | 无头实现方式 |
+|------|--------|------------|
+| **Playwright** | CDP（Chromium）+ 自定义补丁（Firefox/WebKit） | 下载独立 `chrome-headless-shell`，默认无头 |
+| **Puppeteer** | CDP + WebDriver BiDi（Firefox） | `headless: true`（新无头）或 `headless: 'shell'`（旧版） |
+| **Selenium** | W3C WebDriver + BiDi | 传递 `--headless=new` 参数，浏览器自行处理 |
+
+未来方向是 **WebDriver BiDi** 协议——一个融合了 WebDriver 跨浏览器标准和 CDP 双向通信能力的 W3C 新标准，所有主流工具和浏览器厂商均在参与制定。
+
+---
+
+## 三、传统自动化工具的 AI 进化
+
+### Playwright：AI 集成最深的传统工具
+
+**Playwright**（Microsoft）是当前 AI 集成最完善的传统自动化框架。截至 2026 年 3 月，最新版本为 **v1.58.2**，支持 Chromium、Firefox、WebKit 三大内核，提供 TypeScript/JavaScript、Python、Java、.NET 四种语言 SDK。
+
+- **GitHub**：https://github.com/microsoft/playwright （**82.5k** 星）
+- **文档**：https://playwright.dev/
+
+Playwright 2025-2026 年的 AI 能力飞跃主要体现在两大功能：
+
+**Playwright MCP**（2025 年 3 月推出，https://github.com/microsoft/playwright-mcp）是基于 Model Context Protocol 的 AI 集成方案。它使用浏览器的 **可访问性树（Accessibility Tree）** 而非截图来实现结构化语义交互，让 AI 能通过标准化命令执行导航、点击、输入等操作。该协议已被集成到 **GitHub Copilot 的 Coding Agent** 中，同时支持 VS Code、Claude Code、OpenAI 模型等 MCP 兼容客户端。
+
+**Playwright Test Agents**（v1.56，2025 年 10 月推出）提供了三个专用 AI 代理：**Planner Agent** 探索应用并生成 Markdown 测试计划；**Generator Agent** 将计划转化为测试文件；**Healer Agent** 执行测试并自动修复失败用例。
+
+### Puppeteer：CDP 原生的高性能方案
+
+**Puppeteer**（Google）是 CDP 的原生高级封装，专为 Chrome 自动化设计，最新版本 **v24.39.0**。
+
+- **GitHub**：https://github.com/puppeteer/puppeteer （**93.8k** 星）
+- **文档**：https://pptr.dev/
+
+自 v22 起默认使用新无头模式（Chrome for Testing），旧版快速模式可通过 `headless: 'shell'` 启用。Puppeteer 现也支持 WebDriver BiDi 协议实现 Firefox 自动化。虽无内置 AI 代理功能，但提供 chrome-devtools-mcp 服务器，是 Browser Use 等多个 AI 项目的底层引擎。
+
+### Selenium：老牌框架拥抱 WebDriver BiDi
+
+**Selenium** 是历史最悠久的浏览器自动化框架，最新版本 **v4.41.0**，支持 Java、Python、C#、Ruby、JavaScript。
+
+- **GitHub**：https://github.com/SeleniumHQ/selenium
+- **文档**：https://www.selenium.dev/documentation/
+
+Selenium 4 的核心变化是全面采用 W3C WebDriver 标准和 **WebDriver BiDi** 双向协议。无头模式需手动通过 `--headless=new` 参数配置。内置 Selenium Manager 可自动管理浏览器驱动。**Selenium 没有内置 AI/LLM 集成**，但被广泛用于 AI 测试平台。
+
+---
+
+## 四、AI 原生浏览器自动化工具深度对比
+
+### Browser Use：社区最活跃的 DOM 优先方案
+
+**Browser Use** 是当前最受欢迎的开源 AI 浏览器代理框架，**78.9k 星**，采用 **DOM 优先 + 可选视觉** 的混合架构。
+
+- **GitHub**：https://github.com/browser-use/browser-use
+- **文档**：https://browser-use.com
+- **语言**：Python（≥3.11） | **许可证**：MIT
+
+其核心工作流为 **观察→决策→执行→评估** 循环。DOM 提取模块将页面交互元素（按钮、链接、表单）转化为带唯一索引的文本表示，LLM 通过索引号精确引用元素。截图仅在需要视觉上下文时才捕获（每次约增加 0.8 秒延迟）。底层使用 Playwright 控制浏览器。
+
+**关键优势：速度**。Browser Use 完成 OnlineMind2Web 任务平均仅需 **68 秒**（每步约 3 秒），显著快于 OpenAI CUA（330 秒）和 Claude Computer Use。支持 OpenAI、Anthropic、Google Gemini、本地模型（Ollama），还发布了自研优化模型 **ChatBrowserUse（bu-30b-a3b-preview）**。支持无头模式和远程浏览器连接。
+
+### Stagehand：代码与 AI 的最佳融合
+
+**Stagehand** 由 Browserbase 公司开发，**21.1k 星**，定位为 "代码 + 自然语言" 的混合自动化框架。
+
+- **GitHub**：https://github.com/browserbase/stagehand
+- **文档**：https://docs.stagehand.dev
+- **语言**：TypeScript（主）+ Python、Go、Rust、Java、C# 等 SDK
+
+其三层 API 设计极为优雅：`act()` 执行自然语言动作、`extract()` 提取结构化数据（配合 Zod schema）、`agent()` 执行多步自主任务。最具创新性的功能是 **Auto-Caching + Self-Healing**——首次运行时 AI 发现并缓存操作路径，后续运行无需 LLM 推理直接重放，网站变化时自动调用 AI 修复。支持 OpenAI CUA 和 Anthropic Computer Use 模型一行代码集成。
+
+### Claude Computer Use：最通用的视觉驱动方案
+
+**Claude Computer Use** 是 Anthropic 的 Beta 功能，能控制 **整个桌面环境**，不仅限于浏览器。
+
+- **文档**：https://docs.claude.com/en/docs/agents-and-tools/tool-use/computer-use-tool
+- **参考实现**：https://github.com/anthropics/claude-quickstarts
+
+架构为 **持续视觉-动作反馈循环**：截图 → 视觉分析 → 决策 → 执行（鼠标移动/点击/输入/滚动）→ 新截图 → 循环。**完全基于视觉/截图，不解析 DOM**，通过像素坐标执行操作。这使它具有 **通用性**（能操控任何应用），但精确度和速度逊于 DOM 方案。运行需要可视显示器（物理或虚拟），通常在 Docker + VNC 环境中部署。
+
+### OpenAI CUA：灵活的多模态方案
+
+**OpenAI Operator** 产品已于 **2025 年 8 月 31 日停止服务**，其能力整合进 ChatGPT Agent Mode。但 **CUA（Computer-Using Agent）模型通过 Responses API 仍可供开发者使用**。
+
+- **开发者指南**：https://developers.openai.com/api/docs/guides/tools-computer-use/
+- **示例应用**：https://github.com/openai/openai-cua-sample-app
+
+CUA 提供三种运行模式：内置 Computer Use 循环（纯视觉）、自定义工具接入（Playwright/Selenium/MCP）、以及代码执行模式（AI 编写并运行脚本，混合视觉和 DOM）。这种灵活性是其最大特点。
+
+### 四大 AI 工具核心对比
+
+| 维度 | Browser Use | Stagehand | Claude Computer Use | OpenAI CUA |
+|------|-----------|-----------|-------------------|-----------|
+| **理解网页方式** | DOM 优先 + 可选视觉 | DOM(CDP) + AI 自然语言 + CUA 模型 | 纯视觉/截图 | 视觉为主，可混合 DOM |
+| **平均任务耗时** | ~68 秒（最快） | 快（缓存后极快） | ~245 秒+ | ~330 秒 |
+| **适用范围** | 仅浏览器 | 仅浏览器 | 全桌面+浏览器 | 浏览器+桌面 |
+| **无头支持** | ✅ Playwright | ✅ Playwright/Browserbase | ❌ 需虚拟显示 | ✅ 灵活配置 |
+| **核心优势** | 速度最快、社区最大 | 缓存自愈、开发体验最佳 | 通用性最强 | 模式最灵活 |
+| **核心劣势** | 仅 Python | 深度绑定 Browserbase | 慢、贵、需虚拟桌面 | 研究预览阶段 |
+
+---
+
+## 五、新兴 AI 浏览器工具生态
+
+### AgentQL：语义化查询的先行者
+
+AgentQL（https://github.com/tinyfish-io/agentql ，文档：https://docs.agentql.com）用自定义语义查询语言替代脆弱的 XPath/CSS 选择器。查询如 `{ products[] { name, price } }` 即可跨站点复用。基于 HTML 结构和可访问性树理解内容，封装 Playwright 的 Page 类。提供 Python 和 JavaScript SDK，以及 REST API。核心价值在于 **确定性、结构化输出**，减少 LLM 幻觉风险。
+
+### Skyvern：面向 RPA 的多代理协作
+
+Skyvern（https://github.com/Skyvern-AI/skyvern ，**2 万+星**，Y Combinator 投资，2025 年 6 月完成 4000 万美元 B 轮融资）采用 **视觉 + DOM + 多代理蜂群** 架构。六个专用代理分工协作：交互元素代理解析 HTML，导航代理规划动作，数据提取代理读取表格，验证代理检查结果。其 **Explore → Replay** 模式首次用 AI 探索并生成 Playwright 代码，后续确定性重放，网站变化时回退到 AI——兼顾智能与效率。WebVoyager 基准 **85.8%**。
+
+### LaVague：拥抱开源模型的 RAG 方案
+
+LaVague（https://github.com/lavague-ai/LaVague ，文档：https://docs.lavague.ai）来自 Hugging Face 生态，采用独特的 **RAG + HTML** 架构。Navigation Engine 先用本地 embedding 模型（bge-small-en-v1.5）检索相关 HTML 片段，再由 LLM 生成 Selenium/Playwright 代码——有效解决大型页面超出上下文窗口的问题。支持本地模型（Gemma-7b、Codestral），适合隐私敏感场景。
+
+### 其他值得关注的工具
+
+- **Vercel Agent Browser**（https://github.com/vercel-labs/agent-browser ，1.4 万星）：Rust 编写的 CLI 工具，速度极快，兼容 Claude Code、Codex、Cursor 等主流 AI 编码工具
+- **Firecrawl**（https://github.com/firecrawl/firecrawl ，8.2 万星）：AI 数据层，支持搜索、爬取和结构化提取，新增 Browser Sandbox 功能
+- **Steel**（https://github.com/steel-dev/steel-browser ，6400 星）：Browserbase 的开源自托管替代方案
+- **MultiOn**（https://docs.multion.ai）：API + Chrome 扩展方式的自主 Web 代理
+- **Perplexity Comet**：免费 AI 浏览器，2026 年 1 月因自动购物功能被亚马逊起诉
+
+### WebVoyager 基准排行（2026 年 2 月）
+
+Surfer 2（H Company）以 **97.1%** 领跑，Magnitude 达到 **93.9%** 证明纯视觉方案也能超越 DOM 方案，Browser Use **89.1%**、OpenAI CUA **87%**、Skyvern **85.8%**。需注意各团队使用的数据集和评估条件不同，分数不可直接对比。
+
+---
+
+## 六、实战代码：各工具集成示例
+
+### Playwright 无头模式（Python）
+
+```python
+# pip install playwright && playwright install
+from playwright.sync_api import sync_playwright
+
+with sync_playwright() as p:
+    browser = p.chromium.launch(headless=True)  # 默认即为无头
+    page = browser.new_page()
+    page.goto("https://example.com")
+    print(f"标题: {page.title()}")
+    page.screenshot(path="screenshot.png")
+    browser.close()
+```
+
+### Browser Use + LLM 集成（Python）
+
+```python
+# pip install browser-use
+from browser_use import Agent, Browser
+from browser_use.llm import ChatOpenAI
+import asyncio, os
+
+async def main():
+    agent = Agent(
+        task="在 GitHub 上搜索 browser-use 项目，告诉我它的星标数",
+        llm=ChatOpenAI(model="gpt-4o-mini", api_key=os.getenv("OPENAI_API_KEY")),
+        browser=Browser(headless=True),  # 无头模式
+    )
+    result = await agent.run()
+    print(result)
+
+asyncio.run(main())
+```
+
+### Stagehand 三层 API（TypeScript）
+
+```typescript
+// npm install @browserbase/stagehand zod
+import { Stagehand } from "@browserbase/stagehand";
+import { z } from "zod";
+
+const stagehand = new Stagehand({
+  env: "LOCAL",
+  modelName: "gpt-4o",
+  modelClientOptions: { apiKey: process.env.OPENAI_API_KEY },
+});
+await stagehand.init();
+
+const page = stagehand.context.pages()[0];
+await page.goto("https://github.com/browserbase/stagehand");
+
+// act: 自然语言执行动作
+await stagehand.act("点击 Issues 标签页");
+
+// extract: 结构化数据提取
+const data = await stagehand.extract(
+  "提取前 3 个 issue 的标题和作者",
+  z.object({
+    issues: z.array(z.object({ title: z.string(), author: z.string() }))
+  })
+);
+
+// agent: 多步自主任务
+const agent = stagehand.agent({ provider: "openai", model: "computer-use-preview" });
+await agent.execute("找到最新的 Pull Request 并总结其内容");
+
+await stagehand.close();
+```
+
+### Puppeteer 新旧无头模式（Node.js）
+
+```javascript
+// npm install puppeteer
+import puppeteer from 'puppeteer';
+
+// 新无头模式（默认，与有头 Chrome 同一代码库）
+const browser = await puppeteer.launch({ headless: true });
+// 旧无头模式（更快，功能较少）
+// const browser = await puppeteer.launch({ headless: 'shell' });
+
+const page = await browser.newPage();
+await page.goto('https://example.com');
+console.log(await page.title());
+await page.screenshot({ path: 'result.png' });
+await browser.close();
+```
+
+### Selenium 无头模式（Python）
+
+```python
+# pip install selenium webdriver-manager
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+
+options = Options()
+options.add_argument("--headless=new")  # 必须用 --headless=new，旧版已废弃
+options.add_argument("--window-size=1920,1080")
+
+driver = webdriver.Chrome(options=options)
+driver.get("https://example.com")
+print(f"标题: {driver.title}")
+driver.save_screenshot("screenshot.png")
+driver.quit()
+```
+
+### Playwright + GPT-4o 视觉集成（Python）
+
+```python
+import base64
+from openai import OpenAI
+from playwright.sync_api import sync_playwright
+
+client = OpenAI()
+
+with sync_playwright() as p:
+    browser = p.chromium.launch(headless=True)
+    page = browser.new_page()
+    page.goto("https://example.com")
+    
+    screenshot_bytes = page.screenshot()
+    b64_image = base64.b64encode(screenshot_bytes).decode()
+    
+    response = client.chat.completions.create(
+        model="gpt-4o",
+        messages=[{
+            "role": "user",
+            "content": [
+                {"type": "text", "text": "描述这个页面的内容并提取所有文本"},
+                {"type": "image_url", "image_url": {"url": f"data:image/png;base64,{b64_image}"}},
+            ],
+        }],
+    )
+    print(response.choices[0].message.content)
+    browser.close()
+```
+
+### Claude Computer Use API（Python）
+
+```python
+# pip install anthropic
+import anthropic
+
+client = anthropic.Anthropic()
+
+response = client.beta.messages.create(
+    model="claude-sonnet-4-5",
+    max_tokens=1024,
+    tools=[
+        {"type": "computer_20250124", "name": "computer",
+         "display_width_px": 1024, "display_height_px": 768, "display_number": 1},
+        {"type": "text_editor_20250124", "name": "str_replace_editor"},
+        {"type": "bash_20250124", "name": "bash"},
+    ],
+    messages=[{"role": "user", "content": "打开浏览器并搜索 AI 新闻"}],
+    betas=["computer-use-2025-01-24"],
+)
+```
+
+---
+
+## 七、技术选型决策框架
+
+选择 AI 浏览器自动化工具需要权衡五个关键维度：
+
+**速度与成本敏感** → 选 **Browser Use**。DOM 优先方案每步仅需 3 秒，远低于视觉方案的 30-60 秒，Token 消耗也更低。自研优化模型 ChatBrowserUse 进一步提升了性价比。
+
+**生产环境稳定性** → 选 **Stagehand + Browserbase**。Auto-Caching 消除了重复任务的 LLM 依赖，Self-Healing 应对网站变更，Browserbase 提供 SOC-2 Type 1 + HIPAA 合规的云浏览器基础设施。
+
+**需要操控桌面应用** → 选 **Claude Computer Use**。这是唯一能操控任意桌面应用的方案，代价是速度较慢且需要虚拟桌面环境。
+
+**已有 Playwright/Selenium 项目** → 使用 **Playwright MCP** 或 **AgentQL** 无缝接入 AI 能力，无需重构现有代码库。
+
+**数据提取和爬虫场景** → **Firecrawl**（大规模爬取）或 **Crawl4AI**（LLM 结构化提取）更为适合。
+
+当前行业正朝着 **混合方案** 收敛：DOM 解析保证速度和精确度，视觉识别处理动态和非标准内容，MCP 协议统一 AI 与浏览器的通信标准。2026 年的关键趋势是 "**Explore → Replay**" 模式——首次用 AI 智能探索，后续确定性重放——这将从根本上解决 AI 浏览器自动化的成本和可靠性问题。

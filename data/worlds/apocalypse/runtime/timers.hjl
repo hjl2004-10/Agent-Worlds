@@ -1,0 +1,20 @@
+{
+  "header": {
+    "version": "v1.0",
+    "type": "TIMER_POOL",
+    "world_id": "apocalypse"
+  },
+  "pool": [
+    {
+      "id": "102351cd",
+      "name": "林七的巡查提醒",
+      "description": "检查发电房和照明线路",
+      "target": "测试工具助手",
+      "interval_ticks": 60,
+      "max_triggers": 1,
+      "triggered_count": 1,
+      "last_trigger_tick": 755,
+      "enabled": false
+    }
+  ]
+}

@@ -18,6 +18,7 @@ def register_all_routers(app: FastAPI):
     from api.mailbox import router as mailbox_router
     from api.misc import router as misc_router
     from api.wechat import router as wechat_router
+    from api.map_io import router as map_io_router
 
     app.include_router(status_router)
     app.include_router(god_router)
@@ -29,3 +30,4 @@ def register_all_routers(app: FastAPI):
     app.include_router(mailbox_router)
     app.include_router(misc_router)
     app.include_router(wechat_router)
+    app.include_router(map_io_router)
