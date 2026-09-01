@@ -6,13 +6,14 @@ import {
   ThunderboltOutlined,
   SunOutlined,
   MoonOutlined,
+  BookOutlined,
 } from '@ant-design/icons';
 import { useStatusStore } from '@/store/useStatusStore';
 import { useThemeStore } from '@/store/useThemeStore';
 import { useLocaleStore } from '@/store/useLocaleStore';
 import { useT } from '@/i18n';
 import { PixelBanner, PixelButton } from '@/components/ui';
-import { HelpModal } from './HelpModal';
+import { navigateToDocs } from '@/components/Docs/DocsPage';
 
 const { Content } = Layout;
 
@@ -64,7 +65,15 @@ export function AppLayout({ children }: AppLayoutProps) {
         {/* 中间状态指标 + 工具按钮 */}
         <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
           {/* 帮助按钮 */}
-          <HelpModal />
+          <PixelButton
+            variant="style1"
+            size="sm"
+            onClick={() => navigateToDocs()}
+            title={t('header.docs')}
+            style={{ minWidth: 36 }}
+          >
+            <BookOutlined style={{ fontSize: 14 }} />
+          </PixelButton>
 
           {/* 主题切换按钮 */}
           <PixelButton

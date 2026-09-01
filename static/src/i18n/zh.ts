@@ -12,6 +12,7 @@ export const zh: Record<string, string> = {
   'header.toggleLight': '切换亮色',
   'header.toggleDark': '切换暗色',
   'header.switchLang': 'EN',
+  'header.docs': '帮助文档',
 
   // NPC List
   'npc.create': '创建',

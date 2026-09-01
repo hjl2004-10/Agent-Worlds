@@ -12,6 +12,7 @@ export const en: Record<string, string> = {
   'header.toggleLight': 'Light mode',
   'header.toggleDark': 'Dark mode',
   'header.switchLang': '中',
+  'header.docs': 'Docs',
 
   // NPC List
   'npc.create': 'Create',
