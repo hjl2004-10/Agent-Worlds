@@ -8,6 +8,8 @@ import {
   SearchOutlined,
   ArrowLeftOutlined,
   GithubOutlined,
+  SunOutlined,
+  MoonOutlined,
   BookOutlined,
   MenuFoldOutlined,
   MenuUnfoldOutlined,
@@ -15,6 +17,7 @@ import {
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { useLocaleStore } from '@/store/useLocaleStore';
+import { useThemeStore } from '@/store/useThemeStore';
 import { zhGroups } from './content.zh';
 import { enGroups } from './content.en';
 import './docs.css';
@@ -32,6 +35,7 @@ export function navigateToDocs(pageId?: string) {
 
 export function DocsPage() {
   const { locale } = useLocaleStore();
+  const { theme, toggle: toggleTheme } = useThemeStore();
   const isZh = locale === 'zh';
   const groups = isZh ? zhGroups : enGroups;
 
@@ -105,6 +109,13 @@ export function DocsPage() {
             onChange={e => setQuery(e.target.value)}
             className="docs-search"
           />
+          <Tooltip title={theme === 'dark' ? (isZh ? '切换亮色' : 'Light') : (isZh ? '切换暗色' : 'Dark')}>
+            <Button
+              type="text"
+              icon={theme === 'dark' ? <SunOutlined /> : <MoonOutlined />}
+              onClick={toggleTheme}
+            />
+          </Tooltip>
           <Tooltip title="GitHub">
             <Button
               type="text"
